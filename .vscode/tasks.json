@@ -1,0 +1,123 @@
+{
+  "version": "2.0.0",
+  "options": {},
+  "presentation": {
+    "reveal": "silent",
+    "revealProblems": "onProblem",
+  },
+  "tasks": [
+    {
+      "label": "compile (debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Compile.ps1",
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "compile (release)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Compile.ps1",
+        "-Release",
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "decompile (debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.ps1",
+      ],
+      "problemMatcher": [],
+    },
+    {
+      "label": "decompile (release)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.ps1",
+        "-Release",
+      ],
+      "problemMatcher": [],
+    },
+    {
+      "label": "install",
+      "type": "shell",
+      "command": "${workspaceFolder}\\Install.bat",
+      "problemMatcher": [],
+    },
+    {
+      "label": "pester current file",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-File",
+        "Pester.ps1",
+        "-Path",
+        "${file}",
+      ],
+      "problemMatcher": [
+        "$pester",
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "pester current line",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-File",
+        ".github/skills/powershell-pester/scripts/Pester.ps1",
+        "-Path",
+        "${file}",
+        "-LineNumber",
+        "${lineNumber}",
+      ],
+      "problemMatcher": [
+        "$pester",
+      ],
+      "group": {
+        "kind": "test",
+      },
+    },
+  ],
+}

@@ -1,0 +1,44 @@
+﻿using namespace System.Xml
+
+[CmdletBinding()]
+param ()
+
+$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Modules\Automation.Office.psm1'
+Import-Module -Name $modulePath -Force
+Set-StrictMode -Version Latest
+Set-Location -LiteralPath $PSScriptRoot
+
+$configPath = 'Config.psd1'
+if (-not (Test-Path -LiteralPath $configPath)) {
+  Copy-Item -LiteralPath 'Config.tmpl.psd1' -Destination $configPath
+}
+$config = Import-PowerShellDataFile -LiteralPath $configPath
+if ($null -eq $config.Output) {
+  throw [InvalidOperationException]::new('Output is required.')
+}
+if (-not (Test-Path -LiteralPath $config.Output)) {
+  New-Item -Path $config.Output -ItemType Directory | Out-Null
+}
+$output = $config.Output | Join-Path -ChildPath 'Page'
+if (Test-Path -LiteralPath $output) {
+  Get-ChildItem -LiteralPath $output -Filter '*.xml' | Remove-Item
+}
+else {
+  New-Item -Path $output -ItemType Directory | Out-Null
+}
+
+$hierarchies = Get-OneNoteHierarchy -Id $config.StartNodeId -HierarchyScope hsPages
+$hierarchies.SelectNodes('//*') |
+Where-Object {
+  $_ -is [XmlElement] -and
+  $_.HasAttribute('ID') -and
+  (-not $_.HasAttribute('isInRecycleBin') -or -not [bool]::Parse($_.GetAttribute('isInRecycleBin'))) -and
+  $_.LocalName -eq 'Page'
+} |
+ForEach-Object {
+  $destination = Resolve-Path -LiteralPath $output
+  Export-OneNotePageContent -Id $_.GetAttribute('ID') -Destination $destination
+}
+if (@(Get-Item -Path "$output/*").Count -gt 0) {
+  Compress-Archive -Path "$output/*" -Destination "$output.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+}

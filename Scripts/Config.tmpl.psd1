@@ -1,0 +1,4 @@
+﻿@{
+  Output      = './Out'
+  StartNodeId = $null
+}

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./.temp/VBProject.schema.json",
+  "title": "VBProject",
+  "description": "Schema for unified VBProject.json format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "VBComponents",
+    "References"
+  ],
+  "properties": {
+    "VBComponents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/VBComponentInfo"
+      }
+    },
+    "References": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ReferenceInfo"
+      }
+    }
+  },
+  "$defs": {
+    "VBComponentInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Name",
+        "Path",
+        "Type"
+      ],
+      "properties": {
+        "Name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Path": {
+          "type": "string",
+          "pattern": "^\\.\\\\.+\\.(bas|cls|frm|vba|txt)$"
+        },
+        "Type": {
+          "type": "string",
+          "anyOf": [
+            {
+              "enum": [
+                "vbext_ct_StdModule",
+                "vbext_ct_ClassModule",
+                "vbext_ct_MSForm",
+                "vbext_ct_Document",
+                "acTable",
+                "acQuery",
+                "acForm",
+                "acReport",
+                "acMacro",
+                "acModule",
+                "acDataAccessPage",
+                "acServerView",
+                "acDiagram",
+                "acStoredProcedure",
+                "acFunction",
+                "acDatabaseProperties",
+                "acTableDataMacro",
+                "acDefault"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ReferenceInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "BuiltIn",
+        "Description",
+        "FullPath",
+        "Guid",
+        "IsBroken",
+        "Major",
+        "Minor",
+        "Name",
+        "Type"
+      ],
+      "properties": {
+        "BuiltIn": {
+          "type": "boolean"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "FullPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Guid": {
+          "type": "string",
+          "pattern": "^\\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\\}$"
+        },
+        "IsBroken": {
+          "type": "boolean"
+        },
+        "Major": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "Name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "Type": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
