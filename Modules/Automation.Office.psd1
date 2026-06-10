@@ -44,6 +44,7 @@
     'Set-PowerPointAppProperty'
     'Get-PowerPointFileProperty'
     'Set-PowerPointFileProperty'
+    'Get-PowerPointSpeakerNote'
     'Get-PowerPointDocumentProperty'
     'Get-PowerPointPropertyValue'
     'Set-PowerPointDocumentProperty'
