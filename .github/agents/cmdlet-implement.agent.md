@@ -10,7 +10,7 @@ user-invocable: true
 handoffs:
   - label: Start Review
     agent: cmdlet-review
-    prompt: The implementation is complete and tests are passing. Please review for consistency and quality.
+    prompt: The implementation is complete and tests are passing. Review for consistency and quality.
     send: true
 ---
 

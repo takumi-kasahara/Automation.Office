@@ -9,7 +9,7 @@ user-invocable: true
 handoffs:
   - label: Start Implementation
     agent: cmdlet-implement
-    prompt: The design is complete with detailed test specifications. Please start the implementation by creating failing tests.
+    prompt: The design is complete with detailed test specifications. Start the implementation until the tests are passing.
     send: true
 ---
 

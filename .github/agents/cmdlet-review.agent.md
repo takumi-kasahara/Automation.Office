@@ -9,7 +9,7 @@ user-invocable: true
 handoffs:
   - label: Start Design
     agent: cmdlet-design
-    prompt: The review is complete. Please address any identified issues and update the design.
+    prompt: The review is complete. Address any identified issues and update the design.
     send: true
 ---
 
