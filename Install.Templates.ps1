@@ -1,4 +1,6 @@
-﻿[CmdletBinding()]
+﻿using namespace System.IO
+
+[CmdletBinding()]
 param ()
 if ($PSEdition -ne 'Desktop') {
   return
@@ -25,22 +27,23 @@ if (Test-Path -LiteralPath $vba) {
 
 @(
   @{
-    Source      = Resolve-Path -LiteralPath 'Bin' | Join-Path -ChildPath 'Personal.Release.xlsb'
+    LiteralPath = Resolve-Path -LiteralPath 'Bin' | Join-Path -ChildPath 'Personal.Release.xlsb'
     Destination = $env:APPDATA | Join-Path -ChildPath 'Microsoft\Excel\XLSTART\Personal.xlsb'
   }
   @{
-    Source      = Resolve-Path -LiteralPath 'Bin' | Join-Path -ChildPath 'Normal.Release.dotm'
+    LiteralPath = Resolve-Path -LiteralPath 'Bin' | Join-Path -ChildPath 'Normal.Release.dotm'
     Destination = $env:APPDATA | Join-Path -ChildPath 'Microsoft\Templates\Normal.dotm'
   }
 ) |
 ForEach-Object {
-  if (Test-Path -LiteralPath $_.Source) {
-    if (-not (Test-Path -LiteralPath $_.Destination)) {
-      New-Item -ItemType Directory -Path $_.Destination >$null
+  if (Test-Path -LiteralPath $_.LiteralPath) {
+    $parent = [Path]::GetDirectoryName($_.Destination)
+    if (-not (Test-Path -LiteralPath $parent)) {
+      New-Item -Path $parent -ItemType Directory | Out-Null
     }
-    Copy-Item -LiteralPath $_.Source -Destination $_.Destination -PassThru
+    Copy-Item @_ -PassThru
   }
   else {
-    Write-Warning -Message "$($_.Source) not found."
+    Write-Warning -Message "$($_.LiteralPath) not found."
   }
 }
