@@ -59,7 +59,7 @@ function Get-WordDocumentProperty {
       Each NoteProperty corresponds to a file property.
 
   .NOTES
-    If a file cannot be opened (for example, an invalid `-PasswordToOpen` value), the cmdlet throws an exception and continues processing remaining items.
+    If a file cannot be opened (for example, incorrect password), the cmdlet throws an error record and continues processing remaining items.
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
