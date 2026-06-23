@@ -125,6 +125,53 @@ InModuleScope 'PowerPoint.Automation' {
           }
         }
       }
+      function New-PowerPointFileWithSequentialSpeakerNotes {
+        [CmdletBinding()]
+        [OutputType([void])]
+        param (
+          [Parameter(Mandatory)]
+          [string]
+          $Path,
+          [Parameter(Mandatory)]
+          [ValidateRange(1, [int]::MaxValue)]
+          [int]
+          $SlideCount
+        )
+        $app = New-PowerPointObject
+        try {
+          $presentation = $app.Presentations.Add([MsoTriState]::msoFalse)
+          try {
+            foreach ($index in 1..$SlideCount) {
+              $slide = $presentation.Slides.Add($index, [PpSlideLayout]::ppLayoutText)
+              $slide.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = "page $index note"
+            }
+
+            $presentation.SaveCopyAs2(
+              [Path]::GetFullPath($Path)
+              , [PpSaveAsFileType]::ppSaveAsOpenXMLPresentation
+              , [type]::Missing
+              , $false
+            )
+          }
+          finally {
+            $presentation.Close()
+          }
+        }
+        finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          }
+          finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
     }
     BeforeEach {
       $path = Get-TempFile
@@ -192,6 +239,39 @@ InModuleScope 'PowerPoint.Automation' {
 
         { Get-PowerPointSpeakerNote -Path $path -PasswordToOpen (Get-Password) } | Should -Throw
       }
+      It 'returns notes only for requested discrete and range mix' {
+        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 8
+
+        $result = Get-PowerPointSpeakerNote -Path $path -Range '1-3, 5, 7-8'
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.Items.Page | Should -Be @(1, 2, 3, 5, 7, 8)
+        $result.Items.Text | Should -Be @('page 1 note', 'page 2 note', 'page 3 note', 'page 5 note', 'page 7 note', 'page 8 note')
+      }
+      It 'supports spaces in range expression' {
+        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 6
+
+        $result = Get-PowerPointSpeakerNote -Path $path -Range '2, 4-5'
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.Items.Page | Should -Be @(2, 4, 5)
+      }
+      It 'works with non sorted range token order' {
+        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 6
+
+        $result = Get-PowerPointSpeakerNote -Path $path -Range '4-6, 2'
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.Items.Page | Should -Be @(4, 5, 6, 2)
+      }
+      It 'supports reverse order range' {
+        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 5
+
+        $result = Get-PowerPointSpeakerNote -Path $path -Range '3-1'
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.Items.Page | Should -Be @(3, 2, 1)
+      }
     }
   }
   Describe 'Get-PowerPointSpeakerNote.Unit' {
@@ -209,6 +289,11 @@ InModuleScope 'PowerPoint.Automation' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
 
         { Get-PowerPointSpeakerNote -Path $path } | Should -Throw
+      }
+      It 'throws for invalid characters in Range' {
+        { Get-PowerPointSpeakerNote -Path $path -Range 'a' } | Should -Throw
+        { Get-PowerPointSpeakerNote -Path $path -Range '1-' } | Should -Throw
+        { Get-PowerPointSpeakerNote -Path $path -Range '1:2' } | Should -Throw
       }
     }
   }

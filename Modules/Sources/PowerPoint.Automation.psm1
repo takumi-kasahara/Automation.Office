@@ -1,5 +1,6 @@
 ﻿using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
+using namespace System.Collections.Generic
 using namespace System.Management.Automation
 using namespace System.Runtime.InteropServices
 
@@ -50,6 +51,12 @@ function Get-PowerPointSpeakerNote {
 
     If omitted, speaker notes from hidden slides are not included in the output.
 
+  .PARAMETER Range
+    Specifies slide indexes to include.
+
+    Supports discrete indexes and inclusive ranges separated by commas. Spaces are allowed.
+    For example, `1-3, 5, 7-10` includes slides 1, 2, 3, 5, 7, 8, 9, and 10.
+
   .EXAMPLE
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx"
 
@@ -80,6 +87,11 @@ function Get-PowerPointSpeakerNote {
 
     Gets speaker notes including notes on hidden slides.
 
+  .EXAMPLE
+    Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -Range '2, 4-6'
+
+    Gets speaker notes only for slides 2, 4, 5, and 6.
+
   .OUTPUTS
     SpeakerNotes
       Returns an object that contains the source path and a collection of `SpeakerNote` objects.
@@ -105,6 +117,9 @@ function Get-PowerPointSpeakerNote {
     $PasswordToOpen = $null,
     [SecureString]
     $PasswordToModify = $null,
+    [ValidatePattern('^\s*\d+(\s*-\s*\d+)?(\s*,\s*\d+(\s*-\s*\d+)?)*\s*$')]
+    [string]
+    $Range,
     [switch]
     $Force
   )
@@ -121,13 +136,46 @@ function Get-PowerPointSpeakerNote {
           Get-Item -LiteralPath $LiteralPath -Force
         }
       }
+      $slideIndexes = $null
+      if (-not [string]::IsNullOrEmpty($Range)) {
+        $normalizedRange = $Range -replace '\s+', [string]::Empty
+        $slideIndexes = [List[int]]::new()
+
+        foreach ($token in ($normalizedRange -split ',')) {
+          if ($token.Contains('-')) {
+            $startAndEnd = $token -split '-', 2
+            $start = [int]$startAndEnd[0]
+            $end = [int]$startAndEnd[1]
+            if ($start -le $end) {
+              foreach ($index in ($start..$end)) {
+                $null = $slideIndexes.Add($index)
+              }
+            }
+            else {
+              for ($index = $start; $index -ge $end; $index--) {
+                $null = $slideIndexes.Add($index)
+              }
+            }
+            continue
+          }
+
+          $null = $slideIndexes.Add([int]$token)
+        }
+      }
       $items |
       ForEach-Object {
         $item = $_
         $file = Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
         $notes = @()
         try {
-          foreach ($slide in @($file.Slides)) {
+          $slidesToProcess = if ($slideIndexes) {
+            $slideIndexes
+          }
+          else {
+            1..@($file.Slides).Count | Where-Object { $true }
+          }
+          foreach ($index in $slidesToProcess) {
+            $slide = $file.Slides.Item($index)
             if (-not $Force -and ($slide.SlideShowTransition.Hidden -ne [MsoTriState]::msoFalse)) {
               continue
             }
