@@ -11,8 +11,8 @@ Set-StrictMode -Version Latest
 #region Private
 function New-WordObject {
   [CmdletBinding()]
-  [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for Word application and does not change persistent state')]
   [OutputType([__ComObject])]
+  [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for Word application and does not change persistent state')]
   param (
     [switch]
     $NoSetup
@@ -174,6 +174,10 @@ function New-WordFile {
   .PARAMETER RemovePersonalInformation
     Removes personal information from the new document file.
 
+  .PARAMETER Initialize
+    Specifies a script block to initialize the document before saving.
+    The script block receives the document object as its first argument.
+
   .EXAMPLE
     New-WordFile -Path "$env:TEMP\Document.docx"
 
@@ -194,6 +198,14 @@ function New-WordFile {
     New-WordFile -Path "$env:TEMP\Document.docx" -ReadOnlyRecommended
 
     Creates a file that recommends opening as read-only.
+
+  .EXAMPLE
+    New-WordFile -Path "$env:TEMP\Document.docx" -Initialize {
+      param($Document)
+      $Document.Range().Text = 'Hello, World!'
+    }
+
+    Creates a document and adds text to it.
 
   .OUTPUTS
     System.IO.FileInfo
@@ -219,7 +231,9 @@ function New-WordFile {
     [switch]
     $Force,
     [switch]
-    $RemovePersonalInformation
+    $RemovePersonalInformation,
+    [ScriptBlock]
+    $Initialize
   )
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
@@ -258,6 +272,9 @@ function New-WordFile {
       try {
         if ($RemovePersonalInformation) {
           $file.RemovePersonalInformation = $true
+        }
+        if ($Initialize) {
+          & $Initialize $file
         }
         # https://learn.microsoft.com/en-us/office/vba/api/word.saveas2
         $file.SaveAs2(

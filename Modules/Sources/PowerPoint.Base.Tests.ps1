@@ -13,6 +13,7 @@ Set-StrictMode -Version Latest
 
 InModuleScope 'PowerPoint.Base' {
   BeforeAll {
+    Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
     Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
@@ -230,6 +231,20 @@ InModuleScope 'PowerPoint.Base' {
             [GC]::WaitForPendingFinalizers()
           }
         }
+      }
+      It 'creates a file with Initialize script block' {
+        $path = Get-TempFile
+        $item = New-PowerPointFile -Path $path -Initialize {
+          param (
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+        }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
       }
     }
     Context 'Edge cases' {

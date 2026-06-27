@@ -233,6 +233,44 @@ InModuleScope 'Word.Base' {
           }
         }
       }
+      It 'creates a file with Initialize script block' {
+        $path = Get-TempFile
+        $item = New-WordFile -Path $path -Initialize {
+          param (
+            [Parameter(Mandatory)]
+            [Microsoft.Office.Interop.Word.Document]
+            $Document
+          )
+          $Document.Range().Text = 'TestData'
+        }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
+        $app = New-WordObject
+        try {
+          $file = Open-WordFile -Application $app -Path $path
+          try {
+            $file.Range().Text | Should -Be 'TestData'
+          }
+          finally {
+            $file.Close()
+          }
+        }
+        finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          }
+          finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
     }
     Context 'Edge cases' {
       It 'fails when the path already exists and Force is not specified' {
@@ -343,25 +381,25 @@ InModuleScope 'Word.Base' {
         New-WordFile -Path $path
         $properties = Get-WordFileProperty -Path $path -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeFlase
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by LiteralPath' {
         New-WordFile -Path $path
         $properties = Get-WordFileProperty -LiteralPath $path -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeFlase
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-WordFile -Path $path
         $properties = $path | Get-WordFileProperty -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeFlase
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-WordFileProperty -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeFlase
+        $properties.Final | Should -BeFalse
       }
     }
     Context 'Other parameters' {

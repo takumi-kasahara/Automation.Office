@@ -233,6 +233,44 @@ InModuleScope 'Excel.Base' {
           }
         }
       }
+      It 'creates a file with Initialize script block' {
+        $path = Get-TempFile
+        $item = New-ExcelFile -Path $path -Initialize {
+          param (
+            [Parameter(Mandatory)]
+            [Microsoft.Office.Interop.Excel.Workbook]
+            $Workbook
+          )
+          $Workbook.Worksheets.Item(1).Name = 'TestData'
+        }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
+        $app = New-ExcelObject
+        try {
+          $file = Open-ExcelFile -Application $app -Path $path
+          try {
+            $file.Worksheets.Item(1).Name | Should -Be 'TestData'
+          }
+          finally {
+            $file.Close()
+          }
+        }
+        finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          }
+          finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
     }
     Context 'Edge cases' {
       It 'fails when the path already exists and Force is not specified' {

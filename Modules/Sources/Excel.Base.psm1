@@ -174,6 +174,10 @@ function New-ExcelFile {
   .PARAMETER RemovePersonalInformation
     Removes personal information from the new workbook file.
 
+  .PARAMETER Initialize
+    Specifies a script block to initialize the workbook before saving.
+    The script block receives the workbook object as its first argument.
+
   .EXAMPLE
     New-ExcelFile -Path "$env:TEMP\Book.xlsx"
 
@@ -194,6 +198,14 @@ function New-ExcelFile {
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -ReadOnlyRecommended
 
     Creates a file that recommends opening as read-only.
+
+  .EXAMPLE
+    New-ExcelFile -Path "$env:TEMP\Book.xlsx" -Initialize {
+      param($Workbook)
+      $Workbook.Worksheets.Item(1).Name = 'Data'
+    }
+
+    Creates a workbook and renames the first worksheet.
 
   .OUTPUTS
     System.IO.FileInfo
@@ -219,7 +231,9 @@ function New-ExcelFile {
     [switch]
     $Force,
     [switch]
-    $RemovePersonalInformation
+    $RemovePersonalInformation,
+    [ScriptBlock]
+    $Initialize
   )
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
@@ -258,6 +272,9 @@ function New-ExcelFile {
       try {
         if ($RemovePersonalInformation) {
           $file.RemovePersonalInformation = $true
+        }
+        if ($Initialize) {
+          & $Initialize $file
         }
         # https://learn.microsoft.com/en-us/office/vba/api/excel.workbook.saveas
         $file.SaveAs(

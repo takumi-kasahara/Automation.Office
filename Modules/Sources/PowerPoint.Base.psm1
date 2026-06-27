@@ -174,6 +174,10 @@ function New-PowerPointFile {
   .PARAMETER RemovePersonalInformation
     Removes personal information from the new presentation file.
 
+  .PARAMETER Initialize
+    Specifies a script block to initialize the presentation before saving.
+    The script block receives the presentation object as its first argument.
+
   .EXAMPLE
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
 
@@ -194,6 +198,14 @@ function New-PowerPointFile {
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -ReadOnlyRecommended
 
     Creates a file that recommends opening as read-only.
+
+  .EXAMPLE
+    New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Initialize {
+      param($Presentation)
+      $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+    }
+
+    Creates a presentation and adds a title slide.
 
   .OUTPUTS
     System.IO.FileInfo
@@ -219,7 +231,9 @@ function New-PowerPointFile {
     [switch]
     $Force,
     [switch]
-    $RemovePersonalInformation
+    $RemovePersonalInformation,
+    [ScriptBlock]
+    $Initialize
   )
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
@@ -264,6 +278,9 @@ function New-PowerPointFile {
         }
         if ($RemovePersonalInformation) {
           $file.RemovePersonalInformation = [MsoTriState]::msoTrue
+        }
+        if ($Initialize) {
+          & $Initialize $file
         }
         # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentation.savecopyas2
         $file.SaveCopyAs2(

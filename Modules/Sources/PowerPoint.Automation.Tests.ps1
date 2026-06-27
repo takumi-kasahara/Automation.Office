@@ -15,6 +15,7 @@ Set-StrictMode -Version Latest
 
 InModuleScope 'PowerPoint.Automation' {
   BeforeAll {
+    Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
     Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
@@ -32,9 +33,6 @@ InModuleScope 'PowerPoint.Automation' {
       )
       return $env:TEMP | Join-Path -ChildPath "Presentation.$([guid]::NewGuid().ToString('N'))$Extension"
     }
-  }
-  Describe 'Get-PowerPointSpeakerNote' {
-    BeforeAll {
       function New-PowerPointFileWithSpeakerNote {
         [CmdletBinding()]
         [OutputType([void])]
@@ -42,137 +40,57 @@ InModuleScope 'PowerPoint.Automation' {
         param (
           [Parameter(Mandatory)]
           [string]
-          $Path
-        )
-        $app = New-PowerPointObject
-        try {
-          $presentation = $app.Presentations.Add([MsoTriState]::msoFalse)
-          try {
-            $slide1 = $presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutText)
-            $slide2 = $presentation.Slides.Add(2, [PpSlideLayout]::ppLayoutText)
-
-            $slide1.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'page 1 note'
-            $slide2.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'page 2 note'
-
-            $presentation.SaveCopyAs2(
-              [Path]::GetFullPath($Path)
-              , [PpSaveAsFileType]::ppSaveAsOpenXMLPresentation
-              , [type]::Missing
-              , $false
-            )
-          }
-          finally {
-            $presentation.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
-      }
-      function New-PowerPointFileWithHiddenSpeakerNote {
-        [CmdletBinding()]
-        [OutputType([void])]
+        $Path,
+        [SecureString]
+        $PasswordToOpen,
+        [SecureString]
+        $PasswordToModify,
+        [Parameter(Mandatory)]
+        [ValidateRange(1, [int]::MaxValue)]
+        [int]
+        $SlideCount
+      )
+      New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
         param (
           [Parameter(Mandatory)]
-          [string]
-          $Path
+          [Presentation]
+          $Presentation
         )
-        $app = New-PowerPointObject
-        try {
-          $presentation = $app.Presentations.Add([MsoTriState]::msoFalse)
-          try {
-            $slide1 = $presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutText)
-            $slide2 = $presentation.Slides.Add(2, [PpSlideLayout]::ppLayoutText)
-
-            $slide1.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'visible note'
-            $slide2.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'hidden note'
-            $slide2.SlideShowTransition.Hidden = [MsoTriState]::msoTrue
-
-            $presentation.SaveCopyAs2(
-              [Path]::GetFullPath($Path)
-              , [PpSaveAsFileType]::ppSaveAsOpenXMLPresentation
-              , [type]::Missing
-              , $false
-            )
-          }
-          finally {
-            $presentation.Close()
-          }
+        foreach ($index in 1..$SlideCount) {
+          $slide = $Presentation.Slides.Add($index, [PpSlideLayout]::ppLayoutText)
+          $slide.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = "page $index note"
         }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
+      } | Out-Null
       }
-      function New-PowerPointFileWithSequentialSpeakerNotes {
+    function New-PowerPointFileWithHiddenSpeakerNote {
         [CmdletBinding()]
         [OutputType([void])]
+      [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
         param (
           [Parameter(Mandatory)]
           [string]
           $Path,
+        [SecureString]
+        $PasswordToOpen,
+        [SecureString]
+        $PasswordToModify
+      )
+      New-PowerPointFile @PSBoundParameters -Initialize {
+        param (
           [Parameter(Mandatory)]
-          [ValidateRange(1, [int]::MaxValue)]
-          [int]
-          $SlideCount
+          [Presentation]
+          $Presentation
         )
-        $app = New-PowerPointObject
-        try {
-          $presentation = $app.Presentations.Add([MsoTriState]::msoFalse)
-          try {
-            foreach ($index in 1..$SlideCount) {
-              $slide = $presentation.Slides.Add($index, [PpSlideLayout]::ppLayoutText)
-              $slide.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = "page $index note"
-            }
+        $slide1 = $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutText)
+        $slide2 = $Presentation.Slides.Add(2, [PpSlideLayout]::ppLayoutText)
 
-            $presentation.SaveCopyAs2(
-              [Path]::GetFullPath($Path)
-              , [PpSaveAsFileType]::ppSaveAsOpenXMLPresentation
-              , [type]::Missing
-              , $false
-            )
-          }
-          finally {
-            $presentation.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
+        $slide1.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'visible note'
+        $slide2.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'hidden note'
+        $slide2.SlideShowTransition.Hidden = [MsoTriState]::msoTrue
+      } | Out-Null
             }
           }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
-      }
-    }
+  Describe 'Get-PowerPointSpeakerNote' {
     BeforeEach {
       $path = Get-TempFile
       $password = Get-Password
@@ -184,7 +102,7 @@ InModuleScope 'PowerPoint.Automation' {
     }
     Context 'ParameterSetName' {
       It 'returns speaker notes by Path' {
-        New-PowerPointFileWithSpeakerNote -Path $path
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
 
         $result = Get-PowerPointSpeakerNote -Path $path
 
@@ -195,7 +113,7 @@ InModuleScope 'PowerPoint.Automation' {
         $result.Items[0].Text | Should -Be 'page 1 note'
       }
       It 'returns speaker notes by LiteralPath' {
-        New-PowerPointFileWithSpeakerNote -Path $path
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
 
         $result = Get-PowerPointSpeakerNote -LiteralPath $path
 
@@ -204,7 +122,7 @@ InModuleScope 'PowerPoint.Automation' {
         $result.Items[1].Text | Should -Be 'page 2 note'
       }
       It 'returns speaker notes by ValueFromPipelineByPropertyName' {
-        New-PowerPointFileWithSpeakerNote -Path $path
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
 
         $result = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointSpeakerNote
 
@@ -240,7 +158,7 @@ InModuleScope 'PowerPoint.Automation' {
         { Get-PowerPointSpeakerNote -Path $path -PasswordToOpen (Get-Password) } | Should -Throw
       }
       It 'returns notes only for requested discrete and range mix' {
-        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 8
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 8
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '1-3, 5, 7-8'
 
@@ -249,7 +167,7 @@ InModuleScope 'PowerPoint.Automation' {
         $result.Items.Text | Should -Be @('page 1 note', 'page 2 note', 'page 3 note', 'page 5 note', 'page 7 note', 'page 8 note')
       }
       It 'supports spaces in range expression' {
-        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 6
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 6
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '2, 4-5'
 
@@ -257,7 +175,7 @@ InModuleScope 'PowerPoint.Automation' {
         $result.Items.Page | Should -Be @(2, 4, 5)
       }
       It 'works with non sorted range token order' {
-        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 6
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 6
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '4-6, 2'
 
@@ -265,7 +183,7 @@ InModuleScope 'PowerPoint.Automation' {
         $result.Items.Page | Should -Be @(4, 5, 6, 2)
       }
       It 'supports reverse order range' {
-        New-PowerPointFileWithSequentialSpeakerNotes -Path $path -SlideCount 5
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 5
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '3-1'
 
