@@ -33,13 +33,13 @@ InModuleScope 'PowerPoint.Automation' {
       )
       return $env:TEMP | Join-Path -ChildPath "Presentation.$([guid]::NewGuid().ToString('N'))$Extension"
     }
-      function New-PowerPointFileWithSpeakerNote {
-        [CmdletBinding()]
-        [OutputType([void])]
-        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
-        param (
-          [Parameter(Mandatory)]
-          [string]
+    function New-PowerPointFileWithSpeakerNote {
+      [CmdletBinding()]
+      [OutputType([void])]
+      [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
+      param (
+        [Parameter(Mandatory)]
+        [string]
         $Path,
         [SecureString]
         $PasswordToOpen,
@@ -50,7 +50,7 @@ InModuleScope 'PowerPoint.Automation' {
         [int]
         $SlideCount
       )
-      New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
+      New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
         param (
           [Parameter(Mandatory)]
           [Presentation]
@@ -61,21 +61,21 @@ InModuleScope 'PowerPoint.Automation' {
           $slide.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = "page $index note"
         }
       } | Out-Null
-      }
+    }
     function New-PowerPointFileWithHiddenSpeakerNote {
-        [CmdletBinding()]
-        [OutputType([void])]
+      [CmdletBinding()]
+      [OutputType([void])]
       [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
-        param (
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
+      param (
+        [Parameter(Mandatory)]
+        [string]
+        $Path,
         [SecureString]
         $PasswordToOpen,
         [SecureString]
         $PasswordToModify
       )
-      New-PowerPointFile @PSBoundParameters -Initialize {
+      New-PowerPointFile @PSBoundParameters -Action {
         param (
           [Parameter(Mandatory)]
           [Presentation]
@@ -88,8 +88,8 @@ InModuleScope 'PowerPoint.Automation' {
         $slide2.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text = 'hidden note'
         $slide2.SlideShowTransition.Hidden = [MsoTriState]::msoTrue
       } | Out-Null
-            }
-          }
+    }
+  }
   Describe 'Get-PowerPointSpeakerNote' {
     BeforeEach {
       $path = Get-TempFile
@@ -212,6 +212,117 @@ InModuleScope 'PowerPoint.Automation' {
         { Get-PowerPointSpeakerNote -Path $path -Range 'a' } | Should -Throw
         { Get-PowerPointSpeakerNote -Path $path -Range '1-' } | Should -Throw
         { Get-PowerPointSpeakerNote -Path $path -Range '1:2' } | Should -Throw
+      }
+    }
+  }
+  Describe 'Export-PowerPointAsFixedFormat' {
+    BeforeEach {
+      $path = Get-TempFile
+      $passwordToOpen = Get-Password
+      $passwordToModify = Get-Password
+      $pdf = $env:TEMP | Join-Path -ChildPath "Exported.$([guid]::NewGuid().ToString('N')).pdf"
+      $xps = $env:TEMP | Join-Path -ChildPath "Exported.$([guid]::NewGuid().ToString('N')).xps"
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+      if (Test-Path -LiteralPath $pdf) {
+        Remove-Item -LiteralPath $pdf -Force
+      }
+      if (Test-Path -LiteralPath $xps) {
+        Remove-Item -LiteralPath $xps -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'exports a presentation to PDF by default' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+      It 'exports by ValueFromPipelineByPropertyName using FullName alias' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        $result = [PSCustomObject]@{ FullName = $path } |
+        Export-PowerPointAsFixedFormat -Destination $pdf
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+    }
+    Context 'SupportShouldProcess' {
+      It 'does not create file when WhatIf is specified' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -WhatIf
+
+        Test-Path -LiteralPath $pdf | Should -BeFalse
+      }
+      It 'overwrites existing file when Force is specified' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Not -Throw
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Throw
+
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -Force
+        $result | Should -Not -BeNullOrEmpty
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+      It 'throws when file exists and NoClobber is specified' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        Export-PowerPointAsFixedFormat -Path $path -Destination $pdf | Out-Null
+
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -NoClobber } | Should -Throw
+      }
+    }
+    Context 'Other parameters' {
+      It 'exports a presentation to PDF with PasswordToOpen' {
+        New-PowerPointFileWithSpeakerNote -Path $path -PasswordToOpen $passwordToOpen -SlideCount 2
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen $passwordToOpen
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+      It 'exports a presentation to PDF with PasswordToModify' {
+        New-PowerPointFileWithSpeakerNote -Path $path -PasswordToModify $passwordToModify -SlideCount 2
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToModify $passwordToModify
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+      It 'throws when PasswordToOpen is incorrect' {
+        New-PowerPointFileWithSpeakerNote -Path $path -PasswordToOpen $passwordToOpen -SlideCount 2
+
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen (Get-Password) } | Should -Throw
+      }
+      It 'exports a presentation with FixedFormatType' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $xps -FixedFormatType ([PpFixedFormatType]::ppFixedFormatTypeXPS)
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($xps))
+        Test-Path -LiteralPath $xps | Should -BeTrue
+      }
+      It 'exports a presentation with IncludeDocumentProperties' {
+        New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+        $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -IncludeDocumentProperties
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should -BeTrue
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when source file does not exist' {
+        $invalidPath = $env:TEMP | Join-Path -ChildPath 'NonExistent.pptx'
+        { Export-PowerPointAsFixedFormat -Path $invalidPath -Destination $pdf } | Should -Throw
+      }
+      It 'throws when destination is an invalid path' {
+        $invalidDest = 'Z:\Invalid\Path\File.pdf'
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $invalidDest } | Should -Throw
       }
     }
   }

@@ -1,6 +1,7 @@
 ﻿using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Collections.Generic
+using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Runtime.InteropServices
 
@@ -231,6 +232,95 @@ function Get-PowerPointSpeakerNote {
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
       [GC]::Collect()
       [GC]::WaitForPendingFinalizers()
+    }
+  }
+}
+function Export-PowerPointAsFixedFormat {
+  [CmdletBinding(SupportsShouldProcess)]
+  [OutputType([System.IO.FileInfo])]
+  param (
+    [Alias('FilePath', 'FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [SecureString]
+    $PasswordToOpen = $null,
+    [SecureString]
+    $PasswordToModify = $null,
+    [Parameter(Mandatory)]
+    [ValidateScript({ (Test-Path -LiteralPath $_ -IsValid) -and -not (Test-Path -LiteralPath $_ -PathType Container) })]
+    [string]
+    $Destination,
+    [Microsoft.Office.Interop.PowerPoint.PpFixedFormatType]
+    $FixedFormatType = [Microsoft.Office.Interop.PowerPoint.PpFixedFormatType]::ppFixedFormatTypePDF,
+    [Microsoft.Office.Interop.PowerPoint.PpFixedFormatIntent]
+    $FixedFormatIntent = [Microsoft.Office.Interop.PowerPoint.PpFixedFormatIntent]::ppFixedFormatIntentPrint,
+    [Microsoft.Office.Interop.PowerPoint.PpPrintHandoutOrder]
+    $HandoutOrder = [Microsoft.Office.Interop.PowerPoint.PpPrintHandoutOrder]::ppPrintHandoutHorizontalFirst,
+    [Microsoft.Office.Interop.PowerPoint.PpPrintOutputType]
+    $OutputType = [Microsoft.Office.Interop.PowerPoint.PpPrintOutputType]::ppPrintOutputSlides,
+    [Microsoft.Office.Interop.PowerPoint.PpPrintRangeType]
+    $PrintRangeType = [Microsoft.Office.Interop.PowerPoint.PpPrintRangeType]::ppPrintAll,
+    [switch]
+    $IncludeDocumentProperties,
+    [switch]
+    $Force,
+    [switch]
+    $NoClobber
+  )
+  process {
+    if ($PSCmdlet.ShouldProcess($Path, "Export as Fixed Format to $Destination")) {
+      $resolved = [Path]::GetFullPath($Destination)
+      # By default, ExportAsFixedFormat overwrites.
+      if ((Test-Path -LiteralPath $resolved) -and ($NoClobber -or -not $Force)) {
+        $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))
+      }
+
+      $app = New-PowerPointObject
+      try {
+        # Presentation must be opened in read/write mode because PrintOptions.Ranges.Add() requires it.
+        $presentation = Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
+        $printRange = $presentation.PrintOptions.Ranges.Add(1, $presentation.Slides.Count)
+        try {
+          # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentation.exportasfixedformat
+          $presentation.ExportAsFixedFormat(
+            $resolved                               # Path
+            , $FixedFormatType                      # FixedFormatType
+            , $FixedFormatIntent                    # Intent
+            , [msoTriState]::msoFalse               # FrameSlides
+            , $HandoutOrder                         # HandoutOrder
+            , $OutputType                           # OutputType
+            , [msoTriState]::msoFalse               # PrintHiddenSlides
+            , $printRange                           # PrintRange
+            , $PrintRangeType                       # PrintRangeType
+            , [type]::Missing                       # SlideShowName
+            , $IncludeDocumentProperties.IsPresent  # IncludeDocProperties
+            , $true                                 # KeepIRMSettings
+            , $true                                 # DocStructureTags
+            , $true                                 # BitmapMissingFonts
+            , $true                                 # UseISO19005_1
+          )
+          return [FileInfo]::new($resolved)
+        }
+        finally {
+          $presentation.Close()
+        }
+      }
+      finally {
+        try {
+          if ($app) {
+            $app.Quit()
+          }
+        }
+        finally {
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
     }
   }
 }
