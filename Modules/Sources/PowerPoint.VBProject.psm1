@@ -70,12 +70,13 @@ function Export-PowerPointVBProject {
     }
     $app = New-PowerPointObject
     try {
-      $file = Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-      try {
-        return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
-      }
-      finally {
-        $file.Close()
+      Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+        param (
+          [Parameter(Mandatory)]
+          [Presentation]
+          $Presentation
+        )
+        return Export-VBProject -VBProject $Presentation.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
       }
     }
     finally {

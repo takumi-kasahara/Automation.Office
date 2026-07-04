@@ -71,12 +71,13 @@ function Export-WordVBProject {
     }
     $app = New-WordObject
     try {
-      $file = Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-      try {
-        return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
-      }
-      finally {
-        $file.Close()
+      Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+        param (
+          [Parameter(Mandatory)]
+          [Document]
+          $Document
+        )
+        return Export-VBProject -VBProject $Document.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
       }
     }
     finally {
@@ -150,16 +151,17 @@ function Import-WordVBProject {
     }
     $app = New-WordObject
     try {
-      $file = Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-      try {
-        if ($file.ReadOnly) {
+      Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+        param (
+          [Parameter(Mandatory)]
+          [Document]
+          $Document
+        )
+        if ($Document.ReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $Path))
         }
-        Import-VBProject -VBProject $file.VBProject -Source $Source -TargetExe 'WINWORD.EXE'
-        $file.Save()
-      }
-      finally {
-        $file.Close()
+        Import-VBProject -VBProject $Document.VBProject -Source $Source -TargetExe 'WINWORD.EXE'
+        $Document.Save()
       }
     }
     finally {

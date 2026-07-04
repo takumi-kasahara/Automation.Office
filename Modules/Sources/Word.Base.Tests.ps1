@@ -121,13 +121,14 @@ InModuleScope 'Word.Base' {
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-WordObject
         try {
-          $file = Open-WordFile -Application $app -Path $path -PasswordToOpen $password
-          try {
-            $file.HasPassword | Should -BeTrue
-            $file.ReadOnly | Should -BeFalse
-          }
-          finally {
-            $file.Close()
+          Open-WordFile -Application $app -Path $path -PasswordToOpen $password -Action {
+            param (
+              [Parameter(Mandatory)]
+              [Document]
+              $Document
+            )
+            $Document.HasPassword | Should -BeTrue
+            $Document.ReadOnly | Should -BeFalse
           }
         }
         finally {
@@ -151,13 +152,14 @@ InModuleScope 'Word.Base' {
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-WordObject
         try {
-          $file = Open-WordFile -Application $app -Path $path -PasswordToModify $password
-          try {
-            $file.WriteReserved | Should -BeTrue
-            $file.ReadOnly | Should -BeFalse
-          }
-          finally {
-            $file.Close()
+          Open-WordFile -Application $app -Path $path -PasswordToModify $password -Action {
+            param (
+              [Parameter(Mandatory)]
+              [Document]
+              $Document
+            )
+            $Document.WriteReserved | Should -BeTrue
+            $Document.ReadOnly | Should -BeFalse
           }
         }
         finally {
@@ -181,12 +183,13 @@ InModuleScope 'Word.Base' {
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-WordObject
         try {
-          $file = Open-WordFile -Application $app -Path $path
-          try {
-            $file.ReadOnlyRecommended | Should -BeTrue
-          }
-          finally {
-            $file.Close()
+          Open-WordFile -Application $app -Path $path -Action {
+            param (
+              [Parameter(Mandatory)]
+              [Document]
+              $Document
+            )
+            $Document.ReadOnlyRecommended | Should -BeTrue
           }
         }
         finally {
@@ -210,12 +213,13 @@ InModuleScope 'Word.Base' {
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-WordObject
         try {
-          $file = Open-WordFile -Application $app -Path $path
-          try {
-            $file.RemovePersonalInformation | Should -BeTrue
-          }
-          finally {
-            $file.Close()
+          Open-WordFile -Application $app -Path $path -Action {
+            param (
+              [Parameter(Mandatory)]
+              [Document]
+              $Document
+            )
+            $Document.RemovePersonalInformation | Should -BeTrue
           }
         }
         finally {
@@ -238,7 +242,7 @@ InModuleScope 'Word.Base' {
         $item = New-WordFile -Path $path -Initialize {
           param (
             [Parameter(Mandatory)]
-            [Microsoft.Office.Interop.Word.Document]
+            [Document]
             $Document
           )
           $Document.Range().Text = 'TestData'
@@ -248,12 +252,13 @@ InModuleScope 'Word.Base' {
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-WordObject
         try {
-          $file = Open-WordFile -Application $app -Path $path
-          try {
-            $file.Range().Text | Should -Be 'TestData'
-          }
-          finally {
-            $file.Close()
+          Open-WordFile -Application $app -Path $path -Action {
+            param (
+              [Parameter(Mandatory)]
+              [Document]
+              $Document
+            )
+            $Document.Range().Text | Should -Be 'TestData'
           }
         }
         finally {
@@ -312,6 +317,92 @@ InModuleScope 'Word.Base' {
 
         { New-WordFile -Path $path } | Should -Throw
         $script:called | Should -Be 0
+      }
+    }
+  }
+  Describe 'Open-WordFile' {
+    BeforeEach {
+      $password = Get-Password
+      $path = Get-TempFile
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'opens a document and returns the document object' {
+        New-WordFile -Path $path
+        { Open-WordFile -Path $path } | Should -Not -Throw
+      }
+      It 'opens a document by Path with ValueFromPipeline' {
+        New-WordFile -Path $path
+        { $path | Open-WordFile } | Should -Not -Throw
+      }
+      It 'opens a document by Path with ValueFromPipelineByPropertyName' {
+        New-WordFile -Path $path
+        { [PSCustomObject]@{ FullName = $path } | Open-WordFile } | Should -Not -Throw
+      }
+      It 'opens a document using an existing Application object' {
+        New-WordFile -Path $path
+        $app = New-WordObject
+        try {
+          { Open-WordFile -Path $path -Application $app } | Should -Not -Throw
+        }
+        finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    Context 'Other parameters' {
+      It 'opens a document with PasswordToOpen' {
+        New-WordFile -Path $path -PasswordToOpen $password
+        { Open-WordFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+      }
+      It 'opens a document with PasswordToModify' {
+        New-WordFile -Path $path -PasswordToModify $password
+        { Open-WordFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+      }
+      It 'opens a document with ReadOnly' {
+        New-WordFile -Path $path
+        { Open-WordFile -Path $path -ReadOnly } | Should -Not -Throw
+      }
+      It 'opens a document with Action script block' {
+        New-WordFile -Path $path
+        $result = Open-WordFile -Path $path -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          $Document.Range().Text = 'TestContent'
+          return $Document.Range().Text
+        }
+        $result | Should -Be 'TestContent'
+      }
+    }
+  }
+  Describe 'Open-WordFile.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-WordObject fails and Application is not specified' {
+        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+
+        { Open-WordFile -Path $path } | Should -Throw
+        Assert-MockCalled -CommandName New-WordObject -Times 1 -Exactly
       }
     }
   }

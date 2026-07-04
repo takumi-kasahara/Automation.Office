@@ -70,12 +70,13 @@ function Export-ExcelVBProject {
     }
     $app = New-ExcelObject
     try {
-      $file = Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-      try {
+      Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+        param(
+          [Parameter(Mandatory)]
+          [Workbook]
+          $file
+        )
         return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
-      }
-      finally {
-        $file.Close()
       }
     }
     finally {
@@ -159,8 +160,12 @@ function Import-ExcelVBProject {
     }
     $app = New-ExcelObject
     try {
-      $file = Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force
-      try {
+      Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
+        param(
+          [Parameter(Mandatory)]
+          [Workbook]
+          $file
+        )
         if ($file.ReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $Path))
         }
@@ -169,9 +174,6 @@ function Import-ExcelVBProject {
         }
         Import-VBProject -VBProject $file.VBProject -Source $Source -TargetExe 'EXCEL.EXE'
         $file.Save()
-      }
-      finally {
-        $file.Close()
       }
     }
     finally {

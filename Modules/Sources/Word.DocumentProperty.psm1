@@ -100,12 +100,13 @@ function Get-WordDocumentProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
-          return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
-        }
-        finally {
-          $file.Close()
+        Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          return Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
         }
       }
     }
@@ -352,35 +353,36 @@ function Set-WordDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly) {
+        Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          if ($Document.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
           switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
             { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
+              $Document.Saved = -not (Set-DocumentProperty -InputObject $Document -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
             }
             { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties $InputObject -Custom:$Custom)
+              $Document.Saved = -not (Set-DocumentProperty -InputObject $Document -Properties $InputObject -Custom:$Custom)
             }
           }
-          if (-not $file.Saved) {
-            $file.Save()
+          if (-not $Document.Saved) {
+            $Document.Save()
           }
           if ($PassThru) {
             switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
               }
               { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $file -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $Document -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
               }
             }
           }
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -510,17 +512,18 @@ function Remove-WordDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly) {
+        Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          if ($Document.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
-          $file.RemoveDocumentInformation($RemoveDocInfoType)
-          $file.Saved = $false
-          $file.Save()
-        }
-        finally {
-          $file.Close()
+          $Document.RemoveDocumentInformation($RemoveDocInfoType)
+          $Document.Saved = $false
+          $Document.Save()
         }
       }
     }

@@ -59,7 +59,7 @@ function Get-PowerPointDocumentProperty {
       Each NoteProperty corresponds to a file property.
 
   .NOTES
-    If a file cannot be opened (for example, file access issues), the cmdlet writes an error record and continues processing remaining items.
+    If a file cannot be opened (for example, incorrect password), the cmdlet throws an error record and continues processing remaining items.
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -100,12 +100,13 @@ function Get-PowerPointDocumentProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
-          return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
-        }
-        finally {
-          $file.Close()
+        return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          return Get-DocumentProperty -InputObject $Presentation -Name $Name -Custom:$Custom
         }
       }
     }
@@ -352,35 +353,37 @@ function Set-PowerPointDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly) {
+        $parameterSetName = $PSCmdlet.ParameterSetName
+        return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          if ($Presentation.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
-          switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+          switch -Exact -CaseSensitive ($parameterSetName) {
             { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
+              $Presentation.Saved = -not (Set-DocumentProperty -InputObject $Presentation -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
             }
             { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties $InputObject -Custom:$Custom)
+              $Presentation.Saved = -not (Set-DocumentProperty -InputObject $Presentation -Properties $InputObject -Custom:$Custom)
             }
           }
-          if (-not $file.Saved) {
-            $file.Save()
+          if (-not $Presentation.Saved) {
+            $Presentation.Save()
           }
           if ($PassThru) {
-            switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+            switch -Exact -CaseSensitive ($parameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $Presentation -Name $Name -Custom:$Custom
               }
               { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $file -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $Presentation -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
               }
             }
           }
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -510,17 +513,18 @@ function Remove-PowerPointDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly) {
+        return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          if ($Presentation.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
-          $file.RemoveDocumentInformation($RemoveDocInfoType)
-          $file.Saved = $false
-          $file.Save()
-        }
-        finally {
-          $file.Close()
+          $Presentation.RemoveDocumentInformation($RemoveDocInfoType)
+          $Presentation.Saved = $false
+          $Presentation.Save()
         }
       }
     }

@@ -100,12 +100,13 @@ function Get-ExcelDocumentProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
+        Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Workbook]
+            $file
+          )
           return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -358,12 +359,17 @@ function Set-ExcelDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force
-        try {
+        $parameterSetName = $PSCmdlet.ParameterSetName
+        Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Workbook]
+            $file
+          )
           if ($file.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
-          switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+          switch -Exact -CaseSensitive ($parameterSetName) {
             { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
               $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
             }
@@ -375,7 +381,7 @@ function Set-ExcelDocumentProperty {
             $file.Save()
           }
           if ($PassThru) {
-            switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+            switch -Exact -CaseSensitive ($parameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
                 return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
               }
@@ -384,9 +390,6 @@ function Set-ExcelDocumentProperty {
               }
             }
           }
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -522,17 +525,13 @@ function Remove-ExcelDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
-        $file = Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force
-        try {
+        Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           if ($file.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
           $file.RemoveDocumentInformation($RemoveDocInfoType)
           $file.Saved = $false
           $file.Save()
-        }
-        finally {
-          $file.Close()
         }
       }
     }

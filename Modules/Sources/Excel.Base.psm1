@@ -62,72 +62,6 @@ function New-ExcelObject {
     [GC]::WaitForPendingFinalizers()
   }
 }
-function Open-ExcelFile {
-  [CmdletBinding()]
-  [OutputType([__ComObject])]
-  param(
-    [Parameter(Mandatory)]
-    [__ComObject]
-    $Application,
-    [Parameter(Mandatory)]
-    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
-    [string]
-    $Path,
-    [SecureString]
-    $PasswordToOpen = $null,
-    [SecureString]
-    $PasswordToModify = $null,
-    [switch]
-    $ReadOnly,
-    [switch]
-    $Force
-  )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
-  $passwordToOpenString = if ($null -eq $PasswordToOpen) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
-  }
-  $passwordToModifyString = if ($null -eq $PasswordToModify) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
-  }
-  $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-    Start-NUIDialogSuppressor -TargetExe 'EXCEL.EXE'
-  }
-  else {
-    $null
-  }
-  try {
-    # https://learn.microsoft.com/en-us/office/vba/api/excel.workbooks.open
-    return $Application.Workbooks.Open(
-      $resolved                  # FileName
-      , [type]::Missing         # UpdateLinks
-      , $ReadOnly.IsPresent     # ReadOnly
-      , [type]::Missing         # Format
-      , $passwordToOpenString   # Password
-      , $passwordToModifyString # WriteResPassword
-      , $Force.IsPresent        # IgnoreReadOnlyRecommended
-    )
-  }
-  finally {
-    try {
-      if ($dialogSuppressor) {
-        Stop-NUIDialogSuppressor -Job $dialogSuppressor
-      }
-    }
-    finally {
-      Get-Variable |
-      Where-Object -Property Value -Is [__ComObject] |
-      Clear-Variable -Force -WhatIf:$false -Confirm:$false
-      [GC]::Collect()
-      [GC]::WaitForPendingFinalizers()
-    }
-  }
-}
 #endregion
 #region Public
 function New-ExcelFile {
@@ -297,6 +231,172 @@ function New-ExcelFile {
         }
       }
       finally {
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+function Open-ExcelFile {
+  <#
+  .SYNOPSIS
+    Opens an Excel workbook file.
+
+  .DESCRIPTION
+    Opens a workbook file by automating Excel through COM.
+
+    If `-Application` is not specified, the cmdlet creates a new Excel Application
+    object, opens the workbook, and releases the application after the action completes.
+
+  .PARAMETER Path
+    Specifies the path to the workbook file to open.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Application
+    Specifies the Excel Application COM object to use for opening the workbook.
+
+    If not specified, a new Excel Application object is created automatically.
+
+  .PARAMETER PasswordToOpen
+    Specifies the password required to open the workbook.
+
+    Pass a `SecureString` value. If omitted, no open password is used.
+
+  .PARAMETER PasswordToModify
+    Specifies the password required to modify the workbook.
+
+    Pass a `SecureString` value. If omitted, no modify password is used.
+
+  .PARAMETER ReadOnly
+    Opens the workbook in read-only mode.
+
+  .PARAMETER Force
+    Ignores the read-only recommended flag when opening the workbook.
+
+  .PARAMETER Action
+    Specifies a script block to execute with the opened workbook.
+
+    The script block receives the workbook object as its first argument.
+    When this parameter is specified, the workbook is automatically closed after
+    the action completes.
+
+  .EXAMPLE
+    Open-ExcelFile -Path "$env:TEMP\Book.xlsx"
+
+    Opens a workbook and returns the workbook object.
+
+  .EXAMPLE
+    Open-ExcelFile -Path "$env:TEMP\Book.xlsx" -Action {
+      param($Workbook)
+      $Workbook.Worksheets.Item(1).Name = 'Sheet1'
+    }
+
+    Opens a workbook, renames the first worksheet, and closes the workbook.
+
+  .EXAMPLE
+    $app = New-ExcelObject
+    Open-ExcelFile -Application $app -Path "$env:TEMP\Book.xlsx" -Action {
+      param($Workbook)
+      $Workbook.Worksheets.Item(1).Name = 'Sheet1'
+    }
+    $app.Quit()
+
+    Opens a workbook using an existing Excel Application object.
+
+  .OUTPUTS
+    __ComObject
+      Returns the opened workbook object.
+  #>
+  [OutputType([__ComObject])]
+  param(
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [__ComObject]
+    $Application,
+    [SecureString]
+    $PasswordToOpen = $null,
+    [SecureString]
+    $PasswordToModify = $null,
+    [switch]
+    $ReadOnly,
+    [switch]
+    $Force,
+    [ScriptBlock]
+    $Action
+  )
+  process {
+    $app = if ($Application) {
+      $Application
+    }
+    else {
+      New-ExcelObject
+    }
+    $shouldDisposeApp = -not $Application
+    try {
+      $resolved = (Resolve-Path -LiteralPath $Path).Path
+      $passwordToOpenString = if ($null -eq $PasswordToOpen) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
+      }
+      $passwordToModifyString = if ($null -eq $PasswordToModify) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
+      }
+      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
+        Start-NUIDialogSuppressor -TargetExe 'EXCEL.EXE'
+      }
+      else {
+        $null
+      }
+      try {
+        # https://learn.microsoft.com/en-us/office/vba/api/excel.workbooks.open
+        $file = $app.Workbooks.Open(
+          $resolved                  # FileName
+          , [type]::Missing         # UpdateLinks
+          , $ReadOnly.IsPresent     # ReadOnly
+          , [type]::Missing         # Format
+          , $passwordToOpenString   # Password
+          , $passwordToModifyString # WriteResPassword
+          , $Force.IsPresent        # IgnoreReadOnlyRecommended
+        )
+        try {
+          if ($Action) {
+            return & $Action $file
+          }
+        }
+        finally {
+          $file.Close()
+        }
+      }
+      finally {
+        try {
+          if ($dialogSuppressor) {
+            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+          }
+        }
+        finally {
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    finally {
+      if ($shouldDisposeApp -and $app) {
+        $app.Quit()
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -497,8 +597,12 @@ function Get-ExcelFileProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
+        Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Workbook]
+            $file
+          )
           $properties = Get-ObjectProperty -InputObject $file
           if ($Name) {
             $selected = [PSCustomObject]@{}
@@ -513,9 +617,6 @@ function Get-ExcelFileProperty {
             return $selected
           }
           return $properties
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -698,8 +799,12 @@ function Set-ExcelFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
-        $file = Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force
-        try {
+        Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Workbook]
+            $file
+          )
           if ($file.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
           }
@@ -719,9 +824,6 @@ function Set-ExcelFileProperty {
             }
             return $updated | Select-Object -Property $propertyNames
           }
-        }
-        finally {
-          $file.Close()
         }
       }
     }

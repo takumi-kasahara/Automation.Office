@@ -62,72 +62,6 @@ function New-WordObject {
     [GC]::WaitForPendingFinalizers()
   }
 }
-function Open-WordFile {
-  [CmdletBinding()]
-  [OutputType([__ComObject])]
-  param(
-    [Parameter(Mandatory)]
-    [__ComObject]
-    $Application,
-    [Parameter(Mandatory)]
-    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
-    [string]
-    $Path,
-    [SecureString]
-    $PasswordToOpen = $null,
-    [SecureString]
-    $PasswordToModify = $null,
-    [switch]
-    $ReadOnly
-  )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
-  $passwordToOpenString = if ($null -eq $PasswordToOpen) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
-  }
-  $passwordToModifyString = if ($null -eq $PasswordToModify) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
-  }
-  $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-    Start-NUIDialogSuppressor -TargetExe 'WINWORD.EXE'
-  }
-  else {
-    $null
-  }
-  try {
-    # https://learn.microsoft.com/en-us/office/vba/api/word.documents.open
-    return $Application.Documents.Open(
-      $resolved                 # FileName
-      , [type]::Missing         # ConfirmConversions
-      , $ReadOnly.IsPresent     # ReadOnly
-      , [type]::Missing         # AddToRecentFiles
-      , $passwordToOpenString   # PasswordDocument
-      , [type]::Missing         # PasswordTemplate
-      , [type]::Missing         # Revert
-      , $passwordToModifyString # WritePasswordDocuments
-      , [type]::Missing         # WritePasswordTemplate
-    )
-  }
-  finally {
-    try {
-      if ($dialogSuppressor) {
-        Stop-NUIDialogSuppressor -Job $dialogSuppressor
-      }
-    }
-    finally {
-      Get-Variable |
-      Where-Object -Property Value -Is [__ComObject] |
-      Clear-Variable -Force -WhatIf:$false -Confirm:$false
-      [GC]::Collect()
-      [GC]::WaitForPendingFinalizers()
-    }
-  }
-}
 #endregion
 #region Public
 function New-WordFile {
@@ -299,6 +233,165 @@ function New-WordFile {
         }
       }
       finally {
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+function Open-WordFile {
+  <#
+  .SYNOPSIS
+    Opens a Word document file.
+
+  .DESCRIPTION
+    Opens a document file by automating Word through COM.
+
+    If `-Application` is not specified, the cmdlet creates a new Word Application
+    object, opens the document, and releases the application after the action completes.
+
+  .PARAMETER Path
+    Specifies the path to the document file to open.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Application
+    Specifies the Word Application COM object to use for opening the document.
+
+    If not specified, a new Word Application object is created automatically.
+
+  .PARAMETER PasswordToOpen
+    Specifies the password required to open the document.
+
+    Pass a `SecureString` value. If omitted, no open password is used.
+
+  .PARAMETER PasswordToModify
+    Specifies the password required to modify the document.
+
+    Pass a `SecureString` value. If omitted, no modify password is used.
+
+  .PARAMETER ReadOnly
+    Opens the document in read-only mode.
+
+  .PARAMETER Action
+    Specifies a script block to execute with the opened document.
+
+    The script block receives the document object as its first argument.
+    When this parameter is specified, the document is automatically closed after
+    the action completes.
+
+  .EXAMPLE
+    Open-WordFile -Path "$env:TEMP\Document.docx"
+
+    Opens a document and returns the document object.
+
+  .EXAMPLE
+    Open-WordFile -Path "$env:TEMP\Document.docx" -Action {
+      param($Document)
+      $Document.Range().Text = 'Hello, World!'
+    }
+
+    Opens a document, adds text, and closes the document.
+
+  .OUTPUTS
+    __ComObject
+      Returns the opened document object.
+  #>
+  [CmdletBinding()]
+  [OutputType([__ComObject])]
+  param(
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [__ComObject]
+    $Application,
+    [SecureString]
+    $PasswordToOpen = $null,
+    [SecureString]
+    $PasswordToModify = $null,
+    [switch]
+    $ReadOnly,
+    [ScriptBlock]
+    $Action
+  )
+  process {
+    $app = if ($Application) {
+      $Application
+    }
+    else {
+      New-WordObject
+    }
+    $shouldDisposeApp = -not $Application
+    try {
+      $resolved = (Resolve-Path -LiteralPath $Path).Path
+      $passwordToOpenString = if ($null -eq $PasswordToOpen) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
+      }
+      $passwordToModifyString = if ($null -eq $PasswordToModify) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
+      }
+      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
+        Start-NUIDialogSuppressor -TargetExe 'WINWORD.EXE'
+      }
+      else {
+        $null
+      }
+      try {
+        # https://learn.microsoft.com/en-us/office/vba/api/word.documents.open
+        $file = $app.Documents.Open(
+          $resolved                 # FileName
+          , [type]::Missing         # ConfirmConversions
+          , $ReadOnly.IsPresent     # ReadOnly
+          , [type]::Missing         # AddToRecentFiles
+          , $passwordToOpenString   # PasswordDocument
+          , [type]::Missing         # PasswordTemplate
+          , [type]::Missing         # Revert
+          , $passwordToModifyString # WritePasswordDocuments
+          , [type]::Missing         # WritePasswordTemplate
+        )
+        try {
+          if ($Action) {
+            & $Action $file
+          }
+          else {
+            return $file
+          }
+        }
+        finally {
+          if ($Action -and $file) {
+            $file.Close()
+          }
+        }
+      }
+      finally {
+        try {
+          if ($dialogSuppressor) {
+            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+          }
+        }
+        finally {
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    finally {
+      if ($shouldDisposeApp -and $app) {
+        $app.Quit()
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -499,9 +592,13 @@ function Get-WordFileProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
-          $properties = Get-ObjectProperty -InputObject $file
+        Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          $properties = Get-ObjectProperty -InputObject $Document
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {
@@ -515,9 +612,6 @@ function Get-WordFileProperty {
             return $selected
           }
           return $properties
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -692,17 +786,21 @@ function Set-WordFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
-        $file = Open-WordFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly) {
+        Open-WordFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Document]
+            $Document
+          )
+          if ($Document.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
           }
-          Set-ObjectProperty -InputObject $file -Properties $properties | Out-Null
-          if (-not $file.Saved) {
-            $file.Save()
+          Set-ObjectProperty -InputObject $Document -Properties $properties | Out-Null
+          if (-not $Document.Saved) {
+            $Document.Save()
           }
           if ($PassThru) {
-            $updated = Get-ObjectProperty -InputObject $file
+            $updated = Get-ObjectProperty -InputObject $Document
             $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
                 $Name
@@ -713,9 +811,6 @@ function Set-WordFileProperty {
             }
             return $updated | Select-Object -Property $propertyNames
           }
-        }
-        finally {
-          $file.Close()
         }
       }
     }

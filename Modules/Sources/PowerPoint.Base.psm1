@@ -61,73 +61,6 @@ function New-PowerPointObject {
     [GC]::WaitForPendingFinalizers()
   }
 }
-function Open-PowerPointFile {
-  [CmdletBinding()]
-  [OutputType([__ComObject])]
-  param(
-    [Parameter(Mandatory)]
-    [__ComObject]
-    $Application,
-    [Parameter(Mandatory)]
-    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
-    [string]
-    $Path,
-    [SecureString]
-    $PasswordToOpen = $null,
-    [SecureString]
-    $PasswordToModify = $null,
-    [switch]
-    $ReadOnly
-  )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
-  $passwordToOpenString = if ($null -eq $PasswordToOpen) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
-  }
-  $passwordToModifyString = if ($null -eq $PasswordToModify) {
-    [type]::Missing
-  }
-  else {
-    [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
-  }
-  $readOnlyValue = if ($ReadOnly) {
-    [MsoTriState]::msoTrue
-  }
-  else {
-    [MsoTriState]::msoFalse
-  }
-  $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-    Start-NUIDialogSuppressor -TargetExe 'POWERPNT.EXE'
-  }
-  else {
-    $null
-  }
-  try {
-    # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentations.open
-    return $Application.Presentations.Open(
-      "$resolved::$passwordToOpenString::$passwordToModifyString" # FileName
-      , $readOnlyValue                                            # ReadOnly
-      , [type]::Missing                                           # Untitled
-      , [MsoTriState]::msoFalse                                   # WithWindow
-    )
-  }
-  finally {
-    try {
-      if ($dialogSuppressor) {
-        Stop-NUIDialogSuppressor -Job $dialogSuppressor
-      }
-    }
-    finally {
-      Get-Variable |
-      Where-Object -Property Value -Is [__ComObject] |
-      Clear-Variable -Force -WhatIf:$false -Confirm:$false
-      [GC]::Collect()
-      [GC]::WaitForPendingFinalizers()
-    }
-  }
-}
 #endregion
 #region Public
 function New-PowerPointFile {
@@ -302,6 +235,161 @@ function New-PowerPointFile {
         }
       }
       finally {
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+function Open-PowerPointFile {
+  <#
+  .SYNOPSIS
+    Opens a PowerPoint presentation file.
+
+  .DESCRIPTION
+    Opens a presentation file by automating PowerPoint through COM.
+
+    If `-Application` is not specified, the cmdlet creates a new PowerPoint Application
+    object, opens the presentation, and releases the application after the action completes.
+
+  .PARAMETER Path
+    Specifies the path to the presentation file to open.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Application
+    Specifies the PowerPoint Application COM object to use for opening the presentation.
+
+    If not specified, a new PowerPoint Application object is created automatically.
+
+  .PARAMETER PasswordToOpen
+    Specifies the password required to open the presentation.
+
+    Pass a `SecureString` value. If omitted, no open password is used.
+
+  .PARAMETER PasswordToModify
+    Specifies the password required to modify the presentation.
+
+    Pass a `SecureString` value. If omitted, no modify password is used.
+
+  .PARAMETER ReadOnly
+    Opens the presentation in read-only mode.
+
+  .PARAMETER Action
+    Specifies a script block to execute with the opened presentation.
+
+    The script block receives the presentation object as its first argument.
+    When this parameter is specified, the presentation is automatically closed after
+    the action completes.
+
+  .EXAMPLE
+    Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
+
+    Opens a presentation and returns the presentation object.
+
+  .EXAMPLE
+    Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Action {
+      param($Presentation)
+      $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+    }
+
+    Opens a presentation, adds a title slide, and closes the presentation.
+
+  .OUTPUTS
+    __ComObject
+      Returns the opened presentation object.
+  #>
+  [CmdletBinding()]
+  [OutputType([__ComObject])]
+  param(
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [__ComObject]
+    $Application,
+    [SecureString]
+    $PasswordToOpen = $null,
+    [SecureString]
+    $PasswordToModify = $null,
+    [switch]
+    $ReadOnly,
+    [ScriptBlock]
+    $Action
+  )
+  process {
+    $app = if ($Application) {
+      $Application
+    }
+    else {
+      New-PowerPointObject
+    }
+    $shouldDisposeApp = -not $Application
+    try {
+      $resolved = (Resolve-Path -LiteralPath $Path).Path
+      $passwordToOpenString = if ($null -eq $PasswordToOpen) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
+      }
+      $passwordToModifyString = if ($null -eq $PasswordToModify) {
+        [type]::Missing
+      }
+      else {
+        [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
+      }
+      $readOnlyValue = if ($ReadOnly) {
+        [MsoTriState]::msoTrue
+      }
+      else {
+        [MsoTriState]::msoFalse
+      }
+      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
+        Start-NUIDialogSuppressor -TargetExe 'POWERPNT.EXE'
+      }
+      else {
+        $null
+      }
+      try {
+        # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentations.open
+        $file = $app.Presentations.Open(
+          "$resolved::$passwordToOpenString::$passwordToModifyString" # FileName
+          , $readOnlyValue                                            # ReadOnly
+          , [type]::Missing                                           # Untitled
+          , [MsoTriState]::msoFalse                                   # WithWindow
+        )
+        try {
+          if ($Action) {
+            return & $Action $file
+          }
+        }
+        finally {
+          $file.Close()
+        }
+      }
+      finally {
+        try {
+          if ($dialogSuppressor) {
+            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+          }
+        }
+        finally {
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    finally {
+      if ($shouldDisposeApp -and $app) {
+        $app.Quit()
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -502,9 +590,13 @@ function Get-PowerPointFileProperty {
       }
       $items |
       ForEach-Object {
-        $file = Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        try {
-          $properties = Get-ObjectProperty -InputObject $file
+        Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $properties = Get-ObjectProperty -InputObject $Presentation
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {
@@ -518,9 +610,6 @@ function Get-PowerPointFileProperty {
             return $selected
           }
           return $properties
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -697,30 +786,36 @@ function Set-PowerPointFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
-        $file = Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        try {
-          if ($file.ReadOnly -ne [MsoTriState]::msoFalse) {
-            $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
-          }
-          Set-ObjectProperty -InputObject $file -Properties $properties | Out-Null
-          if (-not $file.Saved) {
-            $file.Save()
-          }
-          if ($PassThru) {
-            $updated = Get-ObjectProperty -InputObject $file
-            $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
-              { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                $Name
-              }
-              { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                $InputObject.PSObject.Properties.Name
-              }
+        Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          try {
+            if ($Presentation.ReadOnly -ne [MsoTriState]::msoFalse) {
+              $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
             }
-            return $updated | Select-Object -Property $propertyNames
+            Set-ObjectProperty -InputObject $Presentation -Properties $properties | Out-Null
+            if (-not $Presentation.Saved) {
+              $Presentation.Save()
+            }
+            if ($PassThru) {
+              $updated = Get-ObjectProperty -InputObject $Presentation
+              $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+                { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
+                  $Name
+                }
+                { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
+                  $InputObject.PSObject.Properties.Name
+                }
+              }
+              return $updated | Select-Object -Property $propertyNames
+            }
           }
-        }
-        finally {
-          $file.Close()
+          finally {
+            $Presentation.Close()
+          }
         }
       }
     }

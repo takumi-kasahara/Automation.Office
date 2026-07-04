@@ -166,17 +166,21 @@ function Get-PowerPointSpeakerNote {
       $items |
       ForEach-Object {
         $item = $_
-        $file = Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly
-        $notes = @()
-        try {
+        Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $notes = @()
           $slidesToProcess = if ($slideIndexes) {
             $slideIndexes
           }
           else {
-            1..@($file.Slides).Count | Where-Object { $true }
+            1..@($Presentation.Slides).Count | Where-Object { $true }
           }
           foreach ($index in $slidesToProcess) {
-            $slide = $file.Slides.Item($index)
+            $slide = $Presentation.Slides.Item($index)
             if (-not $Force -and ($slide.SlideShowTransition.Hidden -ne [MsoTriState]::msoFalse)) {
               continue
             }
@@ -198,9 +202,6 @@ function Get-PowerPointSpeakerNote {
           $speakerNotes.Path = $item.FullName
           $speakerNotes.Items = $notes
           return $speakerNotes
-        }
-        finally {
-          $file.Close()
         }
       }
     }
@@ -280,11 +281,15 @@ function Export-PowerPointAsFixedFormat {
       $app = New-PowerPointObject
       try {
         # Presentation must be opened in read/write mode because PrintOptions.Ranges.Add() requires it.
-        $presentation = Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-        $printRange = $presentation.PrintOptions.Ranges.Add(1, $presentation.Slides.Count)
-        try {
+        Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $printRange = $Presentation.PrintOptions.Ranges.Add(1, $Presentation.Slides.Count)
           # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentation.exportasfixedformat
-          $presentation.ExportAsFixedFormat(
+          $Presentation.ExportAsFixedFormat(
             $resolved                               # Path
             , $FixedFormatType                      # FixedFormatType
             , $FixedFormatIntent                    # Intent
@@ -302,9 +307,6 @@ function Export-PowerPointAsFixedFormat {
             , $true                                 # UseISO19005_1
           )
           return [FileInfo]::new($resolved)
-        }
-        finally {
-          $presentation.Close()
         }
       }
       finally {

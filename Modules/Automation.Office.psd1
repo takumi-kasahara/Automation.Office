@@ -14,6 +14,7 @@
     #endregion
     #region Excel
     'New-ExcelFile'
+    'Open-ExcelFile'
     'Get-ExcelAppProperty'
     'Set-ExcelAppProperty'
     'Get-ExcelFileProperty'
@@ -27,6 +28,7 @@
     #endregion
     #region Word
     'New-WordFile'
+    'Open-WordFile'
     'Get-WordAppProperty'
     'Set-WordAppProperty'
     'Get-WordFileProperty'
@@ -40,6 +42,7 @@
     #endregion
     #region PowerPoint
     'New-PowerPointFile'
+    'Open-PowerPointFile'
     'Get-PowerPointAppProperty'
     'Set-PowerPointAppProperty'
     'Get-PowerPointFileProperty'

@@ -50,7 +50,7 @@ InModuleScope 'PowerPoint.Automation' {
         [int]
         $SlideCount
       )
-      New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+      New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
         param (
           [Parameter(Mandatory)]
           [Presentation]
@@ -75,7 +75,7 @@ InModuleScope 'PowerPoint.Automation' {
         [SecureString]
         $PasswordToModify
       )
-      New-PowerPointFile @PSBoundParameters -Action {
+      New-PowerPointFile @PSBoundParameters -Initialize {
         param (
           [Parameter(Mandatory)]
           [Presentation]

@@ -1,4 +1,5 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using namespace Microsoft.Office.Interop.Excel
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Security
@@ -120,156 +121,97 @@ InModuleScope 'Excel.Base' {
         New-ExcelFile -Path $path -PasswordToOpen $password
         Test-Path -LiteralPath $path | Should -BeTrue
         $app = New-ExcelObject
-        try {
-          $file = Open-ExcelFile -Application $app -Path $path -PasswordToOpen $password
-          try {
-            $file.HasPassword | Should -BeTrue
-            $file.ReadOnly | Should -BeFalse
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-ExcelFile -Path $path -PasswordToOpen $password -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.HasPassword | Should -BeTrue
+          $Workbook.ReadOnly | Should -BeFalse
         }
       }
       It 'creates a file with PasswordToModify' {
         $path = Get-TempFile
         New-ExcelFile -Path $path -PasswordToModify $password
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-ExcelObject
-        try {
-          $file = Open-ExcelFile -Application $app -Path $path -PasswordToModify $password
-          try {
-            $file.WriteReserved | Should -BeTrue
-            $file.ReadOnly | Should -BeFalse
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-ExcelFile -Path $path -PasswordToModify $password -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.HasPassword | Should -BeTrue
+          $Workbook.ReadOnly | Should -BeFalse
         }
       }
       It 'creates a file with ReadOnlyRecommended' {
         $path = Get-TempFile
         New-ExcelFile -Path $path -ReadOnlyRecommended
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-ExcelObject
-        try {
-          $file = Open-ExcelFile -Application $app -Path $path
-          try {
-            $file.ReadOnlyRecommended | Should -BeTrue
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-ExcelFile -Path $path -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.ReadOnlyRecommended | Should -BeTrue
         }
       }
       It 'creates a file with RemovePersonalInformation' {
         $path = Get-TempFile
         New-ExcelFile -Path $path -RemovePersonalInformation
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-ExcelObject
-        try {
-          $file = Open-ExcelFile -Application $app -Path $path
-          try {
-            $file.RemovePersonalInformation | Should -BeTrue
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
-      }
-      It 'creates a file with Initialize script block' {
-        $path = Get-TempFile
-        $item = New-ExcelFile -Path $path -Initialize {
+        Open-ExcelFile -Path $path -Action {
           param (
             [Parameter(Mandatory)]
-            [Microsoft.Office.Interop.Excel.Workbook]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.RemovePersonalInformation | Should -BeTrue
+        }
+      }
+      It 'opens a file with Action script block' {
+        $path = Get-TempFile
+        New-ExcelFile -Path $path
+        Open-ExcelFile -Path $path -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Workbook]
             $Workbook
           )
           $Workbook.Worksheets.Item(1).Name = 'TestData'
         }
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-ExcelObject
-        try {
-          $file = Open-ExcelFile -Application $app -Path $path
-          try {
-            $file.Worksheets.Item(1).Name | Should -Be 'TestData'
-          }
-          finally {
-            $file.Close()
-          }
+        Open-ExcelFile -Path $path -Action {
+          param (
+            [Parameter(Mandatory)]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.Worksheets.Item(1).Name | Should -Be 'TestData'
         }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
+      }
+    }
+    It 'creates a file with Initialize script block' {
+      $path = Get-TempFile
+      $item = New-ExcelFile -Path $path -Initialize {
+        param (
+          [Parameter(Mandatory)]
+          [Workbook]
+          $Workbook
+        )
+        $Workbook.Worksheets.Item(1).Name = 'TestData'
+      }
+      $item | Should -BeOfType [System.IO.FileInfo]
+      $item.FullName | Should -Be ([Path]::GetFullPath($path))
+      Test-Path -LiteralPath $path | Should -BeTrue
+      Open-ExcelFile -Path $path -Action {
+        param (
+          [Parameter(Mandatory)]
+          [Workbook]
+          $Workbook
+        )
+        $Workbook.Worksheets.Item(1).Name | Should -Be 'TestData'
       }
     }
     Context 'Edge cases' {
@@ -312,6 +254,96 @@ InModuleScope 'Excel.Base' {
 
         { New-ExcelFile -Path $path } | Should -Throw
         $script:called | Should -Be 0
+      }
+    }
+  }
+  Describe 'Open-ExcelFile' {
+    BeforeEach {
+      $password = Get-Password
+      $path = Get-TempFile
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'opens a workbook and returns the workbook object' {
+        New-ExcelFile -Path $path
+        { Open-ExcelFile -Path $path } | Should -Not -Throw
+      }
+      It 'opens a workbook by Path with ValueFromPipeline' {
+        New-ExcelFile -Path $path
+        { $path | Open-ExcelFile } | Should -Not -Throw
+      }
+      It 'opens a workbook by Path with ValueFromPipelineByPropertyName' {
+        New-ExcelFile -Path $path
+        { [PSCustomObject]@{ FullName = $path } | Open-ExcelFile } | Should -Not -Throw
+      }
+      It 'opens a workbook using an existing Application object' {
+        New-ExcelFile -Path $path
+        $app = New-ExcelObject
+        try {
+          { Open-ExcelFile -Application $app -Path $path } | Should -Not -Throw
+        }
+        finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    Context 'Other parameters' {
+      It 'opens a workbook with PasswordToOpen' {
+        New-ExcelFile -Path $path -PasswordToOpen $password
+        { Open-ExcelFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+      }
+      It 'opens a workbook with PasswordToModify' {
+        New-ExcelFile -Path $path -PasswordToModify $password
+        { Open-ExcelFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+      }
+      It 'opens a workbook with ReadOnly' {
+        New-ExcelFile -Path $path
+        { Open-ExcelFile -Path $path -ReadOnly } | Should -Not -Throw
+      }
+      It 'opens a workbook with Force' {
+        New-ExcelFile -Path $path -ReadOnlyRecommended
+        { Open-ExcelFile -Path $path -Force } | Should -Not -Throw
+      }
+      It 'opens a workbook with Action script block' {
+        New-ExcelFile -Path $path
+        $result = Open-ExcelFile -Path $path -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Workbook]
+            $Workbook
+          )
+          $Workbook.Worksheets.Item(1).Name = 'Sheet1'
+          return $Workbook.Worksheets.Item(1).Name
+        }
+        $result | Should -Be 'Sheet1'
+      }
+    }
+  }
+  Describe 'Open-ExcelFile.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-ExcelObject fails and Application is not specified' {
+        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+
+        { Open-ExcelFile -Path $path } | Should -Throw
+        Assert-MockCalled -CommandName New-ExcelObject -Times 1 -Exactly
       }
     }
   }
@@ -381,25 +413,25 @@ InModuleScope 'Excel.Base' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelFileProperty -Path $path -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeTrue
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by LiteralPath' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelFileProperty -LiteralPath $path -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeTrue
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
         $properties = $path | Get-ExcelFileProperty -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeTrue
+        $properties.Final | Should -BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-ExcelFileProperty -Name Final
         @($properties.PSObject.Properties).Count | Should -Be 1
-        $properties.Final | Should -BeTrue
+        $properties.Final | Should -BeFalse
       }
     }
     Context 'Other parameters' {

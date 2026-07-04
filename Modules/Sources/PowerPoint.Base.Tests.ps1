@@ -116,120 +116,43 @@ InModuleScope 'PowerPoint.Base' {
         $item.FullName | Should -Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should -BeTrue
       }
-      It 'creates a file with PasswordToOpen' {
+      It 'opens a file with PasswordToOpen' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -PasswordToOpen $password
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-PowerPointObject
-        try {
-          $file = Open-PowerPointFile -Application $app -Path $path -PasswordToOpen $password
-          try {
-            $file.Password | Should -Match '^\*+$'
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-PowerPointFile -Path $path -PasswordToOpen $password -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $Presentation.Password | Should -Match '^\*+$'
         }
       }
-      It 'creates a file with PasswordToModify' {
+      It 'opens a file with PasswordToModify' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -PasswordToModify $password
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-PowerPointObject
-        try {
-          $file = Open-PowerPointFile -Application $app -Path $path -PasswordToModify $password
-          try {
-            $file.WritePassword | Should -Match '^\*+$'
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-PowerPointFile -Path $path -PasswordToModify $password -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $Presentation.WritePassword | Should -Match '^\*+$'
         }
       }
-      It 'creates a file with ReadOnlyRecommended' {
+      It 'opens a file with ReadOnlyRecommended' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-PowerPointObject
-        try {
-          $file = Open-PowerPointFile -Application $app -Path $path
-          try {
-            $file.ReadOnlyRecommended | Should -BeTrue
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
-        }
-      }
-      It 'creates a file with RemovePersonalInformation' {
-        $path = Get-TempFile
-        New-PowerPointFile -Path $path -RemovePersonalInformation
-        Test-Path -LiteralPath $path | Should -BeTrue
-        $app = New-PowerPointObject
-        try {
-          $file = Open-PowerPointFile -Application $app -Path $path
-          try {
-            $file.RemovePersonalInformation | Should -BeTrue
-          }
-          finally {
-            $file.Close()
-          }
-        }
-        finally {
-          try {
-            if ($app) {
-              $app.Quit()
-            }
-          }
-          finally {
-            Get-Variable |
-            Where-Object -Property Value -Is [__ComObject] |
-            Clear-Variable -Force -WhatIf:$false -Confirm:$false
-            [GC]::Collect()
-            [GC]::WaitForPendingFinalizers()
-          }
+        Open-PowerPointFile -Path $path -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $Presentation.ReadOnlyRecommended | Should -BeTrue
         }
       }
       It 'creates a file with Initialize script block' {
@@ -287,6 +210,92 @@ InModuleScope 'PowerPoint.Base' {
 
         { New-PowerPointFile -Path $path } | Should -Throw
         $script:called | Should -Be 0
+      }
+    }
+  }
+  Describe 'Open-PowerPointFile' {
+    BeforeEach {
+      $password = Get-Password
+      $path = Get-TempFile
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'opens a presentation and returns the presentation object' {
+        New-PowerPointFile -Path $path
+        { Open-PowerPointFile -Path $path } | Should -Not -Throw
+      }
+      It 'opens a presentation by Path with ValueFromPipeline' {
+        New-PowerPointFile -Path $path
+        { $path | Open-PowerPointFile } | Should -Not -Throw
+      }
+      It 'opens a presentation by Path with ValueFromPipelineByPropertyName' {
+        New-PowerPointFile -Path $path
+        { [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile } | Should -Not -Throw
+      }
+      It 'opens a presentation using an existing Application object' {
+        New-PowerPointFile -Path $path
+        $app = New-PowerPointObject
+        try {
+          { Open-PowerPointFile -Path $path -Application $app } | Should -Not -Throw
+        }
+        finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
+      }
+    }
+    Context 'Other parameters' {
+      It 'opens a presentation with PasswordToOpen' {
+        New-PowerPointFile -Path $path -PasswordToOpen $password
+        { Open-PowerPointFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+      }
+      It 'opens a presentation with PasswordToModify' {
+        New-PowerPointFile -Path $path -PasswordToModify $password
+        { Open-PowerPointFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+      }
+      It 'opens a presentation with ReadOnly' {
+        New-PowerPointFile -Path $path
+        { Open-PowerPointFile -Path $path -ReadOnly } | Should -Not -Throw
+      }
+      It 'opens a presentation with Action script block' {
+        New-PowerPointFile -Path $path
+        $result = Open-PowerPointFile -Path $path -Action {
+          param(
+            [Parameter(Mandatory)]
+            [Presentation]
+            $Presentation
+          )
+          $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+          return $Presentation.Slides.Count
+        }
+        $result | Should -Be 1
+      }
+    }
+  }
+  Describe 'Open-PowerPointFile.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-PowerPointObject fails and Application is not specified' {
+        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+
+        { Open-PowerPointFile -Path $path } | Should -Throw
+        Assert-MockCalled -CommandName New-PowerPointObject -Times 1 -Exactly
       }
     }
   }
