@@ -6,6 +6,14 @@ if ($PSEdition -ne 'Desktop') {
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 
+# Word > Options > Save > Create new files in the cloud automatically: false
+# https://support.microsoft.com/en-us/office/collab-files/what-administrators-need-to-know-about-the-cloud-focused-save-experience-in-office
+@(
+  'HKCU:\Software\Microsoft\Office\16.0\Common\General'
+) |
+Where-Object { Test-Path -LiteralPath $_ } |
+ForEach-Object { Set-ItemProperty -LiteralPath $_ -Name PreferCloudSaveLocations -Value 0 -Type DWord }
+
 Get-ChildItem -LiteralPath 'Modules' -File -Filter '*.psd1' |
 ForEach-Object {
   $destination = [WildcardPattern]::Escape($PROFILE.CurrentUserAllHosts) |
