@@ -4,7 +4,9 @@
 param (
   [ValidateScript({ Test-Path -LiteralPath $_ })]
   [string]
-  $Path = ($PSScriptRoot | Join-Path -ChildPath 'Modules\Sources')
+  $Path = ($PSScriptRoot | Join-Path -ChildPath 'Modules\Sources'),
+  [switch]
+  $Parallel
 )
 if ($PSEdition -ne 'Desktop') {
   return
@@ -39,10 +41,11 @@ if (-not (Test-Path -LiteralPath $test)) {
   throw "Test not found: $test"
 }
 $config = New-PesterConfiguration
+$config.Run.Parallel = $Parallel.IsPresent
 $config.Run.Path = (Resolve-Path -LiteralPath $test).Path
-$config.TestResult.Enabled = $true
 $config.TestResult.OutputFormat = 'NUnitXml'
-$config.CodeCoverage.Enabled = $true
-$config.CodeCoverage.OutputFormat = 'CoverageGutters'
-$config.CodeCoverage.Path = (Resolve-Path -LiteralPath $module).Path
+if (-not $Parallel.IsPresent) {
+  $config.CodeCoverage.OutputFormat = 'JaCoCo'
+  $config.CodeCoverage.Path = (Resolve-Path -LiteralPath $module).Path
+}
 Invoke-Pester -Configuration $config

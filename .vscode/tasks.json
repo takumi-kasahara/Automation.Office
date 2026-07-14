@@ -98,26 +98,5 @@
         "isDefault": true,
       },
     },
-    {
-      "label": "pester current line",
-      "type": "shell",
-      "command": "powershell.exe",
-      "args": [
-        "-NoLogo",
-        "-NoProfile",
-        "-File",
-        ".github/skills/powershell-pester/scripts/Pester.ps1",
-        "-Path",
-        "${file}",
-        "-LineNumber",
-        "${lineNumber}",
-      ],
-      "problemMatcher": [
-        "$pester",
-      ],
-      "group": {
-        "kind": "test",
-      },
-    },
   ],
 }

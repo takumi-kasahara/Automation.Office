@@ -6,7 +6,7 @@ A PowerShell module for automating Microsoft Office applications (Access / Excel
 
 - Windows 11
 - PowerShell 5
-  - [Pester v5](https://pester.dev/docs/introduction/installation)
+  - [Pester v6](https://pester.dev/docs/introduction/installation)
   - [PSScriptAnalyzer](https://learn.microsoft.com/en-us/powershell/utility-modules/psscriptanalyzer/overview?view=ps-modules)
 - Microsoft 365 Apps
   - [Rubberduck v2.x](https://rubberduckvba.ca/)
@@ -19,8 +19,15 @@ Run from the repository root:
 ./Install.bat
 ```
 
+If you want to install Pester v6, run:
+
+``` powershell
+Uninstall-Module -Name Pester
+Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
+```
+
 If you want to run tests:
 
 ``` powershell
-Invoke-Pester -Path .\Modules\Tests
+. .\Pester.ps1
 ```
