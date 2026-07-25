@@ -11,7 +11,6 @@ try {
   Write-Progress -Activity 'Exporting Application Properties'
   $json = $out | Join-Path -ChildPath 'Excel.Application.json'
   Get-ExcelAppProperty | ConvertTo-Json | Out-File -LiteralPath $json -Encoding UTF8
-}
-finally {
+} finally {
   Write-Progress -Activity 'Done' -Completed
 }

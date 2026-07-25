@@ -22,8 +22,7 @@ if (-not (Test-Path -LiteralPath $config.Output)) {
 
 if (Test-Path -LiteralPath $config.Output) {
   Get-ChildItem -LiteralPath $config.Output -Filter '*.csv' | Remove-Item
-}
-else {
+} else {
   New-Item -Path $config.Output -ItemType Directory | Out-Null
 }
 $csv = Resolve-Path -LiteralPath $config.Output | Join-Path -ChildPath 'Hierarchy.csv'
@@ -40,30 +39,25 @@ ForEach-Object {
   $nodeId = $_.GetAttribute('ID')
   $nodeName = if ($_.HasAttribute('name')) {
     $_.GetAttribute('name')
-  }
-  else {
+  } else {
     [string]::Empty
   }
   $parentId = try {
     if ($_.ParentNode -is [XmlElement] -and $_.ParentNode.HasAttribute('ID')) {
       $_.ParentNode.GetAttribute('ID')
-    }
-    else {
+    } else {
       [string]::Empty
     }
-  }
-  catch {
+  } catch {
     [string]::Empty
   }
   $parentName = try {
     if ($_.ParentNode -is [XmlElement] -and $_.ParentNode.HasAttribute('name')) {
       $_.ParentNode.GetAttribute('name')
-    }
-    else {
+    } else {
       [string]::Empty
     }
-  }
-  catch {
+  } catch {
     [string]::Empty
   }
   [PSCustomObject]@{
@@ -80,8 +74,7 @@ Export-Csv -LiteralPath $csv -NoTypeInformation -Encoding UTF8
 $output = $config.Output | Join-Path -ChildPath 'Hierarchy'
 if (Test-Path -LiteralPath $output) {
   Get-ChildItem -LiteralPath $output -Filter '*.xml' | Remove-Item
-}
-else {
+} else {
   New-Item -Path $output -ItemType Directory | Out-Null
 }
 

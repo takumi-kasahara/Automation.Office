@@ -24,8 +24,7 @@ function New-ExcelObject {
       if ($app -and $app.hWnd) {
         break
       }
-    }
-    catch [COMException] {
+    } catch [COMException] {
       Write-Warning -Message $_.Exception.Message
     }
     Start-Sleep -Milliseconds 100
@@ -38,14 +37,12 @@ function New-ExcelObject {
       $app.ScreenUpdating = $false
     }
     return $app
-  }
-  catch {
+  } catch {
     try {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -53,8 +50,7 @@ function New-ExcelObject {
       [GC]::WaitForPendingFinalizers()
     }
     $PSCmdlet.ThrowTerminatingError($_)
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -172,14 +168,12 @@ function New-ExcelFile {
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
       [type]::Missing
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
     }
     $passwordToModifyString = if ($null -eq $PasswordToModify) {
       [type]::Missing
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
     }
     $resolved = [Path]::GetFullPath($Path)
@@ -189,8 +183,7 @@ function New-ExcelFile {
     }
     $action = if ($exists) {
       'Overwrite Excel file'
-    }
-    else {
+    } else {
       'Create Excel file'
     }
     if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolved, $action))) {
@@ -219,18 +212,15 @@ function New-ExcelFile {
           , $ReadOnlyRecommended.IsPresent # ReadOnlyRecommended
         )
         return Get-Item -LiteralPath $resolved -Force
-      }
-      finally {
+      } finally {
         $file.Close()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -334,8 +324,7 @@ function Open-ExcelFile {
   process {
     $app = if ($Application) {
       $Application
-    }
-    else {
+    } else {
       New-ExcelObject
     }
     $shouldDisposeApp = -not $Application
@@ -343,20 +332,17 @@ function Open-ExcelFile {
       $resolved = (Resolve-Path -LiteralPath $Path).Path
       $passwordToOpenString = if ($null -eq $PasswordToOpen) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
       }
       $passwordToModifyString = if ($null -eq $PasswordToModify) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
       }
       $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
         Start-NUIDialogSuppressor -TargetExe 'EXCEL.EXE'
-      }
-      else {
+      } else {
         $null
       }
       try {
@@ -374,18 +360,15 @@ function Open-ExcelFile {
           if ($Action) {
             return & $Action $file
           }
-        }
-        finally {
+        } finally {
           $file.Close()
         }
-      }
-      finally {
+      } finally {
         try {
           if ($dialogSuppressor) {
             Stop-NUIDialogSuppressor -Job $dialogSuppressor
           }
-        }
-        finally {
+        } finally {
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
           Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -393,8 +376,7 @@ function Open-ExcelFile {
           [GC]::WaitForPendingFinalizers()
         }
       }
-    }
-    finally {
+    } finally {
       if ($shouldDisposeApp -and $app) {
         $app.Quit()
         Get-Variable |
@@ -442,8 +424,7 @@ function Get-ExcelAppProperty {
   $app = New-ExcelObject -NoSetup
   try {
     Get-ObjectProperty -InputObject $app
-  }
-  finally {
+  } finally {
     $app.Quit()
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
@@ -502,8 +483,7 @@ function Set-ExcelAppProperty {
   try {
     $app = New-ExcelObject -NoSetup
     Set-ObjectProperty -InputObject $app -Properties $Properties
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -619,14 +599,12 @@ function Get-ExcelFileProperty {
           return $properties
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -641,8 +619,7 @@ function Get-ExcelFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -826,14 +803,12 @@ function Set-ExcelFileProperty {
           }
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -848,8 +823,7 @@ function Set-ExcelFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -917,8 +891,7 @@ function Test-ExcelExtension {
           }
         }
       )
-    }
-    catch [ItemNotFoundException] {
+    } catch [ItemNotFoundException] {
       return $false
     }
     return @(

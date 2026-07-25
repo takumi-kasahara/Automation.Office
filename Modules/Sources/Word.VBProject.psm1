@@ -79,14 +79,12 @@ function Export-WordVBProject {
         )
         return Export-VBProject -VBProject $Document.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -163,14 +161,12 @@ function Import-WordVBProject {
         Import-VBProject -VBProject $Document.VBProject -Source $Source -TargetExe 'WINWORD.EXE'
         $Document.Save()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false

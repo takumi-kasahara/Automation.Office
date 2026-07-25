@@ -285,8 +285,7 @@ InModuleScope 'Excel.Base' {
         $app = New-ExcelObject
         try {
           { Open-ExcelFile -Application $app -Path $path } | Should -Not -Throw
-        }
-        finally {
+        } finally {
           $app.Quit()
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
@@ -491,8 +490,7 @@ InModuleScope 'Excel.Base' {
           $escapedName = $Name.Replace("'", "''")
           $escapedValue = if ($Value) {
             '$true'
-          }
-          else {
+          } else {
             '$false'
           }
           $command = @(

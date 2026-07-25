@@ -69,18 +69,15 @@ function Export-AccessVBProject {
       Open-AccessFile -Application $app -Path $Path -Password $Password
       try {
         return Export-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
-      }
-      finally {
+      } finally {
         $app.CloseCurrentDatabase()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -139,18 +136,15 @@ function Import-AccessVBProject {
       Open-AccessFile -Application $app -Path $Path -Password $Password
       try {
         Import-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject -Source $Source -TargetExe 'MSACCESS.EXE'
-      }
-      finally {
+      } finally {
         $app.CloseCurrentDatabase()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false

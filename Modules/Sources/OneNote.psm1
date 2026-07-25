@@ -69,8 +69,7 @@ function New-OneNoteNotebook {
       , [CreateFileType]::cftNotebook # CreateFileType  cftIfNotExist
     )
     return $objectId
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -162,8 +161,7 @@ function New-OneNoteSection {
       , [CreateFileType]::cftSection  # CreateFileType  cftIfNotExist
     )
     return $objectId
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -254,8 +252,7 @@ function New-OneNoteSectionGroup {
       , [CreateFileType]::cftFolder # CreateFileType  cftIfNotExist
     )
     return $objectId
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -314,8 +311,7 @@ function New-OneNotePage {
       , [NewPageStyle]::npsDefault  # NewPageStyle  npsNewPageStyle
     )
     return $pageId
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -389,8 +385,7 @@ function Get-OneNoteHierarchy {
       , [XMLSchema]::xsCurrent  # XMLSchema       xsSchema
     )
     return $xml
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -457,8 +452,7 @@ function Get-OneNotePageContent {
       , [XMLSchema]::xsCurrent  # XMLSchema xsSchema
     )
     return $xml
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -539,8 +533,7 @@ function Export-OneNoteHierarchy {
   $documentElement = $xml.DocumentElement
   $name = if ($UseName) {
     ConvertTo-SafeFileName -InputString $documentElement.Attributes['name'].Value
-  }
-  else {
+  } else {
     $Id
   }
   $resolved = [Path]::GetFullPath($Destination) | Join-Path -ChildPath "$name.hierarchy.xml"
@@ -655,8 +648,7 @@ function Export-OneNotePageContent {
   $documentElement = $xml.DocumentElement
   $name = if ($UseName) {
     ConvertTo-SafeFileName -InputString $documentElement.Attributes['name'].Value
-  }
-  else {
+  } else {
     $Id
   }
   $resolved = [Path]::GetFullPath($Destination) | Join-Path -ChildPath "$name.content.xml"
@@ -775,8 +767,7 @@ function Export-OneNotePageAsDocument {
   $documentElement = $xml.DocumentElement
   $name = if ($UseName) {
     ConvertTo-SafeFileName -InputString $documentElement.Attributes['name'].Value
-  }
-  else {
+  } else {
     $Id
   }
   $ext = Get-ExtensionByPublishFormat -PublishFormat $PublishFormat
@@ -810,8 +801,7 @@ function Export-OneNotePageAsDocument {
       (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $true
     }
     return Get-Item -LiteralPath $resolved -Force
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -897,8 +887,7 @@ function Export-OneNoteBinaryObject {
     $documentElement = $xml.DocumentElement
     $name = if ($UseName) {
       ConvertTo-SafeFileName -InputString $documentElement.Attributes['name'].Value
-    }
-    else {
+    } else {
       $Id
     }
     $ns = [XmlNamespaceManager]::new($xml.NameTable)
@@ -959,8 +948,7 @@ function Export-OneNoteBinaryObject {
         return Get-Item -LiteralPath $file -Force
       }
     }
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -1045,8 +1033,7 @@ function Import-OneNoteHierarchy {
           , [XMLSchema]::xsCurrent  # XMLSchema xsSchema
         )
       }
-    }
-    catch {
+    } catch {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -1142,8 +1129,7 @@ function Import-OneNotePageContent {
           , $false                  # VARIANT_BOOL  force
         )
       }
-    }
-    catch {
+    } catch {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -1182,8 +1168,7 @@ function Close-OneNoteNotebook {
       $NotebookId # BSTR          bstrObjectID
       , $false    # VARIANT_BOOL  force
     )
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false

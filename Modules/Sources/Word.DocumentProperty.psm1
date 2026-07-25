@@ -109,14 +109,12 @@ function Get-WordDocumentProperty {
           return Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -131,8 +129,7 @@ function Get-WordDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -385,14 +382,12 @@ function Set-WordDocumentProperty {
           }
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -407,8 +402,7 @@ function Set-WordDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -526,14 +520,12 @@ function Remove-WordDocumentProperty {
           $Document.Save()
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -548,8 +540,7 @@ function Remove-WordDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false

@@ -109,14 +109,12 @@ function Get-PowerPointDocumentProperty {
           return Get-DocumentProperty -InputObject $Presentation -Name $Name -Custom:$Custom
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -131,8 +129,7 @@ function Get-PowerPointDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -386,14 +383,12 @@ function Set-PowerPointDocumentProperty {
           }
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -408,8 +403,7 @@ function Set-PowerPointDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -527,14 +521,12 @@ function Remove-PowerPointDocumentProperty {
           $Presentation.Save()
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -549,8 +541,7 @@ function Remove-PowerPointDocumentProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false

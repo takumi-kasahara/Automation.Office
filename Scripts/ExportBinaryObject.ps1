@@ -22,8 +22,7 @@ if (-not (Test-Path -LiteralPath $config.Output)) {
 $output = $config.Output | Join-Path -ChildPath 'Bin'
 if (Test-Path -LiteralPath $output) {
   Get-ChildItem -LiteralPath $output | Remove-Item
-}
-else {
+} else {
   New-Item -Path $output -ItemType Directory | Out-Null
 }
 

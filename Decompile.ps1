@@ -13,28 +13,24 @@ Set-Location -LiteralPath $PSScriptRoot
 
 $config = if ($Release) {
   'Release'
-}
-else {
+} else {
   'Debug'
 }
 
 try {
   $source = if ($Release) {
     $env:APPDATA | Join-Path -ChildPath 'Microsoft\Excel\XLSTART\Personal.xlsb'
-  }
-  else {
+  } else {
     Resolve-Path -LiteralPath '.\Bin\Personal.Debug.xlsb'
   }
   if ((Test-Path -LiteralPath $source)) {
     $destination = Resolve-Path -LiteralPath '.\Apps\Personal.xlsb'
     $componentRoot = $destination | Join-Path -ChildPath 'VBProject'
     Export-ExcelVBProject -Path $source -Destination ($destination | Join-Path -ChildPath "VBProject.$config.json") -ComponentRoot $componentRoot
-  }
-  else {
+  } else {
     Write-Warning -Message "$source not found."
   }
-}
-catch {
+} catch {
   Get-Process |
   Where-Object -Property Name -EQ 'EXCEL' |
   Stop-Process
@@ -44,20 +40,17 @@ catch {
 try {
   $source = if ($Release) {
     $env:APPDATA | Join-Path -ChildPath 'Microsoft\Templates\Normal.dotm'
-  }
-  else {
+  } else {
     Resolve-Path -LiteralPath '.\Bin\Normal.Debug.dotm'
   }
   if ((Test-Path -LiteralPath $source)) {
     $destination = Resolve-Path -LiteralPath '.\Apps\Normal.dotm'
     $componentRoot = $destination | Join-Path -ChildPath 'VBProject'
     Export-WordVBProject -Path $source -Destination ($destination | Join-Path -ChildPath "VBProject.$config.json") -ComponentRoot $componentRoot
-  }
-  else {
+  } else {
     Write-Warning -Message "$source not found."
   }
-}
-catch {
+} catch {
   Get-Process |
   Where-Object -Property Name -EQ 'WINWORD' |
   Stop-Process

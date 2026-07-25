@@ -73,8 +73,7 @@ InModuleScope 'Access.VBProject' {
         New-Item -Path $tempDir -ItemType Directory | Out-Null
         Export-AccessVBProject -Path $LiteralPath -Destination $destination -Password $Password | Out-Null
         return Get-ComparableVBProjectFromJson -LiteralPath $destination
-      }
-      finally {
+      } finally {
         if (Test-Path -LiteralPath $tempDir) {
           Remove-Item -LiteralPath $tempDir -Recurse -Force
         }
@@ -85,8 +84,7 @@ InModuleScope 'Access.VBProject' {
     New-AccessFile -Path $bin -RemovePersonalInformation -Force
     try {
       Import-AccessVBProject -Path $bin -Source (Get-FixtureSource)
-    }
-    catch {
+    } catch {
       Remove-Item -LiteralPath $bin -Force
       throw $_
     }
@@ -181,8 +179,7 @@ InModuleScope 'Access.VBProject' {
           Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
           @($exported.VBComponents).Count | Should -BeGreaterThan 0
           @($exported.References).Count | Should -BeGreaterThan 0
-        }
-        finally {
+        } finally {
           if (Test-Path -LiteralPath $customRoot) {
             Remove-Item -LiteralPath $customRoot -Recurse -Force
           }

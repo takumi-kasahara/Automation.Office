@@ -20,8 +20,7 @@ function New-AccessObject {
       if ($app -and $app.hWndAccessApp) {
         break
       }
-    }
-    catch [COMException] {
+    } catch [COMException] {
       Write-Warning -Message $_.Exception.Message
     }
     Start-Sleep -Milliseconds 100
@@ -29,14 +28,12 @@ function New-AccessObject {
   try {
     $app.Visible = $false
     return $app
-  }
-  catch {
+  } catch {
     try {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -44,8 +41,7 @@ function New-AccessObject {
       [GC]::WaitForPendingFinalizers()
     }
     $PSCmdlet.ThrowTerminatingError($_)
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -70,8 +66,7 @@ function Open-AccessFile {
   $resolved = (Resolve-Path -LiteralPath $Path).Path
   $passwordString = if ($null -eq $Password) {
     $null
-  }
-  else {
+  } else {
     [NetworkCredential]::new([string]::Empty, $Password).Password
   }
   if ($Password) {
@@ -174,8 +169,7 @@ function New-AccessFile {
   process {
     $passwordString = if ($null -eq $Password) {
       $null
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $Password).Password
     }
     $resolved = [Path]::GetFullPath($Path)
@@ -185,8 +179,7 @@ function New-AccessFile {
     }
     $action = if ($exists) {
       'Overwrite Access file'
-    }
-    else {
+    } else {
       'Create Access file'
     }
     if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolved, $action))) {
@@ -216,8 +209,7 @@ function New-AccessFile {
             [string]::Empty   # bstrOld
             , $passwordString # bstrNew
           )
-        }
-        finally {
+        } finally {
           $database.Close()
         }
       }
@@ -226,14 +218,12 @@ function New-AccessFile {
         $app.CurrentProject.RemovePersonalInformation = $true
       }
       return Get-Item -LiteralPath $resolved -Force
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -278,8 +268,7 @@ function Get-AccessAppProperty {
   $app = New-AccessObject
   try {
     Get-ObjectProperty -InputObject $app
-  }
-  finally {
+  } finally {
     $app.Quit()
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
@@ -338,8 +327,7 @@ function Set-AccessAppProperty {
   try {
     $app = New-AccessObject
     Set-ObjectProperty -InputObject $app -Properties $Properties
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -438,19 +426,16 @@ function Get-AccessFileProperty {
             return $selected
           }
           return $properties
-        }
-        finally {
+        } finally {
           $app.CloseCurrentDatabase()
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -465,8 +450,7 @@ function Get-AccessFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -626,19 +610,16 @@ function Set-AccessFileProperty {
             }
             return $updated | Select-Object -Property $propertyNames
           }
-        }
-        finally {
+        } finally {
           $app.CloseCurrentDatabase()
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -653,8 +634,7 @@ function Set-AccessFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false

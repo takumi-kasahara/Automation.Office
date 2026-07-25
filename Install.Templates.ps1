@@ -42,8 +42,7 @@ ForEach-Object {
       New-Item -Path $parent -ItemType Directory | Out-Null
     }
     Copy-Item @_ -PassThru
-  }
-  else {
+  } else {
     Write-Warning -Message "$($_.LiteralPath) not found."
   }
 }

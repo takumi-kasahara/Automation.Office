@@ -151,8 +151,7 @@ function Get-PowerPointSpeakerNote {
               foreach ($index in ($start..$end)) {
                 $null = $slideIndexes.Add($index)
               }
-            }
-            else {
+            } else {
               for ($index = $start; $index -ge $end; $index--) {
                 $null = $slideIndexes.Add($index)
               }
@@ -175,8 +174,7 @@ function Get-PowerPointSpeakerNote {
           $notes = @()
           $slidesToProcess = if ($slideIndexes) {
             $slideIndexes
-          }
-          else {
+          } else {
             1..@($Presentation.Slides).Count | Where-Object { $true }
           }
           foreach ($index in $slidesToProcess) {
@@ -187,8 +185,7 @@ function Get-PowerPointSpeakerNote {
             $text = [string]::Empty
             try {
               $text = [string]$slide.NotesPage.Shapes.Placeholders.Item(2).TextFrame.TextRange.Text.TrimEnd("`r", "`n")
-            }
-            catch {
+            } catch {
               $text = [string]::Empty
             }
             $note = [SpeakerNote]::new()
@@ -204,14 +201,12 @@ function Get-PowerPointSpeakerNote {
           return $speakerNotes
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -226,8 +221,7 @@ function Get-PowerPointSpeakerNote {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -308,14 +302,12 @@ function Export-PowerPointAsFixedFormat {
           )
           return [FileInfo]::new($resolved)
         }
-      }
-      finally {
+      } finally {
         try {
           if ($app) {
             $app.Quit()
           }
-        }
-        finally {
+        } finally {
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
           Clear-Variable -Force -WhatIf:$false -Confirm:$false

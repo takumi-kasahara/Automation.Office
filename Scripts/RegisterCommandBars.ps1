@@ -17,8 +17,7 @@ try {
     ForEach-Object {
       try {
         $_.Reset()
-      }
-      catch [COMException] {
+      } catch [COMException] {
         Write-Warning -Message $_.Exception.Message
       }
       $control = $_
@@ -46,14 +45,12 @@ try {
       }
     }
   }
-}
-finally {
+} finally {
   try {
     if ($app) {
       $app.Quit()
     }
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false

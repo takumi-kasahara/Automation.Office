@@ -47,8 +47,7 @@ function Get-DocumentProperty {
   $values = [PSCustomObject]@{}
   $properties = if ($Custom) {
     $InputObject.CustomDocumentProperties
-  }
-  else {
+  } else {
     $InputObject.BuiltInDocumentProperties
   }
   $properties |
@@ -60,8 +59,7 @@ function Get-DocumentProperty {
       }
       $value = [__ComObject].InvokeMember('Value', [BindingFlags]::GetProperty, $null, $_, $null)
       $values | Add-Member -MemberType NoteProperty -Name $key -Value $value
-    }
-    catch [COMException] {
+    } catch [COMException] {
       Write-Warning -Message "$($_.Exception.Message) on $key"
     }
   }
@@ -84,13 +82,11 @@ function Set-DocumentProperty {
   try {
     if ($Custom) {
       return Set-CustomDocumentProperty -InputObject $InputObject -Properties $Properties
-    }
-    else {
+    } else {
       return Set-BuiltInDocumentProperty -InputObject $InputObject -Properties $Properties
     }
     return $true
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -119,15 +115,13 @@ function Set-BuiltInDocumentProperty {
         # https://learn.microsoft.com/en-us/office/vba/api/office.documentproperty.value
         [__ComObject].InvokeMember('Value', [BindingFlags]::SetProperty, $null, $property, $_.Value)
         return $true
-      }
-      catch [COMException] {
+      } catch [COMException] {
         Write-Warning -Message "$($_.Exception.Message) on $($_.Name)"
         return $false
       }
     }
     return $result -contains $true
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -154,8 +148,7 @@ function Set-CustomDocumentProperty {
         $property = try {
           # https://learn.microsoft.com/en-us/office/vba/api/office.documentproperties.item
           $InputObject.CustomDocumentProperties($_.Name)
-        }
-        catch [ArgumentException] {
+        } catch [ArgumentException] {
           $null
         }
         if ($property) {
@@ -166,15 +159,13 @@ function Set-CustomDocumentProperty {
         $arguments = @($_.Name, $false, (Get-MsoDocProperty -Type ($_.Value.GetType())), $_.Value)
         [__ComObject].InvokeMember('Add', [BindingFlags]::InvokeMethod, $null, $InputObject.CustomDocumentProperties, $arguments) | Out-Null
         return $true
-      }
-      catch [COMException] {
+      } catch [COMException] {
         Write-Warning -Message "$($_.Exception.Message) on $($_.Name)"
         return $false
       }
     }
     return $result -contains $true
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false

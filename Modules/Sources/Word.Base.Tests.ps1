@@ -130,14 +130,12 @@ InModuleScope 'Word.Base' {
             $Document.HasPassword | Should -BeTrue
             $Document.ReadOnly | Should -BeFalse
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -161,14 +159,12 @@ InModuleScope 'Word.Base' {
             $Document.WriteReserved | Should -BeTrue
             $Document.ReadOnly | Should -BeFalse
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -191,14 +187,12 @@ InModuleScope 'Word.Base' {
             )
             $Document.ReadOnlyRecommended | Should -BeTrue
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -221,14 +215,12 @@ InModuleScope 'Word.Base' {
             )
             $Document.RemovePersonalInformation | Should -BeTrue
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -260,14 +252,12 @@ InModuleScope 'Word.Base' {
             )
             $Document.Range().Text | Should -Be 'TestData'
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -348,8 +338,7 @@ InModuleScope 'Word.Base' {
         $app = New-WordObject
         try {
           { Open-WordFile -Path $path -Application $app } | Should -Not -Throw
-        }
-        finally {
+        } finally {
           $app.Quit()
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
@@ -550,8 +539,7 @@ InModuleScope 'Word.Base' {
           $escapedName = $Name.Replace("'", "''")
           $escapedValue = if ($Value) {
             '$true'
-          }
-          else {
+          } else {
             '$false'
           }
           $command = @(

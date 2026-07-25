@@ -22,8 +22,7 @@ if (-not (Test-Path -LiteralPath $config.Output)) {
 $output = $config.Output | Join-Path -ChildPath 'Page'
 if (Test-Path -LiteralPath $output) {
   Get-ChildItem -LiteralPath $output -Filter '*.xml' | Remove-Item
-}
-else {
+} else {
   New-Item -Path $output -ItemType Directory | Out-Null
 }
 

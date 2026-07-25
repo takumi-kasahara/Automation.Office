@@ -83,8 +83,7 @@ function Stop-NUIDialogSuppressor {
   try {
     New-Item -Path $stopFilePath -ItemType File -Force -WhatIf:$false -Confirm:$false | Out-Null
     Receive-Job -Job $Job -Wait -AutoRemoveJob
-  }
-  finally {
+  } finally {
     if (Test-Path -LiteralPath $stopFilePath) {
       Remove-Item -LiteralPath $stopFilePath -Force -WhatIf:$false -Confirm:$false
     }

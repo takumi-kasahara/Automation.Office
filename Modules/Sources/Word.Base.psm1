@@ -24,8 +24,7 @@ function New-WordObject {
       if ($app -and $app.Application) {
         break
       }
-    }
-    catch [COMException] {
+    } catch [COMException] {
       Write-Warning -Message $_.Exception.Message
     }
     Start-Sleep -Milliseconds 100
@@ -38,14 +37,12 @@ function New-WordObject {
       $app.ScreenUpdating = $false
     }
     return $app
-  }
-  catch {
+  } catch {
     try {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -53,8 +50,7 @@ function New-WordObject {
       [GC]::WaitForPendingFinalizers()
     }
     $PSCmdlet.ThrowTerminatingError($_)
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -172,14 +168,12 @@ function New-WordFile {
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
       [type]::Missing
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
     }
     $passwordToModifyString = if ($null -eq $PasswordToModify) {
       [type]::Missing
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
     }
     $resolved = [Path]::GetFullPath($Path)
@@ -189,8 +183,7 @@ function New-WordFile {
     }
     $action = if ($exists) {
       'Overwrite Word file'
-    }
-    else {
+    } else {
       'Create Word file'
     }
     if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolved, $action))) {
@@ -221,18 +214,15 @@ function New-WordFile {
           , $ReadOnlyRecommended.IsPresent  # ReadOnlyRecommended
         )
         return Get-Item -LiteralPath $resolved -Force
-      }
-      finally {
+      } finally {
         $file.Close()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -322,8 +312,7 @@ function Open-WordFile {
   process {
     $app = if ($Application) {
       $Application
-    }
-    else {
+    } else {
       New-WordObject
     }
     $shouldDisposeApp = -not $Application
@@ -331,20 +320,17 @@ function Open-WordFile {
       $resolved = (Resolve-Path -LiteralPath $Path).Path
       $passwordToOpenString = if ($null -eq $PasswordToOpen) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
       }
       $passwordToModifyString = if ($null -eq $PasswordToModify) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
       }
       $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
         Start-NUIDialogSuppressor -TargetExe 'WINWORD.EXE'
-      }
-      else {
+      } else {
         $null
       }
       try {
@@ -363,24 +349,20 @@ function Open-WordFile {
         try {
           if ($Action) {
             & $Action $file
-          }
-          else {
+          } else {
             return $file
           }
-        }
-        finally {
+        } finally {
           if ($Action -and $file) {
             $file.Close()
           }
         }
-      }
-      finally {
+      } finally {
         try {
           if ($dialogSuppressor) {
             Stop-NUIDialogSuppressor -Job $dialogSuppressor
           }
-        }
-        finally {
+        } finally {
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
           Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -388,8 +370,7 @@ function Open-WordFile {
           [GC]::WaitForPendingFinalizers()
         }
       }
-    }
-    finally {
+    } finally {
       if ($shouldDisposeApp -and $app) {
         $app.Quit()
         Get-Variable |
@@ -437,8 +418,7 @@ function Get-WordAppProperty {
   $app = New-WordObject -NoSetup
   try {
     Get-ObjectProperty -InputObject $app
-  }
-  finally {
+  } finally {
     $app.Quit()
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
@@ -497,8 +477,7 @@ function Set-WordAppProperty {
   try {
     $app = New-WordObject -NoSetup
     Set-ObjectProperty -InputObject $app -Properties $Properties
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -614,14 +593,12 @@ function Get-WordFileProperty {
           return $properties
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -636,8 +613,7 @@ function Get-WordFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -813,14 +789,12 @@ function Set-WordFileProperty {
           }
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -835,8 +809,7 @@ function Set-WordFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -904,8 +877,7 @@ function Test-WordExtension {
           }
         }
       )
-    }
-    catch [ItemNotFoundException] {
+    } catch [ItemNotFoundException] {
       return $false
     }
     return @(

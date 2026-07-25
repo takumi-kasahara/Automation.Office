@@ -25,8 +25,7 @@ function New-PowerPointObject {
       if ($app -and $app.hWnd) {
         break
       }
-    }
-    catch [COMException] {
+    } catch [COMException] {
       Write-Warning -Message $_.Exception.Message
     }
     Start-Sleep -Milliseconds 100
@@ -37,14 +36,12 @@ function New-PowerPointObject {
       $app.DisplayAlerts = [PpAlertLevel]::ppAlertsNone
     }
     return $app
-  }
-  catch {
+  } catch {
     try {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -52,8 +49,7 @@ function New-PowerPointObject {
       [GC]::WaitForPendingFinalizers()
     }
     $PSCmdlet.ThrowTerminatingError($_)
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -171,14 +167,12 @@ function New-PowerPointFile {
   process {
     $passwordToOpenString = if ($null -eq $PasswordToOpen) {
       $null
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
     }
     $passwordToModifyString = if ($null -eq $PasswordToModify) {
       $null
-    }
-    else {
+    } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
     }
     $resolved = [Path]::GetFullPath($Path)
@@ -188,8 +182,7 @@ function New-PowerPointFile {
     }
     $action = if ($exists) {
       'Overwrite PowerPoint file'
-    }
-    else {
+    } else {
       'Create PowerPoint file'
     }
     if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolved, $action))) {
@@ -223,18 +216,15 @@ function New-PowerPointFile {
           , $ReadOnlyRecommended.IsPresent  # ReadOnlyRecommended
         )
         return Get-Item -LiteralPath $resolved -Force
-      }
-      finally {
+      } finally {
         $file.Close()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -324,8 +314,7 @@ function Open-PowerPointFile {
   process {
     $app = if ($Application) {
       $Application
-    }
-    else {
+    } else {
       New-PowerPointObject
     }
     $shouldDisposeApp = -not $Application
@@ -333,26 +322,22 @@ function Open-PowerPointFile {
       $resolved = (Resolve-Path -LiteralPath $Path).Path
       $passwordToOpenString = if ($null -eq $PasswordToOpen) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToOpen).Password
       }
       $passwordToModifyString = if ($null -eq $PasswordToModify) {
         [type]::Missing
-      }
-      else {
+      } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
       }
       $readOnlyValue = if ($ReadOnly) {
         [MsoTriState]::msoTrue
-      }
-      else {
+      } else {
         [MsoTriState]::msoFalse
       }
       $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
         Start-NUIDialogSuppressor -TargetExe 'POWERPNT.EXE'
-      }
-      else {
+      } else {
         $null
       }
       try {
@@ -367,18 +352,15 @@ function Open-PowerPointFile {
           if ($Action) {
             return & $Action $file
           }
-        }
-        finally {
+        } finally {
           $file.Close()
         }
-      }
-      finally {
+      } finally {
         try {
           if ($dialogSuppressor) {
             Stop-NUIDialogSuppressor -Job $dialogSuppressor
           }
-        }
-        finally {
+        } finally {
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
           Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -386,8 +368,7 @@ function Open-PowerPointFile {
           [GC]::WaitForPendingFinalizers()
         }
       }
-    }
-    finally {
+    } finally {
       if ($shouldDisposeApp -and $app) {
         $app.Quit()
         Get-Variable |
@@ -435,8 +416,7 @@ function Get-PowerPointAppProperty {
   $app = New-PowerPointObject -NoSetup
   try {
     Get-ObjectProperty -InputObject $app
-  }
-  finally {
+  } finally {
     $app.Quit()
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
@@ -495,8 +475,7 @@ function Set-PowerPointAppProperty {
   try {
     $app = New-PowerPointObject -NoSetup
     Set-ObjectProperty -InputObject $app -Properties $Properties
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -612,14 +591,12 @@ function Get-PowerPointFileProperty {
           return $properties
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -634,8 +611,7 @@ function Get-PowerPointFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -812,20 +788,17 @@ function Set-PowerPointFileProperty {
               }
               return $updated | Select-Object -Property $propertyNames
             }
-          }
-          finally {
+          } finally {
             $Presentation.Close()
           }
         }
       }
-    }
-    catch {
+    } catch {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -840,8 +813,7 @@ function Set-PowerPointFileProperty {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -909,8 +881,7 @@ function Test-PowerPointExtension {
           }
         }
       )
-    }
-    catch [ItemNotFoundException] {
+    } catch [ItemNotFoundException] {
       return $false
     }
     return @(

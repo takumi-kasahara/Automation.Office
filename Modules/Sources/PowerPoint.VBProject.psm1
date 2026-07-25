@@ -78,14 +78,12 @@ function Export-PowerPointVBProject {
         )
         return Export-VBProject -VBProject $Presentation.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -165,18 +163,15 @@ function Import-PowerPointVBProject {
         }
         Import-VBProject -VBProject $file.VBProject -Source $Source -TargetExe 'POWERPNT.EXE'
         $file.Save()
-      }
-      finally {
+      } finally {
         $file.Close()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false

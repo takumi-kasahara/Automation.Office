@@ -75,8 +75,7 @@ InModuleScope 'PowerPoint.VBProject' {
         New-Item -Path $tempDir -ItemType Directory | Out-Null
         Export-PowerPointVBProject -Path $LiteralPath -Destination $destination -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify | Out-Null
         return Get-ComparableVBProjectFromJson -LiteralPath $destination
-      }
-      finally {
+      } finally {
         if (Test-Path -LiteralPath $tempDir) {
           Remove-Item -LiteralPath $tempDir -Recurse -Force
         }
@@ -87,8 +86,7 @@ InModuleScope 'PowerPoint.VBProject' {
     New-PowerPointFile -Path $bin -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -Force
     try {
       Import-PowerPointVBProject -Path $bin -Source (Get-FixtureSource) -Hidden
-    }
-    catch {
+    } catch {
       Remove-Item -LiteralPath $bin -Force
       throw $_
     }
@@ -183,8 +181,7 @@ InModuleScope 'PowerPoint.VBProject' {
           Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
           @($exported.VBComponents).Count | Should -BeGreaterThan 0
           @($exported.References).Count | Should -BeGreaterThan 0
-        }
-        finally {
+        } finally {
           if (Test-Path -LiteralPath $customRoot) {
             Remove-Item -LiteralPath $customRoot -Recurse -Force
           }

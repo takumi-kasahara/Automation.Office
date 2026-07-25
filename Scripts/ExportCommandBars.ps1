@@ -76,14 +76,12 @@ ForEach-Object {
     $commandBars |
     Sort-Object -Property CommandBarId, ControlId |
     Export-Csv -LiteralPath $csv -NoTypeInformation -Encoding UTF8
-  }
-  finally {
+  } finally {
     try {
       if ($app) {
         $app.Quit()
       }
-    }
-    finally {
+    } finally {
       Get-Variable |
       Where-Object -Property Value -Is [__ComObject] |
       Clear-Variable -Force -WhatIf:$false -Confirm:$false

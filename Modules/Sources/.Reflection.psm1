@@ -21,8 +21,7 @@ function Get-ObjectProperty {
           return $false
         }
         $type = $propertyInfo.PropertyType
-      }
-      else {
+      } else {
         $property = $InputObject.PSObject.Properties | Where-Object -Property Name -Value $_.Name -EQ | Select-Object -First 1
         if (-not $property.IsGettable) {
           return $false
@@ -35,8 +34,7 @@ function Get-ObjectProperty {
       $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $InputObject.$($_.Name)
     }
     return $properties
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -65,8 +63,7 @@ function Set-ObjectProperty {
           return
         }
         $type = $propertyInfo.PropertyType
-      }
-      else {
+      } else {
         $property = $InputObject.PSObject.Properties | Where-Object -Property Name -Value $_.Name -EQ | Select-Object -First 1
         if (-not $property) {
           throw [InvalidOperationException] "Property $($_.Name) does not exist."
@@ -93,8 +90,7 @@ function Set-ObjectProperty {
             Value  = $_.Value
             Status = 'Success'
           }
-        }
-        catch {
+        } catch {
           Write-Warning -Message $_.Exception.Message
           return [PSCustomObject]@{
             Name   = $_.Name
@@ -105,8 +101,7 @@ function Set-ObjectProperty {
       }
     } |
     Out-Host
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false

@@ -14,8 +14,7 @@ Set-Location -LiteralPath $PSScriptRoot
 $root = Resolve-Path -LiteralPath '.\Bin'
 $config = if ($Release) {
   'Release'
-}
-else {
+} else {
   'Debug'
 }
 
@@ -24,8 +23,7 @@ try {
   New-ExcelFile -Path $bin -FileFormat xlExcel12 -Force
   $source = Resolve-Path -LiteralPath ".\Apps\Personal.xlsb\VBProject.$config.json"
   Import-ExcelVBProject -Path $bin -Source $source -Hidden
-}
-catch {
+} catch {
   Get-Process |
   Where-Object -Property Name -EQ 'EXCEL' |
   Stop-Process
@@ -38,8 +36,7 @@ try {
   New-WordFile -Path $bin -FileFormat wdFormatXMLTemplateMacroEnabled -Force
   $source = Resolve-Path -LiteralPath ".\Apps\Normal.dotm\VBProject.$config.json"
   Import-WordVBProject -Path $bin -Source $source
-}
-catch {
+} catch {
   Get-Process |
   Where-Object -Property Name -EQ 'WINWORD' |
   Stop-Process
