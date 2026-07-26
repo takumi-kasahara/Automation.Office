@@ -16,13 +16,13 @@ Set-Location -LiteralPath $PSScriptRoot
 
 $ext = [Path]::GetExtension($Path)
 if (Test-Path -LiteralPath $Path -PathType Container) {
-  $module = Get-ChildItem -LiteralPath $Path -File -Filter '*.psm1' | Where-Object { $_.BaseName -notlike '.*' }
+  $module = Get-ChildItem -LiteralPath $Path -File -Filter '*.ps1' | Where-Object { $_.BaseName -notlike '.*' -and $_.BaseName -notlike '*.Tests' }
   $test = Get-ChildItem -LiteralPath $Path -File -Filter '*.Tests.ps1'
 }
 elseif ($ext -eq '.ps1') {
   $parent = [WildcardPattern]::Escape($Path) | Split-Path -Parent
   $base = [Path]::GetFileNameWithoutExtension($Path) -replace '\.Tests$', [string]::Empty
-  $module = $parent | Join-Path -ChildPath "$base.psm1"
+  $module = $parent | Join-Path -ChildPath "$base.ps1"
   $test = $Path
 }
 elseif ($ext -eq '.psm1') {
