@@ -11,7 +11,7 @@ $modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
-InModuleScope 'PowerPoint.Base' {
+InModuleScope 'Automation.Office' {
   BeforeAll {
     Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
     Add-Type -AssemblyName System.Web
@@ -241,8 +241,7 @@ InModuleScope 'PowerPoint.Base' {
         $app = New-PowerPointObject
         try {
           { Open-PowerPointFile -Path $path -Application $app } | Should -Not -Throw
-        }
-        finally {
+        } finally {
           $app.Quit()
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
@@ -443,8 +442,7 @@ InModuleScope 'PowerPoint.Base' {
           $escapedName = $Name.Replace("'", "''")
           $escapedValue = if ($Value) {
             '$true'
-          }
-          else {
+          } else {
             '$false'
           }
           $command = @(

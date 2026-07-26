@@ -10,7 +10,7 @@ $modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
-InModuleScope 'Access.VBProject' {
+InModuleScope 'Automation.Office' {
   BeforeAll {
     Add-Type -AssemblyName System.Web
     function Get-Password {

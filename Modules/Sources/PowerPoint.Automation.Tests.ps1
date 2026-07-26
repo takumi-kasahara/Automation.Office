@@ -13,7 +13,7 @@ $modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
-InModuleScope 'PowerPoint.Automation' {
+InModuleScope 'Automation.Office' {
   BeforeAll {
     Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
     Add-Type -AssemblyName System.Web

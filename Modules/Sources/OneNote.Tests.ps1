@@ -10,7 +10,7 @@ $modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
-InModuleScope 'OneNote' {
+InModuleScope 'Automation.Office' {
   BeforeAll {
     function Get-NotebookPath {
       [CmdletBinding()]

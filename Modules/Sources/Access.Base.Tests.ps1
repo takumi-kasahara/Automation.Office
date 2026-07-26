@@ -10,7 +10,7 @@ $modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
-InModuleScope 'Access.Base' {
+InModuleScope 'Automation.Office' {
   BeforeAll {
     Add-Type -AssemblyName System.Web
     function Get-Password {
@@ -124,18 +124,15 @@ InModuleScope 'Access.Base' {
           Open-AccessFile -Application $app -Path $path -Password $password
           try {
             $app.CurrentProject.FullName | Should -Be $path
-          }
-          finally {
+          } finally {
             $app.CloseCurrentDatabase()
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -153,18 +150,15 @@ InModuleScope 'Access.Base' {
           Open-AccessFile -Application $app -Path $path
           try {
             $app.CurrentProject.RemovePersonalInformation | Should -BeTrue
-          }
-          finally {
+          } finally {
             $app.CloseCurrentDatabase()
           }
-        }
-        finally {
+        } finally {
           try {
             if ($app) {
               $app.Quit()
             }
-          }
-          finally {
+          } finally {
             Get-Variable |
             Where-Object -Property Value -Is [__ComObject] |
             Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -310,10 +304,9 @@ InModuleScope 'Access.Base' {
         $protectedPath = Get-TempFile
         try {
           New-AccessFile -Path $protectedPath -Password $password
-          $properties = Get-AccessFileProperty -Path $protectedPath -PasswordToOpen $password
+          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
           $properties | Should -Not -BeNullOrEmpty
-        }
-        finally {
+        } finally {
           if (Test-Path -LiteralPath $protectedPath) {
             Remove-Item -LiteralPath $protectedPath -Force
           }
@@ -397,11 +390,10 @@ InModuleScope 'Access.Base' {
         $protectedPath = Get-TempFile
         try {
           New-AccessFile -Path $protectedPath -Password $password
-          Set-AccessFileProperty -Path $protectedPath -Name RemovePersonalInformation -Value $true -PasswordToOpen $password
-          $properties = Get-AccessFileProperty -Path $protectedPath -PasswordToOpen $password
+          Set-AccessFileProperty -Path $protectedPath -Name RemovePersonalInformation -Value $true -Password $password
+          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
           $properties.RemovePersonalInformation | Should -Be $true
-        }
-        finally {
+        } finally {
           if (Test-Path -LiteralPath $protectedPath) {
             Remove-Item -LiteralPath $protectedPath -Force
           }

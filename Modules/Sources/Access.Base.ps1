@@ -354,7 +354,7 @@ function Get-AccessFileProperty {
   .PARAMETER Name
     Filters returned properties by name. If not specified, all file properties are returned.
 
-  .PARAMETER PasswordToOpen
+  .PARAMETER Password
     Specifies the password required to open the database.
 
   .EXAMPLE
@@ -364,7 +364,7 @@ function Get-AccessFileProperty {
 
   .EXAMPLE
     $password = Read-Host -AsSecureString
-    Get-AccessFileProperty -LiteralPath "$env:TEMP\Database.accdb" -PasswordToOpen $password -Name RemovePersonalInformation
+    Get-AccessFileProperty -LiteralPath "$env:TEMP\Database.accdb" -Password $password -Name RemovePersonalInformation
 
     Gets file properties from a database protected with a password.
 
@@ -393,7 +393,7 @@ function Get-AccessFileProperty {
     [string[]]
     $Name,
     [SecureString]
-    $PasswordToOpen = $null
+    $Password = $null
   )
   begin {
     $app = New-AccessObject
@@ -410,7 +410,7 @@ function Get-AccessFileProperty {
       }
       $items |
       ForEach-Object {
-        Open-AccessFile -Application $app -Path $_.FullName -Password $PasswordToOpen
+        Open-AccessFile -Application $app -Path $_.FullName -Password $Password
         try {
           $properties = Get-ObjectProperty -InputObject $app.CurrentProject
           if ($Name) {
@@ -489,7 +489,7 @@ function Set-AccessFileProperty {
     Specifies a `PSObject` whose properties are mapped to file property names and values.
     Use this parameter to update multiple properties at once.
 
-  .PARAMETER PasswordToOpen
+  .PARAMETER Password
     Specifies the password required to open the database.
 
   .PARAMETER PassThru
@@ -507,7 +507,7 @@ function Set-AccessFileProperty {
 
   .EXAMPLE
     $password = Read-Host -AsSecureString
-    Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -PasswordToOpen $password
+    Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -Password $password
 
     Updates file properties on a protected database.
 
@@ -554,7 +554,7 @@ function Set-AccessFileProperty {
     [PSObject]
     $InputObject,
     [SecureString]
-    $PasswordToOpen = $null,
+    $Password = $null,
     [switch]
     $PassThru
   )
@@ -595,7 +595,7 @@ function Set-AccessFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
-        Open-AccessFile -Application $app -Path $item.FullName -Password $PasswordToOpen
+        Open-AccessFile -Application $app -Path $item.FullName -Password $Password
         try {
           Set-ObjectProperty -InputObject $app.CurrentProject -Properties $properties | Out-Null
           if ($PassThru) {
