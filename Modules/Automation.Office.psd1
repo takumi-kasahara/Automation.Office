@@ -9,6 +9,11 @@
     'Set-AccessAppProperty'
     'Get-AccessFileProperty'
     'Set-AccessFileProperty'
+    'Get-AccessTable'
+    'Get-AccessView'
+    'Get-AccessData'
+    'Get-AccessTableColumn'
+    'Get-AccessViewColumn'
     'Export-AccessVBProject'
     'Import-AccessVBProject'
     #endregion
