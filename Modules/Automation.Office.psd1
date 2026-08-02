@@ -5,6 +5,7 @@
   FunctionsToExport    = @(
     #region Access
     'New-AccessFile'
+    'Open-AccessFile'
     'Get-AccessAppProperty'
     'Set-AccessAppProperty'
     'Get-AccessFileProperty'

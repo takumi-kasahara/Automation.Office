@@ -41,50 +41,7 @@ function New-AccessObject {
       [GC]::WaitForPendingFinalizers()
     }
     $PSCmdlet.ThrowTerminatingError($_)
-  } finally {
-    Get-Variable |
-    Where-Object -Property Value -Is [__ComObject] |
-    Clear-Variable -Force -WhatIf:$false -Confirm:$false
-    [GC]::Collect()
-    [GC]::WaitForPendingFinalizers()
   }
-}
-function Open-AccessFile {
-  [CmdletBinding()]
-  [OutputType([void])]
-  param(
-    [Parameter(Mandatory)]
-    [__ComObject]
-    $Application,
-    [Parameter(Mandatory)]
-    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
-    [string]
-    $Path,
-    [SecureString]
-    $Password = $null
-  )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
-  $passwordString = if ($null -eq $Password) {
-    $null
-  } else {
-    [NetworkCredential]::new([string]::Empty, $Password).Password
-  }
-  if ($Password) {
-    # Validate credentials through DAO first to avoid Access password UI prompts.
-    # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/dbengine-opendatabase-method-dao
-    $Application.DBEngine.OpenDatabase(
-      $resolved                 # Name
-      , $false                  # Options
-      , $true                   # ReadOnly
-      , ";PWD=$passwordString"  # Connect
-    ).Close()
-  }
-  # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
-  $Application.OpenCurrentDatabase(
-    $resolved         # filePath
-    , $true           # exclusive
-    , $passwordString # bstrPassword
-  )
 }
 #endregion
 #region Public
@@ -123,6 +80,14 @@ function New-AccessFile {
   .PARAMETER RemovePersonalInformation
     Removes personal information from the new database file.
 
+  .PARAMETER InitializeDb
+    Specifies a script block to initialize the database before saving.
+    The script block receives the DAO database object as its first argument.
+
+  .PARAMETER InitializeProject
+    Specifies a script block to initialize the database project before saving.
+    The script block receives the CurrentProject object as its first argument.
+
   .EXAMPLE
     New-AccessFile -Path "$env:TEMP\Database.accdb"
 
@@ -144,6 +109,22 @@ function New-AccessFile {
 
     Creates a new database and removes personal information from the file.
 
+  .EXAMPLE
+    New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeDb {
+      param($db)
+      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+    }
+
+    Creates a database and creates a table using DAO.
+
+  .EXAMPLE
+    New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeProject {
+      param($project)
+      $project.Connection = 'Provider=Microsoft.ACE.OLEDB.12.0;Data Source=$env:TEMP\Database.accdb;'
+    }
+
+    Creates a database and sets the connection string.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created database.
@@ -164,7 +145,11 @@ function New-AccessFile {
     [switch]
     $Force,
     [switch]
-    $RemovePersonalInformation
+    $RemovePersonalInformation,
+    [ScriptBlock]
+    $InitializeDb,
+    [ScriptBlock]
+    $InitializeProject
   )
   process {
     $passwordString = if ($null -eq $Password) {
@@ -217,6 +202,17 @@ function New-AccessFile {
       if ($RemovePersonalInformation) {
         $app.CurrentProject.RemovePersonalInformation = $true
       }
+      if ($InitializeDb) {
+        $db = $app.CurrentDb()
+        try {
+          & $InitializeDb $db
+        } finally {
+          $db.Close()
+        }
+      }
+      if ($InitializeProject) {
+        & $InitializeProject $app.CurrentProject
+      }
       return Get-Item -LiteralPath $resolved -Force
     } finally {
       try {
@@ -229,6 +225,159 @@ function New-AccessFile {
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
         [GC]::Collect()
         [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+function Open-AccessFile {
+  <#
+  .SYNOPSIS
+    Opens an Access database file.
+
+  .DESCRIPTION
+    Opens a database file by automating Access through COM.
+
+    If `-Application` is not specified, the cmdlet creates a new Access Application
+    object, opens the database, and releases the application after the action completes.
+
+  .PARAMETER Path
+    Specifies the path to the database file to open.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Application
+    Specifies the Access Application COM object to use for opening the database.
+
+    If not specified, a new Access Application object is created automatically.
+
+  .PARAMETER Password
+    Specifies the password required to open the database.
+
+    Pass a `SecureString` value. If omitted, no password is used.
+
+  .PARAMETER ActionDb
+    Specifies a script block to execute with the DAO database object.
+
+    The script block receives the database object as its first argument.
+    When this parameter is specified, the database is automatically closed after
+    the action completes.
+
+  .PARAMETER ActionProject
+    Specifies a script block to execute with the CurrentProject object.
+
+    The script block receives the CurrentProject object as its first argument.
+    When this parameter is specified, the database is automatically closed after
+    the action completes.
+
+  .EXAMPLE
+    Open-AccessFile -Path "$env:TEMP\Database.accdb"
+
+    Opens a database and returns the CurrentProject object.
+
+  .EXAMPLE
+    Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
+      param($db)
+      $db.Execute('CREATE TABLE Test (Id INTEGER)')
+    }
+
+    Opens a database, creates a table using DAO, and closes the database.
+
+  .EXAMPLE
+    Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionProject {
+      param($project)
+      $project.Connection = 'Provider=Microsoft.ACE.OLEDB.12.0;'
+    }
+
+    Opens a database and sets the connection string.
+
+  .OUTPUTS
+    __ComObject
+      Returns the opened CurrentProject object when no Action parameter is specified.
+  #>
+  [CmdletBinding()]
+  [OutputType([__ComObject])]
+  param(
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [__ComObject]
+    $Application,
+    [SecureString]
+    $Password = $null,
+    [ScriptBlock]
+    $ActionDb,
+    [ScriptBlock]
+    $ActionProject
+  )
+  process {
+    # Validate that only one of ActionDb or ActionProject is specified
+    if ($ActionDb -and $ActionProject) {
+      $PSCmdlet.ThrowTerminatingError((New-Object System.ArgumentException 'ActionDb and ActionProject are mutually exclusive; only one can be specified.'))
+    }
+
+    $app = if ($Application) {
+      $Application
+    } else {
+      New-AccessObject
+    }
+    $shouldDisposeApp = -not $Application
+    try {
+      $resolved = (Resolve-Path -LiteralPath $Path).Path
+      $passwordString = if ($null -eq $Password) {
+        $null
+      } else {
+        [NetworkCredential]::new([string]::Empty, $Password).Password
+      }
+      if ($Password) {
+        # Validate credentials through DAO first to avoid Access password UI prompts.
+        # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/dbengine-opendatabase-method-dao
+        $Application.DBEngine.OpenDatabase(
+          $resolved                 # Name
+          , $false                  # Options
+          , $true                   # ReadOnly
+          , ";PWD=$passwordString"  # Connect
+        ).Close()
+      }
+      # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
+      $Application.OpenCurrentDatabase(
+        $resolved         # filePath
+        , $true           # exclusive
+        , $passwordString # bstrPassword
+      )
+      try {
+        if ($ActionDb) {
+          $db = $app.CurrentDb()
+          try {
+            & $ActionDb $db
+          } finally {
+            $db.Close()
+          }
+        }
+        if ($ActionProject) {
+          & $ActionProject $app.CurrentProject
+        }
+        # If neither ActionDb nor ActionProject is specified, do not return anything
+        # (function will implicitly return $null, but we don't want to explicitly return $app.CurrentProject)
+      } finally {
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    } finally {
+      if ($shouldDisposeApp -and $app) {
+        try {
+          $app.Quit()
+        } finally {
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
       }
     }
   }

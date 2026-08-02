@@ -18,8 +18,7 @@ InModuleScope 'Automation.Office' {
       [OutputType([SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
-      $value = [guid]::NewGuid().ToString('N').Substring(0, 15)
-      return ConvertTo-SecureString -String $value -AsPlainText -Force
+      return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
     }
     function Get-TempFile {
       [CmdletBinding()]
@@ -167,6 +166,28 @@ InModuleScope 'Automation.Office' {
           }
         }
       }
+      It 'creates a database with InitializeDb script block' {
+        $path = Get-TempFile
+        $item = New-AccessFile -Path $path -InitializeDb {
+          param($db)
+          $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+        }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
+      }
+      It 'creates a database with InitializeProject script block' {
+        $path = Get-TempFile
+        $item = New-AccessFile -Path $path -InitializeProject {
+          param($Project)
+          $Project.FullName | Should -Be $path
+        }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
+      }
     }
     Context 'Edge cases' {
       It 'fails when the path already exists and Force is not specified' {
@@ -175,39 +196,39 @@ InModuleScope 'Automation.Office' {
         { New-AccessFile -Path $path } | Should -Throw
       }
     }
-    Describe 'New-AccessFile.Unit' {
-      BeforeEach {
-        $path = Get-TempFile
-        $script:called = 0
+  }
+  Describe 'New-AccessFile.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      $script:called = 0
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
       }
-      AfterEach {
-        if (Test-Path -LiteralPath $path) {
-          Remove-Item -LiteralPath $path -Force
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not call New-AccessObject when WhatIf is specified' {
+        Mock -CommandName New-AccessObject -MockWith {
+          $script:called++
+          throw 'must not be called'
         }
-      }
-      Context 'SupportsShouldProcess' {
-        It 'does not call New-AccessObject when WhatIf is specified' {
-          Mock -CommandName New-AccessObject -MockWith {
-            $script:called++
-            throw 'must not be called'
-          }
 
-          { New-AccessFile -Path $path -Force -WhatIf } | Should -Not -Throw
-          $script:called | Should -Be 0
-          Test-Path -LiteralPath $path | Should -BeFalse
-        }
+        { New-AccessFile -Path $path -Force -WhatIf } | Should -Not -Throw
+        $script:called | Should -Be 0
+        Test-Path -LiteralPath $path | Should -BeFalse
       }
-      Context 'Edge cases' {
-        It 'throws and does not call New-AccessObject when path exists and Force is not specified' {
-          New-Item -Path $path -ItemType File -Force | Out-Null
-          Mock -CommandName New-AccessObject -MockWith {
-            $script:called++
-            throw 'must not be called'
-          }
-
-          { New-AccessFile -Path $path } | Should -Throw
-          $script:called | Should -Be 0
+    }
+    Context 'Edge cases' {
+      It 'throws and does not call New-AccessObject when path exists and Force is not specified' {
+        New-Item -Path $path -ItemType File -Force | Out-Null
+        Mock -CommandName New-AccessObject -MockWith {
+          $script:called++
+          throw 'must not be called'
         }
+
+        { New-AccessFile -Path $path } | Should -Throw
+        $script:called | Should -Be 0
       }
     }
   }
@@ -403,6 +424,202 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist' {
         { Set-AccessFileProperty -Path $path -Name NonExistentProperty -Value 'test' } | Should -Throw
+      }
+    }
+  }
+  Describe 'Open-AccessFile' {
+    BeforeAll {
+      # Reuse existing helper functions from parent scope
+    }
+    BeforeEach {
+      $password = Get-Password
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'opens a database by Path and returns nothing when no action specified' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app = New-AccessObject
+        try {
+          $result = Open-AccessFile -Application $app -Path $path
+          $result | Should -BeNullOrEmpty
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+      It 'opens a database by Path with ValueFromPipeline and returns nothing when no action specified' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app = New-AccessObject
+        try {
+          $result = $path | Open-AccessFile -Application $app
+          $result | Should -BeNullOrEmpty
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+      It 'opens a database by Path with ValueFromPipelineByPropertyName and returns nothing when no action specified' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app = New-AccessObject
+        try {
+          $result = [PSCustomObject]@{ FullName = $path } | Open-AccessFile -Application $app
+          $result | Should -BeNullOrEmpty
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+    }
+    Context 'Other parameters' {
+      It 'opens a database with Password' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path -Password $password | Out-Null
+        $app = New-AccessObject
+        try {
+          Open-AccessFile -Application $app -Path $path -Password $password | Out-Null
+          Test-Path -LiteralPath $path | Should -BeTrue
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+      It 'opens a database and executes ActionDb script block' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app = New-AccessObject
+        try {
+          Open-AccessFile -Application $app -Path $path -ActionDb {
+            param($db)
+            $db.Execute('CREATE TABLE Test (Id INTEGER)')
+          }
+          # Close the database after ActionDb completes
+          $app.CloseCurrentDatabase()
+          # Now verify the table was created
+          $tables = Get-AccessTable -Path $path
+          ($tables | Where-Object -Property Name -EQ 'Test') | Should -Not -BeNullOrEmpty
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+      It 'opens a database and executes ActionProject script block' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app = New-AccessObject
+        try {
+          $connection = Open-AccessFile -Application $app -Path $path -ActionProject {
+            param($project)
+            return $project.Connection
+          }
+          $connection | Should -Not -BeNullOrEmpty
+        } finally {
+          try {
+            if ($app) {
+              $app.Quit()
+            }
+          } finally {
+            Get-Variable |
+            Where-Object -Property Value -Is [__ComObject] |
+            Clear-Variable -Force -WhatIf:$false -Confirm:$false
+            [GC]::Collect()
+            [GC]::WaitForPendingFinalizers()
+          }
+        }
+      }
+      It 'uses the provided Application object' {
+        $path = Get-TempFile
+        New-AccessFile -Path $path | Out-Null
+        $app1 = New-AccessObject
+        $app2 = New-AccessObject
+        try {
+          Open-AccessFile -Application $app1 -Path $path -ActionProject {
+            param($project)
+            $script:projectApp1 = $project.Application
+          }
+          Open-AccessFile -Application $app2 -Path $path -ActionProject {
+            param($project)
+            $script:projectApp2 = $project.Application
+          }
+          $script:projectApp1 | Should -Be $app1
+          $script:projectApp2 | Should -Be $app2
+        } finally {
+          try {
+            if ($app1) {
+              $app1.Quit()
+            }
+          } finally {
+            try {
+              if ($app2) {
+                $app2.Quit()
+              }
+            } finally {
+              Get-Variable |
+              Where-Object -Property Value -Is [__ComObject] |
+              Clear-Variable -Force -WhatIf:$false -Confirm:$false
+              [GC]::Collect()
+              [GC]::WaitForPendingFinalizers()
+            }
+          }
+        }
+      }
+    }
+    Context 'Edge cases' {
+      It 'fails when the path does not exist' {
+        $path = [IO.Path]::GetTempFileName()
+        Remove-Item -LiteralPath $path -Force
+        { Open-AccessFile -Path $path } | Should -Throw
       }
     }
   }
