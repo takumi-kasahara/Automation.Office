@@ -171,10 +171,9 @@ InModuleScope 'Automation.Office' {
           $Workbook.RemovePersonalInformation | Should -BeTrue
         }
       }
-      It 'opens a file with Action script block' {
+      It 'creates a file with Initialize script block' {
         $path = Get-TempFile
-        New-ExcelFile -Path $path
-        Open-ExcelFile -Path $path -Action {
+        $item = New-ExcelFile -Path $path -Initialize {
           param (
             [Parameter(Mandatory)]
             [Workbook]
@@ -182,6 +181,9 @@ InModuleScope 'Automation.Office' {
           )
           $Workbook.Worksheets.Item(1).Name = 'TestData'
         }
+        $item | Should -BeOfType [System.IO.FileInfo]
+        $item.FullName | Should -Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should -BeTrue
         Open-ExcelFile -Path $path -Action {
           param (
             [Parameter(Mandatory)]
@@ -190,28 +192,6 @@ InModuleScope 'Automation.Office' {
           )
           $Workbook.Worksheets.Item(1).Name | Should -Be 'TestData'
         }
-      }
-    }
-    It 'creates a file with Initialize script block' {
-      $path = Get-TempFile
-      $item = New-ExcelFile -Path $path -Initialize {
-        param (
-          [Parameter(Mandatory)]
-          [Workbook]
-          $Workbook
-        )
-        $Workbook.Worksheets.Item(1).Name = 'TestData'
-      }
-      $item | Should -BeOfType [System.IO.FileInfo]
-      $item.FullName | Should -Be ([Path]::GetFullPath($path))
-      Test-Path -LiteralPath $path | Should -BeTrue
-      Open-ExcelFile -Path $path -Action {
-        param (
-          [Parameter(Mandatory)]
-          [Workbook]
-          $Workbook
-        )
-        $Workbook.Worksheets.Item(1).Name | Should -Be 'TestData'
       }
     }
     Context 'Edge cases' {
