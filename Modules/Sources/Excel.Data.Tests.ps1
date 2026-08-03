@@ -32,14 +32,16 @@ InModuleScope 'Automation.Office' {
     function Initialize-ExcelFixture {
       param(
         [string]
-        $Path
+        $Path,
+        [SecureString]
+        $PasswordToOpen = $null
       )
       $extension = [Path]::GetExtension($Path)
       $fileFormat = switch -Exact -CaseSensitive ($extension) {
         '.xlsx' { [Microsoft.Office.Interop.Excel.XlFileFormat]::xlOpenXMLWorkbook }
         '.xlsm' { [Microsoft.Office.Interop.Excel.XlFileFormat]::xlOpenXMLWorkbookMacroEnabled }
       }
-      New-ExcelFile -Path $Path -FileFormat $fileFormat -Initialize {
+      New-ExcelFile -Path $Path -FileFormat $fileFormat -PasswordToOpen $PasswordToOpen -Initialize {
         param($Workbook)
         $sheet = $Workbook.Worksheets.Item(1)
         $sheet.Name = 'Sheet1'
@@ -174,22 +176,14 @@ InModuleScope 'Automation.Office' {
         $columns | Should -Not -BeNullOrEmpty
       }
     }
-    Context 'Other parameters' {
-      It 'gets table columns from workbook protected with Password' {
-        Initialize-ExcelFixture -Path $xlsxPath
-        { Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Sheet1$ -Password $password } | Should -Throw
-      }
-    }
     Context 'Edge cases' {
       It 'throws for missing table' {
         Initialize-ExcelFixture -Path $xlsxPath
         { Get-ExcelTableColumn -LiteralPath $xlsxPath -Table NotExists } | Should -Throw
       }
-      It 'throws when protected with password' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.xlsx'
-        New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelTableColumn -LiteralPath $path -Table NotExists } | Should -Throw
+      It 'throws when protected with PasswordToOpen' {
+        Initialize-ExcelFixture -Path $xlsxPath -PasswordToOpen $password
+        { Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Sheet1$ } | Should -Throw
       }
     }
   }
