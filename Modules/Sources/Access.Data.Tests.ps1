@@ -94,7 +94,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'gets tables from password-protected database' {
+      It 'gets tables from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $tables = Get-AccessTable -LiteralPath $accdbPath -Password $password
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
@@ -167,7 +167,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'gets views from password-protected database' {
+      It 'gets views from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $views = Get-AccessView -LiteralPath $accdbPath -Password $password
         ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
@@ -243,7 +243,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'gets table columns from password-protected database' {
+      It 'gets table columns from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $columns = Get-AccessTableColumn -LiteralPath $accdbPath -Table Employees -Password $password
         $columns | Should -Not -BeNullOrEmpty
@@ -317,7 +317,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'gets view columns from password-protected database' {
+      It 'gets view columns from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $columns = Get-AccessViewColumn -LiteralPath $accdbPath -View vwSalesEmployees -Password $password
         $columns | Should -Not -BeNullOrEmpty
@@ -428,17 +428,17 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'gets table data from password-protected database' {
+      It 'gets table data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $rows = Get-AccessData -LiteralPath $accdbPath -Table Employees -Password $password
         $rows | Should -HaveCount 2
       }
-      It 'gets view data from password-protected database' {
+      It 'gets view data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $rows = Get-AccessData -LiteralPath $accdbPath -View vwSalesEmployees -Password $password
         $rows | Should -HaveCount 1
       }
-      It 'gets query data from password-protected database' {
+      It 'gets query data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $rows = Get-AccessData -LiteralPath $accdbPath -Query 'SELECT * FROM Employees WHERE Id = 1' -Password $password
         $rows | Should -HaveCount 1

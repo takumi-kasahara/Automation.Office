@@ -25,6 +25,7 @@
     'Set-ExcelAppProperty'
     'Get-ExcelFileProperty'
     'Set-ExcelFileProperty'
+    'Get-ExcelTable'
     'Get-ExcelDocumentProperty'
     'Get-ExcelPropertyValue'
     'Set-ExcelDocumentProperty'
