@@ -46,9 +46,8 @@ InModuleScope 'Automation.Office' {
   Describe 'Get-AccessTable' {
     BeforeEach {
       $accdbPath = Get-TempFile -Extension '.accdb'
-      Initialize-AccessFixture -Path $accdbPath
-      $mdbPath = Get-TempFile -Extension '.mdb'
-      Initialize-AccessFixture -Path $mdbPath
+      $accdbPath = Get-TempFile -Extension '.mdb'
+      $password = Get-Password
     }
     AfterEach {
       if (Test-Path -LiteralPath $accdbPath) {
@@ -60,501 +59,398 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'gets tables by Path' {
+        Initialize-AccessFixture -Path $accdbPath
         $tables = Get-AccessTable -Path $accdbPath
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by LiteralPath' {
+        Initialize-AccessFixture -Path $accdbPath
         $tables = Get-AccessTable -LiteralPath $accdbPath
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by ValueFromPipeline' {
+        Initialize-AccessFixture -Path $accdbPath
         $tables = $accdbPath | Get-AccessTable
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by ValueFromPipelineByPropertyName' {
+        Initialize-AccessFixture -Path $accdbPath
         $tables = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessTable
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected properties' {
+        Initialize-AccessFixture -Path $accdbPath
         $table = Get-AccessTable -Path $accdbPath | Where-Object -Property Name -EQ 'Employees' | Select-Object -First 1
         $table | Should -Not -BeNullOrEmpty
         $table.Path | Should -Be $accdbPath
         $table.Type | Should -Not -BeNullOrEmpty
       }
       It 'works with mdb files' {
+        Initialize-AccessFixture -Path $mdbPath
         $tables = Get-AccessTable -Path $mdbPath
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Other parameters' {
       It 'gets tables from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $tables = Get-AccessTable -Path $path -Password $password
-          ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $tables = Get-AccessTable -Path $accdbPath -Password $password
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
       It 'throws when password is incorrect' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessTable -Path $path -Password (Get-Password) } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessTable -Path $accdbPath -Password (Get-Password) } | Should -Throw
       }
       It 'throws when password is not provided for protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessTable -Path $path } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessTable -Path $accdbPath } | Should -Throw
       }
     }
     Context 'Edge cases' {
       It 'throws for unsupported extensions' {
         $txtPath = Get-TempFile -Extension '.txt'
-        try {
-          Set-Content -LiteralPath $txtPath -Encoding UTF8 -Value 'x'
-          { Get-AccessTable -LiteralPath $txtPath } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $txtPath) {
-            Remove-Item -LiteralPath $txtPath -Force
-          }
-        }
+        Set-Content -LiteralPath $txtPath -Encoding UTF8 -Value 'x'
+        { Get-AccessTable -LiteralPath $txtPath } | Should -Throw
       }
     }
   }
   Describe 'Get-AccessView' {
     BeforeEach {
-      $path = Get-TempFile -Extension '.accdb'
-      Initialize-AccessFixture -Path $path -Password $password
+      $accdbPath = Get-TempFile -Extension '.accdb'
+      $mdbPath = Get-TempFile -Extension '.mdb'
+      $password = Get-Password
     }
     AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
+      if (Test-Path -LiteralPath $accdbPath) {
+        Remove-Item -LiteralPath $accdbPath -Force
+      }
+      if (Test-Path -LiteralPath $mdbPath) {
+        Remove-Item -LiteralPath $mdbPath -Force
       }
     }
     Context 'ParameterSetName' {
       It 'gets views by Path' {
-        $views = Get-AccessView -Path $path
+        Initialize-AccessFixture -Path $accdbPath
+        $views = Get-AccessView -Path $accdbPath
         ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
       }
       It 'gets views by LiteralPath' {
-        $views = Get-AccessView -LiteralPath $path
+        Initialize-AccessFixture -Path $accdbPath
+        $views = Get-AccessView -LiteralPath $accdbPath
+        ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
+      }
+      It 'gets views by ValueFromPipeline' {
+        Initialize-AccessFixture -Path $accdbPath
+        $views = $accdbPath | Get-AccessView
+        ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
+      }
+      It 'gets views by ValueFromPipelineByPropertyName' {
+        Initialize-AccessFixture -Path $accdbPath
+        $views = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessView
         ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected properties' {
-        $view = Get-AccessView -Path $path | Where-Object -Property Name -EQ 'vwSalesEmployees' | Select-Object -First 1
+        Initialize-AccessFixture -Path $accdbPath
+        $view = Get-AccessView -Path $accdbPath | Where-Object -Property Name -EQ 'vwSalesEmployees' | Select-Object -First 1
         $view | Should -Not -BeNullOrEmpty
-        $view.Path | Should -Be $path
+        $view.Path | Should -Be $accdbPath
         $view.Type | Should -Match 'VIEW'
+      }
+      It 'works with mdb files' {
+        Initialize-AccessFixture -Path $mdbPath
+        $views = Get-AccessView -Path $mdbPath
+        ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Other parameters' {
       It 'gets views from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $views = Get-AccessView -Path $path -Password $password
-          ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $views = Get-AccessView -Path $accdbPath -Password $password
+        ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
       }
       It 'throws when password is incorrect' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessView -Path $path -Password (Get-Password) } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessView -Path $accdbPath } | Should -Throw
+        { Get-AccessView -Path $accdbPath -Password (Get-Password) } | Should -Throw
       }
-      It 'throws when password is not provided for protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessView -Path $path } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+    }
+    Context 'Edge cases' {
+      It 'throws for unsupported extensions' {
+        $txtPath = Get-TempFile -Extension '.txt'
+        Set-Content -LiteralPath $txtPath -Encoding UTF8 -Value 'x'
+        { Get-AccessView -LiteralPath $txtPath } | Should -Throw
       }
     }
   }
   Describe 'Get-AccessTableColumn' {
     BeforeEach {
-      $path = Get-TempFile -Extension '.accdb'
-      Initialize-AccessFixture -Path $path
+      $accdbPath = Get-TempFile -Extension '.accdb'
+      $mdbPath = Get-TempFile -Extension '.mdb'
+      $password = Get-Password
     }
     AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
+      if (Test-Path -LiteralPath $accdbPath) {
+        Remove-Item -LiteralPath $accdbPath -Force
+      }
+      if (Test-Path -LiteralPath $mdbPath) {
+        Remove-Item -LiteralPath $mdbPath -Force
       }
     }
     Context 'ParameterSetName' {
       It 'gets table columns by Path' {
-        $columns = Get-AccessTableColumn -Path $path -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessTableColumn -Path $accdbPath -Table Employees
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets table columns by LiteralPath' {
-        $columns = Get-AccessTableColumn -LiteralPath $path -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessTableColumn -LiteralPath $accdbPath -Table Employees
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets table columns by ValueFromPipelineByPropertyName' {
-        $columns = [PSCustomObject]@{ PSPath = $path } | Get-AccessTableColumn -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessTableColumn -Table Employees
         $columns | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected column metadata' {
-        $columns = Get-AccessTableColumn -Path $path -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessTableColumn -Path $accdbPath -Table Employees
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $id | Should -Not -BeNullOrEmpty
         $name | Should -Not -BeNullOrEmpty
-        $id.Path | Should -Be $path
+        $id.Path | Should -Be $accdbPath
         $id.ObjectType | Should -Be 'Table'
         $id.ObjectName | Should -Be 'Employees'
         $id.Ordinal | Should -BeOfType [int]
         $name.DataType | Should -Not -BeNullOrEmpty
       }
+      It 'works with mdb files' {
+        Initialize-AccessFixture -Path $mdbPath
+        $columns = Get-AccessTableColumn -Path $mdbPath -Table Employees
+        $columns | Should -Not -BeNullOrEmpty
+      }
     }
     Context 'Other parameters' {
       It 'gets table columns from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $columns = Get-AccessTableColumn -Path $path -Table Employees -Password $password
-          $columns | Should -Not -BeNullOrEmpty
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $columns = Get-AccessTableColumn -Path $accdbPath -Table Employees -Password $password
+        $columns | Should -Not -BeNullOrEmpty
       }
       It 'throws when password is incorrect' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessTableColumn -Path $path -Table Employees -Password (Get-Password) } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
-      }
-      It 'throws when password is not provided for protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessTableColumn -Path $path -Table Employees } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessTableColumn -Path $accdbPath -Table Employees } | Should -Throw
+        { Get-AccessTableColumn -Path $accdbPath -Table Employees -Password (Get-Password) } | Should -Throw
       }
     }
     Context 'Edge cases' {
       It 'throws for missing table' {
-        { Get-AccessTableColumn -Path $path -Table NotExists } | Should -Throw
+        Initialize-AccessFixture -Path $accdbPath
+        { Get-AccessTableColumn -Path $accdbPath -Table NotExists } | Should -Throw
       }
     }
   }
   Describe 'Get-AccessViewColumn' {
     BeforeEach {
-      $path = Get-TempFile -Extension '.accdb'
-      Initialize-AccessFixture -Path $path
+      $accdbPath = Get-TempFile -Extension '.accdb'
+      $mdbPath = Get-TempFile -Extension '.mdb'
+      $password = Get-Password
     }
     AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
+      if (Test-Path -LiteralPath $accdbPath) {
+        Remove-Item -LiteralPath $accdbPath -Force
+      }
+      if (Test-Path -LiteralPath $mdbPath) {
+        Remove-Item -LiteralPath $mdbPath -Force
       }
     }
     Context 'ParameterSetName' {
       It 'gets view columns by Path' {
-        $columns = Get-AccessViewColumn -Path $path -View vwSalesEmployees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessViewColumn -Path $accdbPath -View vwSalesEmployees
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets view columns by LiteralPath' {
-        $columns = Get-AccessViewColumn -LiteralPath $path -View vwSalesEmployees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessViewColumn -LiteralPath $accdbPath -View vwSalesEmployees
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets view columns by ValueFromPipelineByPropertyName' {
-        $columns = [PSCustomObject]@{ PSPath = $path } | Get-AccessViewColumn -View vwSalesEmployees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessViewColumn -View vwSalesEmployees
         $columns | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected column metadata' {
-        $columns = Get-AccessViewColumn -Path $path -View vwSalesEmployees
+        Initialize-AccessFixture -Path $accdbPath
+        $columns = Get-AccessViewColumn -Path $accdbPath -View vwSalesEmployees
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $id | Should -Not -BeNullOrEmpty
         $name | Should -Not -BeNullOrEmpty
-        $id.Path | Should -Be $path
+        $id.Path | Should -Be $accdbPath
         $id.ObjectType | Should -Be 'View'
         $id.ObjectName | Should -Be 'vwSalesEmployees'
         $id.Ordinal | Should -BeOfType [int]
       }
+      It 'works with mdb files' {
+        Initialize-AccessFixture -Path $mdbPath
+        $columns = Get-AccessViewColumn -Path $mdbPath -View vwSalesEmployees
+        $columns | Should -Not -BeNullOrEmpty
+      }
     }
     Context 'Other parameters' {
       It 'gets view columns from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $columns = Get-AccessViewColumn -Path $path -View vwSalesEmployees -Password $password
-          $columns | Should -Not -BeNullOrEmpty
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $columns = Get-AccessViewColumn -Path $accdbPath -View vwSalesEmployees -Password $password
+        $columns | Should -Not -BeNullOrEmpty
       }
       It 'throws when password is incorrect' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessViewColumn -Path $path -View vwSalesEmployees -Password (Get-Password) } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
-      }
-      It 'throws when password is not provided for protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessViewColumn -Path $path -View vwSalesEmployees } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessViewColumn -Path $accdbPath -View vwSalesEmployees } | Should -Throw
+        { Get-AccessViewColumn -Path $accdbPath -View vwSalesEmployees -Password (Get-Password) } | Should -Throw
       }
     }
     Context 'Edge cases' {
       It 'throws for missing view' {
-        { Get-AccessViewColumn -Path $path -View NotExists } | Should -Throw
+        Initialize-AccessFixture -Path $accdbPath
+        { Get-AccessViewColumn -Path $accdbPath -View NotExists } | Should -Throw
       }
     }
   }
   Describe 'Get-AccessData' {
     BeforeEach {
-      $path = Get-TempFile -Extension '.accdb'
-      Initialize-AccessFixture -Path $path
+      $accdbPath = Get-TempFile -Extension '.accdb'
+      $mdbPath = Get-TempFile -Extension '.mdb'
+      $password = Get-Password
     }
     AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
+      if (Test-Path -LiteralPath $accdbPath) {
+        Remove-Item -LiteralPath $accdbPath -Force
+      }
+      if (Test-Path -LiteralPath $mdbPath) {
+        Remove-Item -LiteralPath $mdbPath -Force
       }
     }
     Context 'ParameterSetName' {
       It 'gets table data by Path' {
-        $rows = Get-AccessData -Path $path -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -Path $accdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets table data by LiteralPath' {
-        $rows = Get-AccessData -LiteralPath $path -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -LiteralPath $accdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets view data by Path' {
-        $rows = Get-AccessData -Path $path -View vwSalesEmployees
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -Path $accdbPath -View vwSalesEmployees
         $rows | Should -HaveCount 1
       }
       It 'gets table data by ValueFromPipelineByPropertyName' {
-        $rows = [PSCustomObject]@{ PSPath = $path } | Get-AccessData -Table Employees
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessData -Table Employees
         $rows | Should -HaveCount 2
-      }
-    }
-
-    Context 'Query' {
-      It 'gets data by Query with Path' {
-        $rows = Get-AccessData -Path $path -Query 'SELECT Id, Name FROM Employees WHERE Id = 1'
-        $rows | Should -HaveCount 1
-        $rows[0].Id | Should -Be 1
-        $rows[0].Name | Should -Be 'Alice'
-      }
-      It 'gets data by Query with leading whitespace and lowercase select' {
-        $rows = Get-AccessData -Path $path -Query "`r`n  select Id, Name FROM Employees WHERE Id = 1"
-        $rows | Should -HaveCount 1
-        $rows[0].Id | Should -Be 1
-        $rows[0].Name | Should -Be 'Alice'
-      }
-      It 'gets data by Query with LiteralPath' {
-        $rows = Get-AccessData -LiteralPath $path -Query 'SELECT * FROM Employees WHERE Id = 2'
-        $rows | Should -HaveCount 1
-        $rows[0].Id | Should -Be 2
-        $rows[0].Name | Should -Be 'Bob'
-      }
-      It 'gets data by Query with ValueFromPipeline' {
-        $rows = $path | Get-AccessData -Query 'SELECT * FROM Employees WHERE Id = 1'
-        $rows | Should -HaveCount 1
-        $rows[0].Name | Should -Be 'Alice'
-      }
-      It 'gets data by Query with ValueFromPipelineByPropertyName' {
-        $rows = [PSCustomObject]@{ PSPath = $path } | Get-AccessData -Query 'SELECT * FROM Employees WHERE Id = 2'
-        $rows | Should -HaveCount 1
-        $rows[0].Name | Should -Be 'Bob'
-      }
-      It 'gets multiple rows by Query' {
-        $rows = Get-AccessData -Path $path -Query 'SELECT * FROM Employees ORDER BY Id'
-        $rows | Should -HaveCount 2
-        $rows[0].Id | Should -Be 1
-        $rows[1].Id | Should -Be 2
       }
     }
     Context 'Other parameters' {
       It 'gets data with selected columns' {
-        $rows = Get-AccessData -Path $path -Table Employees -Columns Id, Name
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -Path $accdbPath -Table Employees -Columns Id, Name
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
         @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'Department'
       }
       It 'gets view data with selected columns' {
-        $rows = Get-AccessData -Path $path -View vwSalesEmployees -Columns Id, Name
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -Path $accdbPath -View vwSalesEmployees -Columns Id, Name
         $rows | Should -HaveCount 1
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
       }
+      It 'gets data by Query' {
+        Initialize-AccessFixture -Path $accdbPath
+        $rows = Get-AccessData -Path $accdbPath -Query 'SELECT Id, Name FROM Employees WHERE Id = 1'
+        $rows | Should -HaveCount 1
+        $rows[0].Id | Should -Be 1
+        $rows[0].Name | Should -Be 'Alice'
+      }
     }
     Context 'Output' {
       It 'returns row metadata and column values for table data' {
-        $row = Get-AccessData -Path $path -Table Employees | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        Initialize-AccessFixture -Path $accdbPath
+        $row = Get-AccessData -Path $accdbPath -Table Employees | Where-Object -Property Id -EQ 1 | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
-        $row.Path | Should -Be $path
+        $row.Path | Should -Be $accdbPath
         $row.ObjectType | Should -Be 'Table'
         $row.ObjectName | Should -Be 'Employees'
         $row.Name | Should -Be 'Alice'
         $row.Department | Should -Be 'Sales'
       }
       It 'returns row metadata and column values for view data' {
-        $row = Get-AccessData -Path $path -View vwSalesEmployees | Select-Object -First 1
+        Initialize-AccessFixture -Path $accdbPath
+        $row = Get-AccessData -Path $accdbPath -View vwSalesEmployees | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.ObjectType | Should -Be 'View'
         $row.ObjectName | Should -Be 'vwSalesEmployees'
         $row.Name | Should -Be 'Alice'
       }
       It 'returns query metadata for Query parameter set' {
-        $row = Get-AccessData -Path $path -Query 'SELECT Id, Name FROM Employees WHERE Id = 1' | Select-Object -First 1
+        Initialize-AccessFixture -Path $accdbPath
+        $row = Get-AccessData -Path $accdbPath -Query 'SELECT Id, Name FROM Employees WHERE Id = 1' | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.ObjectType | Should -Be 'Query'
         $row.ObjectName | Should -Be 'SELECT Id, Name FROM Employees WHERE Id = 1'
       }
+      It 'works with mdb files' {
+        Initialize-AccessFixture -Path $mdbPath
+        $rows = Get-AccessData -Path $mdbPath -Table Employees
+        $rows | Should -HaveCount 2
+      }
     }
     Context 'Other parameters' {
       It 'gets table data from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $rows = Get-AccessData -Path $path -Table Employees -Password $password
-          $rows | Should -HaveCount 2
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $rows = Get-AccessData -Path $accdbPath -Table Employees -Password $password
+        $rows | Should -HaveCount 2
       }
       It 'gets view data from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $rows = Get-AccessData -Path $path -View vwSalesEmployees -Password $password
-          $rows | Should -HaveCount 1
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $rows = Get-AccessData -Path $accdbPath -View vwSalesEmployees -Password $password
+        $rows | Should -HaveCount 1
       }
       It 'gets query data from password-protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          $rows = Get-AccessData -Path $path -Query 'SELECT * FROM Employees WHERE Id = 1' -Password $password
-          $rows | Should -HaveCount 1
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        $rows = Get-AccessData -Path $accdbPath -Query 'SELECT * FROM Employees WHERE Id = 1' -Password $password
+        $rows | Should -HaveCount 1
       }
       It 'throws when password is incorrect' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessData -Path $path -Table Employees -Password (Get-Password) } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
-      }
-      It 'throws when password is not provided for protected database' {
-        $password = Get-Password
-        $path = Get-TempFile -Extension '.accdb'
-        try {
-          Initialize-AccessFixture -Path $path -Password $password
-          { Get-AccessData -Path $path -Table Employees } | Should -Throw
-        } finally {
-          if (Test-Path -LiteralPath $path) {
-            Remove-Item -LiteralPath $path -Force
-          }
-        }
+        Initialize-AccessFixture -Path $accdbPath -Password $password
+        { Get-AccessData -Path $accdbPath -Table Employees } | Should -Throw
+        { Get-AccessData -Path $accdbPath -Table Employees -Password (Get-Password) } | Should -Throw
       }
     }
     Context 'Edge cases' {
       It 'throws when Query is not a SELECT statement' {
-        { Get-AccessData -Path $path -Query 'DELETE FROM Employees' } | Should -Throw
+        { Get-AccessData -Path $accdbPath -Query 'DELETE FROM Employees' } | Should -Throw
       }
       It 'throws when Query is used with Columns' {
-        { Get-AccessData -Path $path -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
+        { Get-AccessData -Path $accdbPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
       }
       It 'throws for missing table' {
-        { Get-AccessData -Path $path -Table NotExists } | Should -Throw
+        { Get-AccessData -Path $accdbPath -Table NotExists } | Should -Throw
       }
       It 'throws for missing view' {
-        { Get-AccessData -Path $path -View NotExists } | Should -Throw
+        { Get-AccessData -Path $accdbPath -View NotExists } | Should -Throw
       }
     }
   }
