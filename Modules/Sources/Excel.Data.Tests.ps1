@@ -187,4 +187,90 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
+  Describe 'Get-ExcelData' {
+    BeforeEach {
+      $xlsxPath = Get-TempFile -Extension '.xlsx'
+      $xlsmPath = Get-TempFile -Extension '.xlsm'
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $xlsxPath) {
+        Remove-Item -LiteralPath $xlsxPath -Force
+      }
+      if (Test-Path -LiteralPath $xlsmPath) {
+        Remove-Item -LiteralPath $xlsmPath -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'gets rows by Path' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -Path $xlsxPath -Table 'Sheet1$'
+        $rows | Should -Not -BeNullOrEmpty
+        $rows[0].Path | Should -Be $xlsxPath
+        $rows[0].TableName | Should -Be 'Sheet1$'
+        $rows[0].Name | Should -Be 'Alice'
+        $rows[0].Department | Should -Be 'Sales'
+      }
+      It 'gets rows by LiteralPath' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$'
+        $rows | Should -Not -BeNullOrEmpty
+        $rows[0].Path | Should -Be $xlsxPath
+      }
+      It 'gets rows by ValueFromPipeline' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = $xlsxPath | Get-ExcelData -Table 'Sheet1$'
+        $rows | Should -Not -BeNullOrEmpty
+      }
+      It 'gets rows by ValueFromPipelineByPropertyName' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelData -Table 'Sheet1$'
+        $rows | Should -Not -BeNullOrEmpty
+      }
+    }
+    Context 'Other parameters' {
+      It 'gets rows with selected columns' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$' -Columns Id, Name
+        $rows | Should -HaveCount 2
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
+        @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'Department'
+      }
+      It 'gets rows by Query' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT Id, Name FROM [Sheet1$] WHERE Id = 1'
+        $rows | Should -HaveCount 1
+        $rows[0].Id | Should -Be 1
+        $rows[0].Name | Should -Be 'Alice'
+      }
+    }
+    Context 'Output' {
+      It 'returns expected row metadata and column values' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        $row | Should -Not -BeNullOrEmpty
+        $row.Path | Should -Be $xlsxPath
+        $row.TableName | Should -Be 'Sheet1$'
+        $row.Name | Should -Be 'Alice'
+        $row.Department | Should -Be 'Sales'
+      }
+      It 'works with xlsm files' {
+        Initialize-ExcelFixture -Path $xlsmPath
+        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Sheet1$'
+        $rows | Should -Not -BeNullOrEmpty
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws for missing table' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        { Get-ExcelData -LiteralPath $xlsxPath -Table 'NotExists' } | Should -Throw
+      }
+      It 'throws when protected with PasswordToOpen' {
+        $password = Get-Password
+        $path = Get-TempFile -Extension '.xlsx'
+        New-ExcelFile -Path $path -PasswordToOpen $password
+        { Get-ExcelData -LiteralPath $path -Table 'Sheet1$' } | Should -Throw
+      }
+    }
+  }
 }

@@ -170,4 +170,122 @@ function Get-ExcelTableColumn {
     }
   }
 }
+function Get-ExcelData {
+  <#
+  .SYNOPSIS
+    Gets rows from Excel tables.
+
+  .DESCRIPTION
+    Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and returns rows from the specified table.
+
+    This cmdlet does not use COM objects.
+
+  .PARAMETER Path
+    Specifies Excel workbook file paths. Wildcards are supported.
+
+  .PARAMETER LiteralPath
+    Specifies Excel workbook file paths literally. Wildcards are not interpreted.
+
+  .PARAMETER Table
+    Specifies one or more table names to query.
+
+  .PARAMETER Columns
+    Specifies the columns to return when querying tables by name.
+
+    When omitted, all columns are returned.
+
+  .PARAMETER Query
+    Specifies a SELECT statement to execute against the database.
+
+  .OUTPUTS
+    System.Management.Automation.PSCustomObject
+  #>
+  [CmdletBinding(DefaultParameterSetName = 'TablePathSet')]
+  [OutputType([PSCustomObject])]
+  param (
+    [Parameter(Mandatory, ParameterSetName = 'TablePathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [SupportsWildcards()]
+    [ValidateScript({ Test-Path -Path $_ -PathType Leaf })]
+    [string[]]
+    $Path,
+    [Alias('PSPath', 'LP')]
+    [Parameter(Mandatory, ParameterSetName = 'TableLiteralPathSet', ValueFromPipelineByPropertyName)]
+    [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string[]]
+    $LiteralPath,
+    [Parameter(Mandatory, ParameterSetName = 'TablePathSet', Position = 1)]
+    [Parameter(Mandatory, ParameterSetName = 'TableLiteralPathSet', Position = 1)]
+    [ValidateCount(1, [int]::MaxValue)]
+    [string[]]
+    $Table,
+    [Parameter(ParameterSetName = 'TablePathSet')]
+    [Parameter(ParameterSetName = 'TableLiteralPathSet')]
+    [ValidateCount(1, [int]::MaxValue)]
+    [string[]]
+    $Columns,
+    [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 1)]
+    [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', Position = 1)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Query
+  )
+  process {
+    $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      { $_ -in 'TablePathSet', 'QueryPathSet' } {
+        Get-Item -Path $Path -Force
+      }
+      { $_ -in 'TableLiteralPathSet', 'QueryLiteralPathSet' } {
+        Get-Item -LiteralPath $LiteralPath -Force
+      }
+    }
+    $targets = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      { $_ -in 'TablePathSet', 'TableLiteralPathSet' } {
+        $Table | ForEach-Object {
+          [PSCustomObject]@{ Name = $_ }
+        }
+      }
+      { $_ -in 'QueryPathSet', 'QueryLiteralPathSet' } {
+        [PSCustomObject]@{ Name = $Query.TrimStart() }
+      }
+    }
+    foreach ($item in $items) {
+      $connection = Open-DbConnection -Path $item.FullName
+      try {
+        foreach ($target in $targets) {
+          $sql = if ($PSCmdlet.ParameterSetName -like 'Query*') {
+            $target.Name
+          } else {
+            $selectList = if ($Columns) {
+              ($Columns | ForEach-Object { "[$_]" }) -join ', '
+            } else {
+              '*'
+            }
+            "SELECT $selectList FROM [$($target.Name)]"
+          }
+          $queryOutput = Invoke-Query -Connection $connection -Query $sql
+          $dataTable = $queryOutput.Table
+          if (-not ($dataTable -is [DataTable])) {
+            throw [InvalidOperationException]::new("Invalid query result type: $($dataTable.GetType().FullName)")
+          }
+          foreach ($rowData in $dataTable.Rows) {
+            $result = [ordered]@{}
+            $result.Path = $item.FullName
+            $result.TableName = $target.Name
+            foreach ($column in $dataTable.Columns) {
+              $value = $rowData[$column.ColumnName]
+              $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+            }
+            [PSCustomObject]$result
+          }
+        }
+      } finally {
+        if ($connection) {
+          $connection.Dispose()
+        }
+      }
+    }
+  }
+}
 #endregion
