@@ -319,7 +319,7 @@ InModuleScope 'Automation.Office' {
         $properties.RemovePersonalInformation | Should -Be $true
         @($properties.PSObject.Properties).Count | Should -Be 1
       }
-      It 'opens a password-protected database' {
+      It 'opens a file protected with Password' {
         $password = Get-Password
         $protectedPath = Get-TempFile
         try {
@@ -365,12 +365,12 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'sets file property by Path and -Name -Value' {
+      It 'sets file property by Path' {
         Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -Path $path
         $properties.RemovePersonalInformation | Should -Be $true
       }
-      It 'sets file property by LiteralPath and -Name -Value' {
+      It 'sets file property by LiteralPath' {
         Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -LiteralPath $path
         $properties.RemovePersonalInformation | Should -Be $true
@@ -400,12 +400,12 @@ InModuleScope 'Automation.Office' {
         $properties = Get-AccessFileProperty -Path $path
         $properties.RemovePersonalInformation | Should -Be $true
       }
-      It 'sets file property with -PassThru' {
+      It 'returns updated file properties when PassThru is specified' {
         $result = Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -PassThru
         $result | Should -Not -BeNullOrEmpty
         $result.RemovePersonalInformation | Should -Be $true
       }
-      It 'updates a password-protected database' {
+      It 'updates a file protected with Password' {
         $password = Get-Password
         $protectedPath = Get-TempFile
         try {
