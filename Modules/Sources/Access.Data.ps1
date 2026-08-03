@@ -299,9 +299,6 @@ function Get-AccessTable {
   .PARAMETER Password
     Specifies the password required to open a protected Access database.
 
-  .PARAMETER IncludeSystem
-    Includes system objects such as MSys* when specified.
-
   .OUTPUTS
     System.Management.Automation.PSCustomObject
   #>
@@ -319,9 +316,7 @@ function Get-AccessTable {
     [string[]]
     $LiteralPath,
     [SecureString]
-    $Password = $null,
-    [switch]
-    $IncludeSystem
+    $Password = $null
   )
   process {
     $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
