@@ -1011,8 +1011,8 @@ public enum XMLSchema
       New-Item -Path $workPath -ItemType Directory -Force | Out-Null
       $file1 = $workPath | Join-Path -ChildPath 'a.hierarchy.xml'
       $file2 = $workPath | Join-Path -ChildPath 'b.hierarchy.xml'
-      Set-Content -LiteralPath $file1 -Value '<Hierarchy id="a" />' -Encoding UTF8
-      Set-Content -LiteralPath $file2 -Value '<Hierarchy id="b" />' -Encoding UTF8
+      '<Hierarchy id="a" />' | Out-File -LiteralPath $file1 -Encoding UTF8
+      '<Hierarchy id="b" />' | Out-File -LiteralPath $file2 -Encoding UTF8
     }
     AfterEach {
       if (Test-Path -LiteralPath $workPath) {
@@ -1117,8 +1117,8 @@ public enum XMLSchema
       New-Item -Path $workPath -ItemType Directory -Force | Out-Null
       $file1 = $workPath | Join-Path -ChildPath 'a.content.xml'
       $file2 = $workPath | Join-Path -ChildPath 'b.content.xml'
-      Set-Content -LiteralPath $file1 -Value '<Page id="a" />' -Encoding UTF8
-      Set-Content -LiteralPath $file2 -Value '<Page id="b" />' -Encoding UTF8
+      '<Page id="a" />' | Out-File -LiteralPath $file1 -Encoding UTF8
+      '<Page id="b" />' | Out-File -LiteralPath $file2 -Encoding UTF8
     }
     AfterEach {
       if (Test-Path -LiteralPath $workPath) {

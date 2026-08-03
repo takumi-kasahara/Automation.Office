@@ -111,7 +111,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws for unsupported extensions' {
         $txtPath = Get-TempFile -Extension '.txt'
-        Set-Content -LiteralPath $txtPath -Encoding UTF8 -Value 'x'
+        New-Item -Path $txtPath -ItemType File -Force | Out-Null
         { Get-AccessTable -LiteralPath $txtPath } | Should -Throw
       }
     }
@@ -181,7 +181,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws for unsupported extensions' {
         $txtPath = Get-TempFile -Extension '.txt'
-        Set-Content -LiteralPath $txtPath -Encoding UTF8 -Value 'x'
+        New-Item -Path $txtPath -ItemType File -Force | Out-Null
         { Get-AccessView -LiteralPath $txtPath } | Should -Throw
       }
     }
