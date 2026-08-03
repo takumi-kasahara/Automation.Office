@@ -35,7 +35,7 @@ InModuleScope 'Automation.Office' {
       param ()
       return $env:TEMP | Join-Path -ChildPath "VBProject.$([guid]::NewGuid().ToString('N')).json"
     }
-    function Get-FixtureWorkbook {
+    function Get-Fixture {
       [CmdletBinding()]
       [OutputType([string])]
       param ()
@@ -82,7 +82,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     $root = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin'
-    $bin = Get-FixtureWorkbook
+    $bin = Get-Fixture
     New-ExcelFile -Path $bin -FileFormat xlOpenXMLWorkbookMacroEnabled -Force
     try {
       Import-ExcelVBProject -Path $bin -Source (Get-FixtureSource)
@@ -97,7 +97,7 @@ InModuleScope 'Automation.Office' {
     if (-not (Test-Path -LiteralPath $componentRoot)) {
       New-Item -Path $componentRoot -ItemType Directory | Out-Null
     }
-    Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination
+    Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination
   }
   Describe 'Export-ExcelVBProject' {
     BeforeAll {
@@ -148,7 +148,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'exports VBProject by FilePath as JSON' {
-        $item = Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination
+        $item = Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should -Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
@@ -156,7 +156,7 @@ InModuleScope 'Automation.Office' {
         @($exported.References).Count | Should -BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipeline' {
-        $item = (Get-FixtureWorkbook) | Export-ExcelVBProject -Destination $destination
+        $item = (Get-Fixture) | Export-ExcelVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should -Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
@@ -164,7 +164,7 @@ InModuleScope 'Automation.Office' {
         @($exported.References).Count | Should -BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipelineByPropertyName' {
-        $item = [PSCustomObject]@{ Path = (Get-FixtureWorkbook) } | Export-ExcelVBProject -Destination $destination
+        $item = [PSCustomObject]@{ Path = (Get-Fixture) } | Export-ExcelVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should -Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
@@ -174,7 +174,7 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject components to the specified ComponentRoot' {
         $customRoot = $env:TEMP | Join-Path -ChildPath "VBComponents.$([guid]::NewGuid().ToString('N'))"
         try {
-          $item = Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -ComponentRoot $customRoot
+          $item = Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -ComponentRoot $customRoot
           $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
           $item.FullName | Should -Be ([Path]::GetFullPath($destination))
           Test-Path -LiteralPath $customRoot -PathType Container | Should -BeTrue
@@ -190,20 +190,20 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not create outputs when WhatIf is specified' {
-        Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -WhatIf
+        Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -WhatIf
         Test-Path -LiteralPath $destination -PathType Leaf | Should -BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path (Get-FixtureWorkbook) -Destination $destination
+        $exitCode = 'N' | Invoke-Confirm -Path (Get-Fixture) -Destination $destination
         $exitCode | Should -Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should -BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
         (New-Item -Path $destination -ItemType File).IsReadOnly = $true
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination } | Should -Throw
-        Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -Confirm
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination } | Should -Throw
+        Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -Confirm
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should -BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
       }
@@ -211,26 +211,26 @@ InModuleScope 'Automation.Office' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         $vba = New-Item -Path ($componentRoot | Join-Path -ChildPath 'ThisWorkbook.vba') -ItemType File
         $vba.IsReadOnly = $true
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination } | Should -Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should -BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
-        Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -Confirm
+        Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -Confirm
         $vba.IsReadOnly | Should -BeTrue
         Test-Path -LiteralPath $destination -PathType Leaf | Should -BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
       }
       It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
         New-Item -Path $destination -ItemType File | Out-Null
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -NoClobber } | Should -Throw
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should -Throw
         (Get-Item -LiteralPath $destination).Length | Should -Be 0
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
       }
       It 'throws and keeps the existing component content unchanged when NoClobber is specified' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         New-Item -Path ($componentRoot | Join-Path -ChildPath 'ThisWorkbook.vba') -ItemType File | Out-Null
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -NoClobber } | Should -Throw
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should -Throw
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'ThisWorkbook.vba') -PathType Leaf | Should -BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeTrue
       }
@@ -253,19 +253,19 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when the destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force } | Should -Throw
         Test-Path -LiteralPath $destination -PathType Container | Should -BeTrue
       }
       It 'throws when the destination path already exists as a directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -NoClobber } | Should -Throw
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should -Throw
         Test-Path -LiteralPath $destination -PathType Container | Should -BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should -BeFalse
       }
       It 'throws when the component directory path already exists as a file' {
         New-Item -Path $componentRoot -ItemType File | Out-Null
-        { Export-ExcelVBProject -Path (Get-FixtureWorkbook) -Destination $destination -Force } | Should -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -Force } | Should -Throw
         Test-Path -LiteralPath $componentRoot -PathType Leaf | Should -BeTrue
         Test-Path -LiteralPath $destination | Should -BeFalse
       }
