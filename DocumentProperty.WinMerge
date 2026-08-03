@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <paths>
-    <left>Modules\Sources\Excel.DocumentProperty.psm1</left>
-    <middle>Modules\Sources\PowerPoint.DocumentProperty.psm1</middle>
-    <right>Modules\Sources\Word.DocumentProperty.psm1</right>
+    <left>Modules\Sources\Excel.DocumentProperty.ps1</left>
+    <middle>Modules\Sources\PowerPoint.DocumentProperty.ps1</middle>
+    <right>Modules\Sources\Word.DocumentProperty.ps1</right>
     <filter>*.*</filter>
     <subfolders>1</subfolders>
     <left-readonly>0</left-readonly>

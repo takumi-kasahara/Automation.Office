@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <paths>
-    <left>Modules\Sources\Excel.VBProject.psm1</left>
-    <middle>Modules\Sources\PowerPoint.VBProject.psm1</middle>
-    <right>Modules\Sources\Word.VBProject.psm1</right>
+    <left>Modules\Sources\Excel.VBProject.ps1</left>
+    <middle>Modules\Sources\PowerPoint.VBProject.ps1</middle>
+    <right>Modules\Sources\Word.VBProject.ps1</right>
     <filter>*.*</filter>
     <subfolders>1</subfolders>
     <left-readonly>0</left-readonly>
