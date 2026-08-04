@@ -215,11 +215,10 @@ function Get-AccessView {
         $schema = Get-DbViewSchema -Connection $connection
         foreach ($row in $schema) {
           $name = [string]$row['TABLE_NAME']
-          $type = [string]$row['TABLE_TYPE']
           [PSCustomObject]@{
             Path = $item.FullName
             Name = $name
-            Type = $type
+            Type = 'VIEW'
           }
         }
       } finally {
@@ -313,13 +312,17 @@ function Get-AccessViewColumn {
     }
   }
 }
-function Get-AccessData {
+function Invoke-AccessSql {
   <#
   .SYNOPSIS
-    Gets rows from Access tables or views.
+    Executes a SQL statement against Access database files and returns rows or affected-row metadata.
 
   .DESCRIPTION
-    Opens one or more Access database files (.accdb, .mdb) through OLE DB and returns rows from the specified table or view.
+    Opens one or more Access database files (.accdb, .mdb) through OLE DB and executes the specified SQL statement.
+
+    For `SELECT` statements, rows are returned as PSCustomObject with Path, ObjectType, ObjectName, and column properties.
+
+    For `INSERT`, `UPDATE`, and `DELETE` statements, a single PSCustomObject with Path, ObjectType, ObjectName, and RecordsAffected is returned.
 
     This cmdlet does not use COM objects.
 
@@ -341,12 +344,17 @@ function Get-AccessData {
     When omitted, all columns are returned.
 
   .PARAMETER Query
-    Specifies a SELECT statement to execute against the database.
-
-    Only SELECT statements are allowed. Data modification statements such as INSERT, UPDATE, DELETE, and DDL statements are rejected.
+    Specifies a SQL statement to execute against the database. `SELECT`, `INSERT`, `UPDATE`, and `DELETE` are supported.
 
   .PARAMETER Password
     Specifies the password required to open a protected Access database.
+
+  .NOTES
+    SQL syntax is based on the Microsoft Access SQL dialect. For a complete SQL reference, see:
+    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
+
+    For connection string details, see:
+    https://www.connectionstrings.com/access/
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
@@ -446,16 +454,25 @@ function Get-AccessData {
           if (-not ($dataTable -is [DataTable])) {
             throw [InvalidOperationException]::new("Invalid query result type: $($dataTable.GetType().FullName)")
           }
-          foreach ($rowData in $dataTable.Rows) {
-            $result = [ordered]@{}
-            $result.Path = $item.FullName
-            $result.ObjectType = $target.ObjectType
-            $result.ObjectName = $target.Name
-            foreach ($column in $dataTable.Columns) {
-              $value = $rowData[$column.ColumnName]
-              $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+          if ($target.ObjectType -eq 'Query' -and $queryOutput.PSObject.Properties.Name -contains 'RecordsAffected' -and $dataTable.Rows.Count -eq 0) {
+            [PSCustomObject]@{
+              Path            = $item.FullName
+              ObjectType      = $target.ObjectType
+              ObjectName      = $target.Name
+              RecordsAffected = $queryOutput.RecordsAffected
             }
-            [PSCustomObject]$result
+          } else {
+            foreach ($rowData in $dataTable.Rows) {
+              $result = [ordered]@{}
+              $result.Path = $item.FullName
+              $result.ObjectType = $target.ObjectType
+              $result.ObjectName = $target.Name
+              foreach ($column in $dataTable.Columns) {
+                $value = $rowData[$column.ColumnName]
+                $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+              }
+              [PSCustomObject]$result
+            }
           }
         }
       } finally {

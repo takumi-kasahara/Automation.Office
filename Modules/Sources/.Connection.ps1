@@ -76,7 +76,6 @@ function Get-OleDbConnectionString {
   if ($extension -notin '.accdb', '.mdb', '.xlsx', '.xls', '.xlsm', '.xlsb') {
     throw [ArgumentException]::new("Unsupported extension: $extension. Supported extensions are .accdb, .mdb, .xlsx, .xls, .xlsm, .xlsb.", 'Path')
   }
-
   $availableProviders = [HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
   $elements = [OleDbEnumerator]::new().GetElements()
   foreach ($row in $elements.Rows) {
@@ -180,6 +179,7 @@ function Open-DbConnection {
     $connection = [OleDbConnection]::new([string]$connectionString)
     try {
       $connection.Open()
+      $PSCmdlet.WriteVerbose("Opened OLE DB connection using provider: $($connection.Provider)")
       return [IDbConnection]$connection
     } catch {
       $messages += $_.Exception.Message
@@ -192,6 +192,7 @@ function Open-DbConnection {
     $connection = [OdbcConnection]::new($connectionString)
     try {
       $connection.Open()
+      $PSCmdlet.WriteVerbose("Opened ODBC connection using driver: $($connection.Driver)")
       return [IDbConnection]$connection
     } catch {
       $messages += $_.Exception.Message
@@ -266,6 +267,20 @@ function Invoke-Query {
     [string]
     $Query
   )
+  $normalizedQuery = $Query.TrimStart()
+  $isDml = $normalizedQuery -imatch '^\s*(INSERT|UPDATE|DELETE)\b'
+  if ($isDml) {
+    $command = $Connection.CreateCommand()
+    try {
+      $command.CommandText = $Query
+      $recordsAffected = $command.ExecuteNonQuery()
+      return [PSCustomObject]@{ Table = [DataTable]::new(); RecordsAffected = $recordsAffected }
+    } finally {
+      if ($command) {
+        $command.Dispose()
+      }
+    }
+  }
   $dataTable = [DataTable]::new()
   if ($Connection -is [OleDbConnection]) {
     $adapter = [OleDbDataAdapter]::new($Query, $Connection)
@@ -276,7 +291,7 @@ function Invoke-Query {
         $adapter.Dispose()
       }
     }
-    return [PSCustomObject]@{ Table = $dataTable }
+    return [PSCustomObject]@{ Table = $dataTable; RecordsAffected = $dataTable.Rows.Count }
   }
   if ($Connection -is [OdbcConnection]) {
     $adapter = [OdbcDataAdapter]::new($Query, $Connection)
@@ -287,7 +302,7 @@ function Invoke-Query {
         $adapter.Dispose()
       }
     }
-    return [PSCustomObject]@{ Table = $dataTable }
+    return [PSCustomObject]@{ Table = $dataTable; RecordsAffected = $dataTable.Rows.Count }
   }
   throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
 }

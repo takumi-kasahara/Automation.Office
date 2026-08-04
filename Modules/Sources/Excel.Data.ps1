@@ -166,13 +166,19 @@ function Get-ExcelTableColumn {
     }
   }
 }
-function Get-ExcelData {
+function Invoke-ExcelSql {
   <#
   .SYNOPSIS
-    Gets rows from Excel tables.
+    Executes a SQL statement against Excel workbook files and returns rows or affected-row metadata.
 
   .DESCRIPTION
-    Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and returns rows from the specified table.
+    Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and executes the specified SQL statement.
+
+    For `SELECT` statements, rows are returned as PSCustomObject with Path, ObjectType, ObjectName, and column properties.
+
+    For `INSERT` and `UPDATE` statements, a single PSCustomObject with Path, ObjectType, ObjectName, and RecordsAffected is returned.
+
+    `DELETE` statements are not supported by the Excel OLE DB provider.
 
     This cmdlet does not use COM objects.
 
@@ -188,9 +194,8 @@ function Get-ExcelData {
   .PARAMETER Address
     Specifies one or more cell ranges to query within the corresponding table.
 
-    Use A1-style notation such as A1:B10. The range is appended to the table name
-    in the form [Sheet1$A1:B10]. This parameter must have the same number of
-    elements as -Table.
+    Use A1-style notation such as A1:B10. The range is appended to the table name in the form [Sheet1$A1:B10].
+    This parameter must have the same number of elements as -Table.
 
     Reference: [Import from Excel or Export to Excel with SQL Server Integration Services (SSIS)](https://learn.microsoft.com/en-us/sql/integration-services/load-data-to-from-excel-with-ssis?view=sql-server-ver17)
 
@@ -200,29 +205,46 @@ function Get-ExcelData {
     When omitted, all columns are returned.
 
   .PARAMETER Query
-    Specifies a SELECT statement to execute against the database.
+    Specifies a SQL statement to execute against the database.
 
-    Only SELECT statements are allowed. Data modification statements such as INSERT, UPDATE, DELETE, and DDL statements are rejected.
+    `SELECT`, `INSERT`, and `UPDATE` are supported.
+
+    `DELETE` is not supported by the Excel OLE DB provider.
 
   .PARAMETER NoHeader
     Specifies that the first row of the Excel range does not contain column names.
 
-    When this switch is specified, the OLE DB connection uses `HDR=NO` instead of
-    the default `HDR=YES`. Column names appear as F1, F2, F3, and so on.
+    When this switch is specified, the OLE DB connection uses `HDR=NO` instead of the default `HDR=YES`.
+    Column names appear as F1, F2, F3, and so on.
 
     Reference: [Initializing the Microsoft Excel driver](https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/initializing-the-microsoft-excel-driver)
 
   .PARAMETER NoIMEX
     Disables IMEX mode for the OLE DB connection.
 
-    When this switch is specified, the OLE DB connection uses `IMEX=0` instead of
-    the default `IMEX=1`. With IMEX disabled, the driver may return null for cells
-    whose data type does not match the guessed column type.
+    When this switch is specified, the OLE DB connection uses `IMEX=0` instead of the default `IMEX=1`.
+    With IMEX disabled, the driver may return null for cells whose data type does not match the guessed column type.
+
+    DML statements automatically use `IMEX=0` because the Excel provider requires an updateable connection.
 
   .PARAMETER ReadOnly
     Opens the connection in read-only mode.
 
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
+
+    This switch is ignored when executing DML statements.
+
+  .NOTES
+    SQL syntax is based on the Jet/ACE SQL dialect used by the Microsoft Access database engine. For a complete SQL reference, see:
+    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
+
+    Excel does not support `DELETE` statements. `UPDATE` requires an updateable connection (`IMEX=0`).
+
+    DDL statements (`CREATE TABLE`, `DROP TABLE`, `ALTER TABLE`) are not supported.
+    To create or delete tables, use the Excel COM object or the OpenXML SDK.
+
+    For connection string details, see:
+    https://www.connectionstrings.com/excel/
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
@@ -314,7 +336,12 @@ function Get-ExcelData {
       }
     }
     foreach ($item in $items) {
-      $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX:$NoIMEX -ReadOnly:$ReadOnly
+      $isDml = $targets | Where-Object { $_.ObjectType -eq 'Query' -and $_.Name -imatch '^\s*(INSERT|UPDATE|DELETE)\b' }
+      if ($isDml) {
+        $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX
+      } else {
+        $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX:$NoIMEX -ReadOnly:$ReadOnly
+      }
       try {
         foreach ($target in $targets) {
           $sql = if ($target.ObjectType -eq 'Query') {
@@ -337,16 +364,25 @@ function Get-ExcelData {
           if (-not ($dataTable -is [DataTable])) {
             throw [InvalidOperationException]::new("Invalid query result type: $($dataTable.GetType().FullName)")
           }
-          foreach ($rowData in $dataTable.Rows) {
-            $result = [ordered]@{}
-            $result.Path = $item.FullName
-            $result.ObjectType = $target.ObjectType
-            $result.ObjectName = $target.Name
-            foreach ($column in $dataTable.Columns) {
-              $value = $rowData[$column.ColumnName]
-              $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+          if ($target.ObjectType -eq 'Query' -and $queryOutput.PSObject.Properties.Name -contains 'RecordsAffected' -and $dataTable.Rows.Count -eq 0) {
+            [PSCustomObject]@{
+              Path            = $item.FullName
+              ObjectType      = $target.ObjectType
+              ObjectName      = $target.Name
+              RecordsAffected = $queryOutput.RecordsAffected
             }
-            [PSCustomObject]$result
+          } else {
+            foreach ($rowData in $dataTable.Rows) {
+              $result = [ordered]@{}
+              $result.Path = $item.FullName
+              $result.ObjectType = $target.ObjectType
+              $result.ObjectName = $target.Name
+              foreach ($column in $dataTable.Columns) {
+                $value = $rowData[$column.ColumnName]
+                $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+              }
+              [PSCustomObject]$result
+            }
           }
         }
       } finally {

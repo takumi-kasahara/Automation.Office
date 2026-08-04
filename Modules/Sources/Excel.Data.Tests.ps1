@@ -98,7 +98,8 @@ InModuleScope 'Automation.Office' {
         $table = Get-ExcelTable -LiteralPath $xlsxPath | Where-Object -Property Name -EQ 'Employees$' | Select-Object -First 1
         $table | Should -Not -BeNullOrEmpty
         $table.Path | Should -Be $xlsxPath
-        $table.Type | Should -Not -BeNullOrEmpty
+        $table.Type | Should -Be 'TABLE'
+        $table.Name | Should -Be 'Employees$'
       }
     }
     Context 'Other parameters' {
@@ -201,7 +202,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-ExcelData' {
+  Describe 'Invoke-ExcelSql' {
     BeforeEach {
       $xlsxPath = Get-TempFile -Extension '.xlsx'
       $xlsmPath = Get-TempFile -Extension '.xlsm'
@@ -217,7 +218,7 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'gets rows by Path' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -Path $xlsxPath -Table 'Employees$'
+        $rows = Invoke-ExcelSql -Path $xlsxPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
         $rows[0].ObjectName | Should -Be 'Employees$'
@@ -226,23 +227,23 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets rows by LiteralPath' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$'
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
       }
       It 'gets rows by ValueFromPipeline' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = $xlsxPath | Get-ExcelData -Table 'Employees$'
+        $rows = $xlsxPath | Invoke-ExcelSql -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows by ValueFromPipelineByPropertyName' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelData -Table 'Employees$'
+        $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Invoke-ExcelSql -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows with selected columns' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Columns Id, Name
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -Columns Id, Name
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
@@ -250,16 +251,48 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets rows by Query' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
         $rows | Should -HaveCount 1
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
       }
     }
+    Context 'Input' {
+      It 'inserts rows and returns affected count' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $result = Invoke-ExcelSql -LiteralPath $xlsxPath -Query "INSERT INTO [Employees$] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
+        $result | Should -Not -BeNullOrEmpty
+        $result.Path | Should -Be $xlsxPath
+        $result.ObjectType | Should -Be 'Query'
+        $result.RecordsAffected | Should -Be 1
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Query 'SELECT * FROM [Employees$] WHERE [Id] = 3'
+        $rows | Should -HaveCount 1
+        $rows[0].Name | Should -Be 'Carol'
+        $rows[0].Department | Should -Be 'Marketing'
+      }
+      It 'updates rows and returns affected count' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $result = Invoke-ExcelSql -LiteralPath $xlsxPath -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
+        $result | Should -Not -BeNullOrEmpty
+        $result.RecordsAffected | Should -Be 1
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Query 'SELECT * FROM [Employees$] WHERE [Id] = 1'
+        $rows | Should -HaveCount 1
+        $rows[0].Department | Should -Be 'Marketing'
+      }
+      It 'throws when executing DELETE' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        { Invoke-ExcelSql -LiteralPath $xlsxPath -Query 'DELETE FROM [Employees$] WHERE [Id] = 1' } | Should -Throw
+      }
+      It 'returns zero affected count when no rows match' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $result = Invoke-ExcelSql -LiteralPath $xlsxPath -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 999"
+        $result.RecordsAffected | Should -Be 0
+      }
+    }
     Context 'Output' {
       It 'returns row metadata and column values for table data' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        $row = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.Path | Should -Be $xlsxPath
         $row.ObjectName | Should -Be 'Employees$'
@@ -270,12 +303,12 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
-        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Employees$'
+        $rows = Invoke-ExcelSql -LiteralPath $xlsmPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows with address range' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:C2'
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:C2'
         $rows | Should -HaveCount 1
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
@@ -283,7 +316,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets rows with address range and selected columns' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:B3' -Columns Id, Name
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:B3' -Columns Id, Name
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
@@ -291,11 +324,11 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when address count does not match table count' {
         Initialize-ExcelFixture -Path $xlsxPath
-        { Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$', 'Other$' -Address 'A1:C2' } | Should -Throw
+        { Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$', 'Other$' -Address 'A1:C2' } | Should -Throw
       }
       It 'gets rows with NoHeader' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader
         $rows | Should -HaveCount 3
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'F1'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'F2'
@@ -303,37 +336,37 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets rows with NoIMEX' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoIMEX
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -NoIMEX
         $rows | Should -HaveCount 2
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
       }
       It 'gets rows with NoHeader and NoIMEX' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader -NoIMEX
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader -NoIMEX
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'F1'
       }
       It 'gets rows with ReadOnly' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -ReadOnly
+        $rows = Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'Employees$' -ReadOnly
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
       }
     }
     Context 'Edge cases' {
       It 'throws when Query is used with Columns' {
-        { Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
+        { Invoke-ExcelSql -LiteralPath $xlsxPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
       }
       It 'throws for missing table' {
         Initialize-ExcelFixture -Path $xlsxPath
-        { Get-ExcelData -LiteralPath $xlsxPath -Table 'NotExists' } | Should -Throw
+        { Invoke-ExcelSql -LiteralPath $xlsxPath -Table 'NotExists' } | Should -Throw
       }
       It 'throws when protected with PasswordToOpen' {
         $password = Get-Password
         $path = Get-TempFile -Extension '.xlsx'
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelData -LiteralPath $path -Table 'Employees$' } | Should -Throw
+        { Invoke-ExcelSql -LiteralPath $path -Table 'Employees$' } | Should -Throw
       }
     }
   }
