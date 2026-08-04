@@ -406,20 +406,20 @@ InModuleScope 'Automation.Office' {
         Remove-Item -LiteralPath $path -Force
       }
     }
-    Context 'Failure propagation' {
-      It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith {
-          throw 'failed to create PowerPoint object'
-        }
-        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should -Throw 'failed to create PowerPoint object'
-      }
-    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
 
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -WhatIf } | Should -Not -Throw
         Assert-MockCalled -CommandName New-PowerPointObject -Times 0 -Exactly
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-PowerPointObject fails' {
+        Mock -CommandName New-PowerPointObject -MockWith {
+          throw 'failed to create PowerPoint object'
+        }
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should -Throw 'failed to create PowerPoint object'
       }
     }
   }

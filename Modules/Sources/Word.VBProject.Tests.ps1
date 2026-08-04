@@ -406,19 +406,19 @@ InModuleScope 'Automation.Office' {
         Remove-Item -LiteralPath $path -Force
       }
     }
-    Context 'Failure propagation' {
-      It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'failed to create Word object' }
-
-        { Import-WordVBProject -Path $path -Source $source } | Should -Throw 'failed to create Word object'
-      }
-    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
         Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
 
         { Import-WordVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
         Assert-MockCalled -CommandName New-WordObject -Times 0 -Exactly
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-WordObject fails' {
+        Mock -CommandName New-WordObject -MockWith { throw 'failed to create Word object' }
+
+        { Import-WordVBProject -Path $path -Source $source } | Should -Throw 'failed to create Word object'
       }
     }
   }

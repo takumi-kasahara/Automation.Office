@@ -56,7 +56,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'New-OneNoteSection' {
@@ -89,7 +89,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'New-OneNoteSectionGroup' {
@@ -122,7 +122,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'New-OneNotePage' {
@@ -151,7 +151,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Get-OneNoteHierarchy' {
@@ -181,7 +181,7 @@ InModuleScope 'Automation.Office' {
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Get-OneNoteHierarchy.Unit' {
@@ -245,7 +245,7 @@ public enum XMLSchema
         $app.Calls[0].HierarchyScope.ToString() | Should -Be 'hsPages'
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Get-OneNotePageContent' {
@@ -270,7 +270,7 @@ public enum XMLSchema
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Get-OneNotePageContent.Unit' {
@@ -334,7 +334,7 @@ public enum XMLSchema
         [int]$app.Calls[0].PageInfo | Should -Be ([int][Microsoft.Office.Interop.OneNote.PageInfo]::piAll)
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Export-OneNoteHierarchy' {
@@ -392,7 +392,7 @@ public enum XMLSchema
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Export-OneNoteHierarchy.Unit' {
@@ -460,7 +460,7 @@ public enum XMLSchema
         Test-Path -LiteralPath $outputPath | Should -BeFalse
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
       It 'throws with NoClobber when output file already exists' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith {
           Get-OneNoteHierarchyExportXml
@@ -537,7 +537,7 @@ public enum XMLSchema
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Export-OneNotePageContent.Unit' {
@@ -605,7 +605,7 @@ public enum XMLSchema
         Test-Path -LiteralPath $outputPath | Should -BeFalse
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
       It 'throws with NoClobber when output file already exists' {
         Mock -CommandName Get-OneNotePageContent -MockWith {
           Get-OneNotePageContentExportXml
@@ -682,7 +682,7 @@ public enum XMLSchema
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Export-OneNotePageAsDocument.Unit' {
@@ -748,7 +748,7 @@ public enum XMLSchema
         $result | Should -BeNullOrEmpty
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
       It 'throws when resolved output path already exists as a directory' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith {
           Get-OneNoteHierarchyXml
@@ -803,7 +803,7 @@ public enum XMLSchema
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Export-OneNoteBinaryObject.Unit' {
@@ -894,7 +894,7 @@ public enum XMLSchema
         $result | Should -BeNullOrEmpty
       }
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
       It 'throws when Destination is an existing file' {
         Mock -CommandName Get-OneNotePageContent -MockWith {
           Get-OneNotePageContentXml
@@ -984,7 +984,7 @@ public enum XMLSchema
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Import-OneNoteHierarchy.Unit' {
@@ -1045,7 +1045,7 @@ public enum XMLSchema
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Import-OneNotePageContent' {
@@ -1088,7 +1088,7 @@ public enum XMLSchema
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
   Describe 'Import-OneNotePageContent.Unit' {
@@ -1151,7 +1151,7 @@ public enum XMLSchema
     }
     Context 'Other parameters' {
     }
-    Context 'Edge case' {
+    Context 'Edge cases' {
     }
   }
 }

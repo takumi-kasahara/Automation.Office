@@ -383,10 +383,6 @@ InModuleScope 'Automation.Office' {
         Remove-Item -LiteralPath $path -Force
       }
     }
-    It 'returns file properties' {
-      New-ExcelFile -Path $path
-      { Get-ExcelFileProperty -Path $path | Out-Host } | Should -Not -Throw
-    }
     Context 'ParameterSetName' {
       It 'returns selected file properties by Path' {
         New-ExcelFile -Path $path

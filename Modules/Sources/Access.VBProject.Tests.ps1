@@ -286,33 +286,6 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Import-AccessVBProject.Unit' {
-    BeforeEach {
-      $path = Get-TempFile
-      $source = Get-FixtureSource
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
-    }
-    Context 'Failure propagation' {
-      It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith {
-          throw 'failed to create Access object'
-        }
-        { Import-AccessVBProject -Path $path -Source $source } | Should -Throw 'failed to create Access object'
-      }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
-
-        { Import-AccessVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
-        Assert-MockCalled -CommandName New-AccessObject -Times 0 -Exactly
-      }
-    }
-  }
   Describe 'Import-AccessVBProject' {
     BeforeAll {
       function Invoke-Confirm {
@@ -408,6 +381,33 @@ InModuleScope 'Automation.Office' {
         New-AccessFile -Path $path -RemovePersonalInformation
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
         { Import-AccessVBProject -Path $path -Source $source } | Should -Throw
+      }
+    }
+  }
+  Describe 'Import-AccessVBProject.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      $source = Get-FixtureSource
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not call New-AccessObject when WhatIf is specified' {
+        Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
+
+        { Import-AccessVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
+        Assert-MockCalled -CommandName New-AccessObject -Times 0 -Exactly
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-AccessObject fails' {
+        Mock -CommandName New-AccessObject -MockWith {
+          throw 'failed to create Access object'
+        }
+        { Import-AccessVBProject -Path $path -Source $source } | Should -Throw 'failed to create Access object'
       }
     }
   }

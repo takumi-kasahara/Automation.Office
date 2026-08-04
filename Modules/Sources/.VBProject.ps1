@@ -6,6 +6,7 @@ using namespace System.Text
 using namespace System.Runtime.InteropServices
 
 # https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop?view=office-pia
+Add-Type -AssemblyName Microsoft.Office.Interop.Access
 Add-Type -AssemblyName Microsoft.Vbe.Interop
 Set-StrictMode -Version Latest
 
@@ -52,8 +53,7 @@ function Get-VBProjectReference {
         }
       }
     )
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -82,8 +82,7 @@ function Import-VBProjectReference {
         try {
           $VBProject.References.Remove($_)
           "Removed:`t$description" | Out-Host
-        }
-        catch [COMException] {
+        } catch [COMException] {
           Write-Warning -Message $_.Exception.Message
         }
       }
@@ -101,13 +100,11 @@ function Import-VBProjectReference {
       try {
         $VBProject.References.AddFromGuid($_.Guid, [int]$_.Major, [int]$_.Minor) | Write-Verbose
         "Imported:`t$description" | Out-Host
-      }
-      catch [COMException] {
+      } catch [COMException] {
         Write-Warning -Message $_.Exception.Message
       }
     }
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -169,8 +166,7 @@ function Get-AccessObject {
     return $objects |
     Where-Object -Property Type -NE ([AcObjectType]::acModule) |
     Where-Object { -not ($_.Type -eq [AcObjectType]::acTable -and $_.Name -like 'MSys*') <# system tables #> }
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -233,8 +229,7 @@ function Export-VBProjectComponent {
             , $_.Name             # ObjectName
             , "$path"             # FileName
           )
-        }
-        finally {
+        } finally {
           if ($isReadOnly -and $Force) {
             (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
           }
@@ -274,12 +269,10 @@ function Export-VBProjectComponent {
             $contents += [Environment]::NewLine
           }
           [File]::WriteAllText($path, $contents, [UTF8Encoding]::new($false))
-        }
-        else {
+        } else {
           $_.Export($path)
         }
-      }
-      finally {
+      } finally {
         if ($isReadOnly -and $Force) {
           (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
         }
@@ -293,8 +286,7 @@ function Export-VBProjectComponent {
       "Exported:`t$($_.Name)`t$([vbext_ComponentType]$_.Type)" | Out-Host
     }
     return $exported
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -340,8 +332,7 @@ function Import-VBProjectComponent {
       ForEach-Object {
         $componentPath = if ($_.Path -is [array]) {
           [string]$_.Path[0]
-        }
-        else {
+        } else {
           [string]$_.Path
         }
         $path = Join-Path -Path $root -ChildPath $componentPath
@@ -377,8 +368,7 @@ function Import-VBProjectComponent {
             , "$importPath"       # FileName
           )
           "Imported:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
-        }
-        finally {
+        } finally {
           if ($null -ne $tempDir -and (Test-Path -LiteralPath $tempDir -PathType Container)) {
             Remove-Item -LiteralPath $tempDir -Recurse -Force -WhatIf:$false -Confirm:$false
           }
@@ -398,8 +388,7 @@ function Import-VBProjectComponent {
     ForEach-Object {
       $componentPath = if ($_.Path -is [array]) {
         [string]$_.Path[0]
-      }
-      else {
+      } else {
         [string]$_.Path
       }
       $path = Join-Path -Path $root -ChildPath $componentPath
@@ -440,15 +429,13 @@ function Import-VBProjectComponent {
             # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.save
             $Application.DoCmd.Save([AcObjectType]::acModule, $component.Name)
           }
-        }
-        else {
+        } else {
           $component = $VBProject.VBComponents.Item($_.Name)
           $codeModule = $component.CodeModule
           $codeModule.DeleteLines(1, $codeModule.CountOfLines)
           $codeModule.AddFromFile($importPath)
         }
-      }
-      finally {
+      } finally {
         if ($null -ne $tempDir -and (Test-Path -LiteralPath $tempDir -PathType Container)) {
           Remove-Item -LiteralPath $tempDir -Recurse -Force -WhatIf:$false -Confirm:$false
         }
@@ -457,8 +444,7 @@ function Import-VBProjectComponent {
     if ($component) {
       "Imported:`t$($component.Name)`t$([vbext_ComponentType]$component.Type)" | Out-Host
     }
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -504,8 +490,7 @@ function Export-VBProject {
       }
       $destinationName = [Path]::GetFileNameWithoutExtension($resolvedDestination)
       $destinationDirectory | Join-Path -ChildPath $destinationName
-    }
-    else {
+    } else {
       [Path]::GetFullPath($ComponentRoot)
     }
 
@@ -532,11 +517,11 @@ function Export-VBProject {
       VBComponents = @($components)
       References   = @($references)
     }
-    $metadata | ConvertTo-Json |
+    $metadata |
+    ConvertTo-Json |
     Out-File -LiteralPath $resolvedDestination -Encoding utf8 -Force:$Force
     return Get-Item -LiteralPath $resolvedDestination -Force
-  }
-  finally {
+  } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -582,8 +567,7 @@ function Import-VBProject {
     Import-VBProjectReference -VBProject $VBProject -References @($metadata.References)
     Write-Progress -Activity $activity -Status 'Importing components'
     Import-VBProjectComponent -Application $Application -VBProject $VBProject -Components $components -ComponentRoot $sourceDirectory
-  }
-  finally {
+  } finally {
     if ($dialogSuppressor) {
       Stop-VBProjectDialogSuppressor -Job $dialogSuppressor
     }
@@ -675,8 +659,7 @@ function Stop-VBProjectDialogSuppressor {
   try {
     New-Item -Path $stopFilePath -ItemType File -Force -WhatIf:$false -Confirm:$false | Out-Null
     Receive-Job -Job $Job -Wait -AutoRemoveJob
-  }
-  finally {
+  } finally {
     if (Test-Path -LiteralPath $stopFilePath) {
       Remove-Item -LiteralPath $stopFilePath -Force -WhatIf:$false -Confirm:$false
     }
