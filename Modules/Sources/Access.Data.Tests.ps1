@@ -337,7 +337,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Invoke-AccessSql' {
+  Describe 'Invoke-AccessQuery' {
     BeforeEach {
       $accdbPath = Get-TempFile -Extension '.accdb'
       $mdbPath = Get-TempFile -Extension '.mdb'
@@ -354,27 +354,27 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'gets table data by Path' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = Invoke-AccessSql -Path $accdbPath -Table Employees
+        $rows = Invoke-AccessQuery -Path $accdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets table data by LiteralPath' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Table Employees
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets table data by ValueFromPipeline' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = $accdbPath | Invoke-AccessSql -Table Employees
+        $rows = $accdbPath | Invoke-AccessQuery -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets table data by ValueFromPipelineByPropertyName' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = [PSCustomObject]@{ PSPath = $accdbPath } | Invoke-AccessSql -Table Employees
+        $rows = [PSCustomObject]@{ PSPath = $accdbPath } | Invoke-AccessQuery -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets data with selected columns' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Table Employees -Columns Id, Name
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees -Columns Id, Name
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
@@ -382,14 +382,14 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets view data with selected columns' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -View vwSalesEmployees -Columns Id, Name
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -View vwSalesEmployees -Columns Id, Name
         $rows | Should -HaveCount 1
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
       }
       It 'gets data by Query' {
         Initialize-AccessFixture -Path $accdbPath
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT [Id], [Name] FROM Employees WHERE [Id] = 1'
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT [Id], [Name] FROM Employees WHERE [Id] = 1'
         $rows | Should -HaveCount 1
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
@@ -398,44 +398,44 @@ InModuleScope 'Automation.Office' {
     Context 'Input' {
       It 'inserts rows and returns affected count' {
         Initialize-AccessFixture -Path $accdbPath
-        $result = Invoke-AccessSql -LiteralPath $accdbPath -Query "INSERT INTO [Employees] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
+        $result = Invoke-AccessQuery -LiteralPath $accdbPath -Query "INSERT INTO [Employees] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
         $result | Should -Not -BeNullOrEmpty
         $result.Path | Should -Be $accdbPath
         $result.ObjectType | Should -Be 'Query'
         $result.ObjectName | Should -Be "INSERT INTO [Employees] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
         $result.RecordsAffected | Should -Be 1
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees] WHERE [Id] = 3'
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees] WHERE [Id] = 3'
         $rows | Should -HaveCount 1
         $rows[0].Name | Should -Be 'Carol'
         $rows[0].Department | Should -Be 'Marketing'
       }
       It 'updates rows and returns affected count' {
         Initialize-AccessFixture -Path $accdbPath
-        $result = Invoke-AccessSql -LiteralPath $accdbPath -Query "UPDATE [Employees] SET [Department] = 'Marketing' WHERE [Id] = 1"
+        $result = Invoke-AccessQuery -LiteralPath $accdbPath -Query "UPDATE [Employees] SET [Department] = 'Marketing' WHERE [Id] = 1"
         $result | Should -Not -BeNullOrEmpty
         $result.RecordsAffected | Should -Be 1
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees] WHERE [Id] = 1'
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees] WHERE [Id] = 1'
         $rows | Should -HaveCount 1
         $rows[0].Department | Should -Be 'Marketing'
       }
       It 'deletes rows and returns affected count' {
         Initialize-AccessFixture -Path $accdbPath
-        $result = Invoke-AccessSql -LiteralPath $accdbPath -Query 'DELETE FROM [Employees] WHERE [Id] = 2'
+        $result = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'DELETE FROM [Employees] WHERE [Id] = 2'
         $result | Should -Not -BeNullOrEmpty
         $result.RecordsAffected | Should -Be 1
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees]'
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT * FROM [Employees]'
         $rows | Should -HaveCount 1
       }
       It 'returns zero affected count when no rows match' {
         Initialize-AccessFixture -Path $accdbPath
-        $result = Invoke-AccessSql -LiteralPath $accdbPath -Query 'DELETE FROM [Employees] WHERE [Id] = 999'
+        $result = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'DELETE FROM [Employees] WHERE [Id] = 999'
         $result.RecordsAffected | Should -Be 0
       }
     }
     Context 'Output' {
       It 'returns row metadata and column values for table data' {
         Initialize-AccessFixture -Path $accdbPath
-        $row = Invoke-AccessSql -LiteralPath $accdbPath -Table Employees | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        $row = Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees | Where-Object -Property Id -EQ 1 | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.Path | Should -Be $accdbPath
         $row.ObjectType | Should -Be 'Table'
@@ -445,7 +445,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'returns row metadata and column values for view data' {
         Initialize-AccessFixture -Path $accdbPath
-        $row = Invoke-AccessSql -LiteralPath $accdbPath -View vwSalesEmployees | Select-Object -First 1
+        $row = Invoke-AccessQuery -LiteralPath $accdbPath -View vwSalesEmployees | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.ObjectType | Should -Be 'View'
         $row.ObjectName | Should -Be 'vwSalesEmployees'
@@ -455,39 +455,39 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
-        $rows = Invoke-AccessSql -LiteralPath $mdbPath -Table Employees
+        $rows = Invoke-AccessQuery -LiteralPath $mdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
       It 'gets table data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Table Employees -Password $password
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees -Password $password
         $rows | Should -HaveCount 2
       }
       It 'gets view data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -View vwSalesEmployees -Password $password
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -View vwSalesEmployees -Password $password
         $rows | Should -HaveCount 1
       }
       It 'gets query data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
-        $rows = Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT * FROM Employees WHERE [Id] = 1' -Password $password
+        $rows = Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT * FROM Employees WHERE [Id] = 1' -Password $password
         $rows | Should -HaveCount 1
       }
       It 'throws when password is incorrect' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
-        { Invoke-AccessSql -LiteralPath $accdbPath -Table Employees } | Should -Throw
-        { Invoke-AccessSql -LiteralPath $accdbPath -Table Employees -Password (Get-Password) } | Should -Throw
+        { Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees } | Should -Throw
+        { Invoke-AccessQuery -LiteralPath $accdbPath -Table Employees -Password (Get-Password) } | Should -Throw
       }
     }
     Context 'Edge cases' {
       It 'throws when Query is used with Columns' {
-        { Invoke-AccessSql -LiteralPath $accdbPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
+        { Invoke-AccessQuery -LiteralPath $accdbPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
       }
       It 'throws for missing table' {
-        { Invoke-AccessSql -LiteralPath $accdbPath -Table NotExists } | Should -Throw
+        { Invoke-AccessQuery -LiteralPath $accdbPath -Table NotExists } | Should -Throw
       }
       It 'throws for missing view' {
-        { Invoke-AccessSql -LiteralPath $accdbPath -View NotExists } | Should -Throw
+        { Invoke-AccessQuery -LiteralPath $accdbPath -View NotExists } | Should -Throw
       }
     }
   }

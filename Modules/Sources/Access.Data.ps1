@@ -312,7 +312,7 @@ function Get-AccessViewColumn {
     }
   }
 }
-function Invoke-AccessSql {
+function Invoke-AccessQuery {
   <#
   .SYNOPSIS
     Executes a SQL statement against Access database files and returns rows or affected-row metadata.

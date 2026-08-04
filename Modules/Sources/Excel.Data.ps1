@@ -166,7 +166,7 @@ function Get-ExcelTableColumn {
     }
   }
 }
-function Invoke-ExcelSql {
+function Invoke-ExcelQuery {
   <#
   .SYNOPSIS
     Executes a SQL statement against Excel workbook files and returns rows or affected-row metadata.
