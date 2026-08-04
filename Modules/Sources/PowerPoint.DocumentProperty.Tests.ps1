@@ -6,7 +6,7 @@ using namespace System.Security
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'
+$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
 Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
@@ -177,7 +177,7 @@ InModuleScope 'Automation.Office' {
           $Value
         )
         process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'))
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $escapedName = $Name.Replace("'", "''")
@@ -376,7 +376,7 @@ InModuleScope 'Automation.Office' {
           $Path
         )
         process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psm1'))
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $command = @(
