@@ -263,6 +263,27 @@ InModuleScope 'Automation.Office' {
         Initialize-ExcelFixture -Path $xlsxPath
         { Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$', 'Other$' -Address 'A1:C2' } | Should -Throw
       }
+      It 'gets rows with NoHeader' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader
+        $rows | Should -HaveCount 3
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'F1'
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'F2'
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'F3'
+      }
+      It 'gets rows with NoIMEX' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoIMEX
+        $rows | Should -HaveCount 2
+        $rows[0].Id | Should -Be 1
+        $rows[0].Name | Should -Be 'Alice'
+      }
+      It 'gets rows with NoHeader and NoIMEX' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader -NoIMEX
+        $rows | Should -HaveCount 2
+        @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'F1'
+      }
     }
     Context 'Output' {
       It 'returns row metadata and column values for table data' {

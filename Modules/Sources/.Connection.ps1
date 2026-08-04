@@ -62,7 +62,11 @@ function Get-OleDbConnectionString {
     [string]
     $Path,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $NoHeader,
+    [switch]
+    $NoIMEX
   )
   $resolved = (Resolve-Path -LiteralPath $Path).Path
   $extension = [Path]::GetExtension($resolved)
@@ -138,13 +142,14 @@ function Get-OleDbConnectionString {
         $builder['Jet OLEDB:Database Password'] = $passwordString
       }
     } elseif ($extension -in '.xlsx', '.xls', '.xlsm', '.xlsb') {
-      # https://learn.microsoft.com/en-us/power-automate/desktop-flows/how-to/sql-queries-excel
       # https://learn.microsoft.com/en-us/sql/integration-services/connection-manager/excel-connection-manager?view=sql-server-ver17
+      $HDR = if ($NoHeader) { 'NO' } else { 'YES' }
+      $IMEX = if ($NoIMEX) { '0' } else { '1' }
       $builder['Extended Properties'] = switch -Exact -CaseSensitive ($extension) {
-        '.xlsx' { 'Excel 12.0 Xml;HDR=YES;IMEX=1' }
-        '.xlsm' { 'Excel 12.0 Macro;HDR=YES;IMEX=1' }
-        '.xlsb' { 'Excel 12.0 Binary;HDR=YES;IMEX=1' }
-        '.xls' { 'Excel 8.0;HDR=YES;IMEX=1' }
+        '.xlsx' { "Excel 12.0 Xml;HDR=$HDR;IMEX=$IMEX" }
+        '.xlsm' { "Excel 12.0 Macro;HDR=$HDR;IMEX=$IMEX" }
+        '.xlsb' { "Excel 12.0 Binary;HDR=$HDR;IMEX=$IMEX" }
+        '.xls' { "Excel 8.0;HDR=$HDR;IMEX=$IMEX" }
       }
     }
     return $builder.ConnectionString
@@ -159,10 +164,14 @@ function Open-DbConnection {
     [string]
     $Path,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $NoHeader,
+    [switch]
+    $NoIMEX
   )
   $messages = @()
-  foreach ($connectionString in (Get-OleDbConnectionString -Path $Path -Password $Password)) {
+  foreach ($connectionString in (Get-OleDbConnectionString -Path $Path -Password $Password -NoHeader:$NoHeader -NoIMEX:$NoIMEX)) {
     $connection = [OleDbConnection]::new([string]$connectionString)
     try {
       $connection.Open()

@@ -185,6 +185,21 @@ function Get-ExcelData {
 
     When omitted, all columns are returned.
 
+  .PARAMETER NoHeader
+    Specifies that the first row of the Excel range does not contain column names.
+
+    When this switch is specified, the OLE DB connection uses `HDR=NO` instead of
+    the default `HDR=YES`. Column names appear as F1, F2, F3, and so on.
+
+    Reference: [Initializing the Microsoft Excel driver](https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/initializing-the-microsoft-excel-driver)
+
+  .PARAMETER NoIMEX
+    Disables IMEX mode for the OLE DB connection.
+
+    When this switch is specified, the OLE DB connection uses `IMEX=0` instead of
+    the default `IMEX=1`. With IMEX disabled, the driver may return null for cells
+    whose data type does not match the guessed column type.
+
   .PARAMETER Query
     Specifies a SELECT statement to execute against the database.
 
@@ -221,6 +236,18 @@ function Get-ExcelData {
     [ValidateCount(1, [int]::MaxValue)]
     [string[]]
     $Columns,
+    [Parameter(ParameterSetName = 'TablePathSet')]
+    [Parameter(ParameterSetName = 'TableLiteralPathSet')]
+    [Parameter(ParameterSetName = 'QueryPathSet')]
+    [Parameter(ParameterSetName = 'QueryLiteralPathSet')]
+    [switch]
+    $NoHeader,
+    [Parameter(ParameterSetName = 'TablePathSet')]
+    [Parameter(ParameterSetName = 'TableLiteralPathSet')]
+    [Parameter(ParameterSetName = 'QueryPathSet')]
+    [Parameter(ParameterSetName = 'QueryLiteralPathSet')]
+    [switch]
+    $NoIMEX,
     [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 1)]
     [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', Position = 1)]
     [ValidateNotNullOrEmpty()]
@@ -263,7 +290,7 @@ function Get-ExcelData {
       }
     }
     foreach ($item in $items) {
-      $connection = Open-DbConnection -Path $item.FullName
+      $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX:$NoIMEX
       try {
         foreach ($target in $targets) {
           $sql = if ($target.ObjectType -eq 'Query') {
