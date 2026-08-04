@@ -240,8 +240,6 @@ InModuleScope 'Automation.Office' {
         $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelData -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
-    }
-    Context 'Other parameters' {
       It 'gets rows with selected columns' {
         Initialize-ExcelFixture -Path $xlsxPath
         $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Columns Id, Name
@@ -256,6 +254,24 @@ InModuleScope 'Automation.Office' {
         $rows | Should -HaveCount 1
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
+      }
+    }
+    Context 'Output' {
+      It 'returns row metadata and column values for table data' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        $row | Should -Not -BeNullOrEmpty
+        $row.Path | Should -Be $xlsxPath
+        $row.ObjectName | Should -Be 'Employees$'
+        $row.Name | Should -Be 'Alice'
+        $row.Department | Should -Be 'Sales'
+      }
+    }
+    Context 'Other parameters' {
+      It 'works with xlsm files' {
+        Initialize-ExcelFixture -Path $xlsmPath
+        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Employees$'
+        $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows with address range' {
         Initialize-ExcelFixture -Path $xlsxPath
@@ -297,24 +313,6 @@ InModuleScope 'Automation.Office' {
         $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -NoHeader -NoIMEX
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'F1'
-      }
-    }
-    Context 'Output' {
-      It 'returns row metadata and column values for table data' {
-        Initialize-ExcelFixture -Path $xlsxPath
-        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
-        $row | Should -Not -BeNullOrEmpty
-        $row.Path | Should -Be $xlsxPath
-        $row.ObjectName | Should -Be 'Employees$'
-        $row.Name | Should -Be 'Alice'
-        $row.Department | Should -Be 'Sales'
-      }
-    }
-    Context 'Other parameters' {
-      It 'works with xlsm files' {
-        Initialize-ExcelFixture -Path $xlsmPath
-        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Employees$'
-        $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows with ReadOnly' {
         Initialize-ExcelFixture -Path $xlsxPath

@@ -370,8 +370,6 @@ InModuleScope 'Automation.Office' {
         $rows = [PSCustomObject]@{ PSPath = $accdbPath } | Get-AccessData -Table Employees
         $rows | Should -HaveCount 2
       }
-    }
-    Context 'Other parameters' {
       It 'gets data with selected columns' {
         Initialize-AccessFixture -Path $accdbPath
         $rows = Get-AccessData -LiteralPath $accdbPath -Table Employees -Columns Id, Name
