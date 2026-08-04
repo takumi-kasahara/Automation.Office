@@ -54,7 +54,7 @@ function Get-ExcelTable {
     foreach ($item in $items) {
       $connection = Open-DbConnection -Path $item.FullName -Password $Password
       try {
-        $schema = Get-ExcelTableSchema -Connection $connection
+        $schema = Get-DbTableSchema -Connection $connection
         foreach ($row in $schema) {
           $name = [string]$row['TABLE_NAME']
           $type = [string]$row['TABLE_TYPE']
@@ -171,6 +171,15 @@ function Get-ExcelData {
   .PARAMETER Table
     Specifies one or more table names to query.
 
+  .PARAMETER Address
+    Specifies one or more cell ranges to query within the corresponding table.
+
+    Use A1-style notation such as A1:B10. The range is appended to the table name
+    in the form [Sheet1$A1:B10]. This parameter must have the same number of
+    elements as -Table.
+
+    Reference: [Import from Excel or Export to Excel with SQL Server Integration Services (SSIS)](https://learn.microsoft.com/en-us/sql/integration-services/load-data-to-from-excel-with-ssis?view=sql-server-ver17)
+
   .PARAMETER Columns
     Specifies the columns to return when querying tables by name.
 
@@ -206,6 +215,11 @@ function Get-ExcelData {
     [Parameter(ParameterSetName = 'TableLiteralPathSet')]
     [ValidateCount(1, [int]::MaxValue)]
     [string[]]
+    $Address,
+    [Parameter(ParameterSetName = 'TablePathSet')]
+    [Parameter(ParameterSetName = 'TableLiteralPathSet')]
+    [ValidateCount(1, [int]::MaxValue)]
+    [string[]]
     $Columns,
     [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 1)]
     [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', Position = 1)]
@@ -224,9 +238,16 @@ function Get-ExcelData {
     }
     $targets = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
       { $_ -in 'TablePathSet', 'TableLiteralPathSet' } {
-        $Table | ForEach-Object {
+        if ($Address -and $Address.Count -ne $Table.Count) {
+          throw [ArgumentException]::new('The number of elements in -Address must match the number of elements in -Table.', 'Address')
+        }
+        for ($i = 0; $i -lt $Table.Count; $i++) {
+          $name = $Table[$i]
+          if ($Address) {
+            $name = "$name$($Address[$i])"
+          }
           [PSCustomObject]@{
-            Name       = $_
+            Name       = $name
             ObjectType = 'Table'
           }
         }
@@ -248,7 +269,11 @@ function Get-ExcelData {
           $sql = if ($target.ObjectType -eq 'Query') {
             $target.Name
           } else {
-            $escapedName = ConvertTo-SqlIdentifier -Name $target.Name
+            $escapedName = if ($target.Name -match '\$[A-Za-z]+\d+(:[A-Za-z]+\d+)?$') {
+              $target.Name -replace '([\]\\])', '$1$1' -replace '^(.+)$', '[$1]'
+            } else {
+              ConvertTo-SqlIdentifier -Name $target.Name
+            }
             $selectList = if ($Columns) {
               ($Columns | ForEach-Object { ConvertTo-SqlIdentifier -Name $_ }) -join ', '
             } else {

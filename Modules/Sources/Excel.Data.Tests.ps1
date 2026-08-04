@@ -206,7 +206,7 @@ InModuleScope 'Automation.Office' {
         $rows = Get-ExcelData -Path $xlsxPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
-        $rows[0].TableName | Should -Be 'Employees$'
+        $rows[0].ObjectName | Should -Be 'Employees$'
         $rows[0].Name | Should -Be 'Alice'
         $rows[0].Department | Should -Be 'Sales'
       }
@@ -243,6 +243,26 @@ InModuleScope 'Automation.Office' {
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
       }
+      It 'gets rows with address range' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:C2'
+        $rows | Should -HaveCount 1
+        $rows[0].Id | Should -Be 1
+        $rows[0].Name | Should -Be 'Alice'
+        $rows[0].Department | Should -Be 'Sales'
+      }
+      It 'gets rows with address range and selected columns' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Address 'A1:B3' -Columns Id, Name
+        $rows | Should -HaveCount 2
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
+        @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
+        @($rows[0].PSObject.Properties.Name) | Should -Not -Contain 'Department'
+      }
+      It 'throws when address count does not match table count' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        { Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$', 'Other$' -Address 'A1:C2' } | Should -Throw
+      }
     }
     Context 'Output' {
       It 'returns row metadata and column values for table data' {
@@ -250,7 +270,7 @@ InModuleScope 'Automation.Office' {
         $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.Path | Should -Be $xlsxPath
-        $row.TableName | Should -Be 'Employees$'
+        $row.ObjectName | Should -Be 'Employees$'
         $row.Name | Should -Be 'Alice'
         $row.Department | Should -Be 'Sales'
       }
