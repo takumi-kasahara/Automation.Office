@@ -307,9 +307,6 @@ function Get-ExcelData {
         }
       }
       { $_ -in 'QueryPathSet', 'QueryLiteralPathSet' } {
-        if (-not (Test-SelectQuery -Query $Query)) {
-          throw [ArgumentException]::new('Only SELECT statements are allowed for -Query. Use a SELECT statement that returns rows.', 'Query')
-        }
         [PSCustomObject]@{
           Name       = $Query.TrimStart()
           ObjectType = 'Query'

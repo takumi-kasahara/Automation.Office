@@ -291,14 +291,3 @@ function Invoke-Query {
   }
   throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
 }
-function Test-SelectQuery {
-  [CmdletBinding()]
-  [OutputType([bool])]
-  param (
-    [Parameter(Mandatory)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $Query
-  )
-  return $Query.TrimStart() -match '^(?i)SELECT\b'
-}

@@ -443,9 +443,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when Query is not a SELECT statement' {
-        { Get-AccessData -LiteralPath $accdbPath -Query 'DELETE FROM Employees' } | Should -Throw
-      }
       It 'throws when Query is used with Columns' {
         { Get-AccessData -LiteralPath $accdbPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
       }
