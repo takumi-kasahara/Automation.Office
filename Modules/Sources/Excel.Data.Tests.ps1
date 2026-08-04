@@ -302,6 +302,12 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
+      It 'throws when Query is not a SELECT statement' {
+        { Get-ExcelData -LiteralPath $xlsxPath -Query 'DELETE FROM Employees' } | Should -Throw
+      }
+      It 'throws when Query is used with Columns' {
+        { Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT * FROM Employees' -Columns Id } | Should -Throw
+      }
       It 'throws for missing table' {
         Initialize-ExcelFixture -Path $xlsxPath
         { Get-ExcelData -LiteralPath $xlsxPath -Table 'NotExists' } | Should -Throw

@@ -343,8 +343,7 @@ function Get-AccessData {
   .PARAMETER Query
     Specifies a SELECT statement to execute against the database.
 
-    Only SELECT statements are allowed. Data modification statements such as INSERT, UPDATE,
-    DELETE, and DDL statements are rejected.
+    Only SELECT statements are allowed. Data modification statements such as INSERT, UPDATE, DELETE, and DDL statements are rejected.
 
   .PARAMETER Password
     Specifies the password required to open a protected Access database.

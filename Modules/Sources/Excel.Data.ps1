@@ -185,6 +185,11 @@ function Get-ExcelData {
 
     When omitted, all columns are returned.
 
+  .PARAMETER Query
+    Specifies a SELECT statement to execute against the database.
+
+    Only SELECT statements are allowed. Data modification statements such as INSERT, UPDATE, DELETE, and DDL statements are rejected.
+
   .PARAMETER NoHeader
     Specifies that the first row of the Excel range does not contain column names.
 
@@ -199,9 +204,6 @@ function Get-ExcelData {
     When this switch is specified, the OLE DB connection uses `IMEX=0` instead of
     the default `IMEX=1`. With IMEX disabled, the driver may return null for cells
     whose data type does not match the guessed column type.
-
-  .PARAMETER Query
-    Specifies a SELECT statement to execute against the database.
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
@@ -236,6 +238,11 @@ function Get-ExcelData {
     [ValidateCount(1, [int]::MaxValue)]
     [string[]]
     $Columns,
+    [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 1)]
+    [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', Position = 1)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Query,
     [Parameter(ParameterSetName = 'TablePathSet')]
     [Parameter(ParameterSetName = 'TableLiteralPathSet')]
     [Parameter(ParameterSetName = 'QueryPathSet')]
@@ -247,12 +254,7 @@ function Get-ExcelData {
     [Parameter(ParameterSetName = 'QueryPathSet')]
     [Parameter(ParameterSetName = 'QueryLiteralPathSet')]
     [switch]
-    $NoIMEX,
-    [Parameter(Mandatory, ParameterSetName = 'QueryPathSet', Position = 1)]
-    [Parameter(Mandatory, ParameterSetName = 'QueryLiteralPathSet', Position = 1)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $Query
+    $NoIMEX
   )
   process {
     $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
