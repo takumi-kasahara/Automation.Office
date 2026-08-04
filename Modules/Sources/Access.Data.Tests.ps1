@@ -87,13 +87,13 @@ InModuleScope 'Automation.Office' {
         $table.Path | Should -Be $accdbPath
         $table.Type | Should -Not -BeNullOrEmpty
       }
+    }
+    Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
         $tables = Get-AccessTable -LiteralPath $mdbPath
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
       }
-    }
-    Context 'Other parameters' {
       It 'gets tables from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $tables = Get-AccessTable -LiteralPath $accdbPath -Password $password
@@ -166,13 +166,13 @@ InModuleScope 'Automation.Office' {
         $id.Ordinal | Should -BeOfType [int]
         $name.DataType | Should -Not -BeNullOrEmpty
       }
+    }
+    Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
         $columns = Get-AccessTableColumn -LiteralPath $mdbPath -Table Employees
         $columns | Should -Not -BeNullOrEmpty
       }
-    }
-    Context 'Other parameters' {
       It 'gets table columns from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $columns = Get-AccessTableColumn -LiteralPath $accdbPath -Table Employees -Password $password
@@ -235,13 +235,13 @@ InModuleScope 'Automation.Office' {
         $view.Path | Should -Be $accdbPath
         $view.Type | Should -Match 'VIEW'
       }
+    }
+    Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
         $views = Get-AccessView -LiteralPath $mdbPath
         ($views | Where-Object -Property Name -EQ 'vwSalesEmployees') | Should -Not -BeNullOrEmpty
       }
-    }
-    Context 'Other parameters' {
       It 'gets views from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $views = Get-AccessView -LiteralPath $accdbPath -Password $password
@@ -310,13 +310,13 @@ InModuleScope 'Automation.Office' {
         $id.ObjectName | Should -Be 'vwSalesEmployees'
         $id.Ordinal | Should -BeOfType [int]
       }
+    }
+    Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
         $columns = Get-AccessViewColumn -LiteralPath $mdbPath -View vwSalesEmployees
         $columns | Should -Not -BeNullOrEmpty
       }
-    }
-    Context 'Other parameters' {
       It 'gets view columns from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $columns = Get-AccessViewColumn -LiteralPath $accdbPath -View vwSalesEmployees -Password $password
@@ -414,13 +414,13 @@ InModuleScope 'Automation.Office' {
         $row.ObjectName | Should -Be 'vwSalesEmployees'
         $row.Name | Should -Be 'Alice'
       }
+    }
+    Context 'Other parameters' {
       It 'works with mdb files' {
         Initialize-AccessFixture -Path $mdbPath
         $rows = Get-AccessData -LiteralPath $mdbPath -Table Employees
         $rows | Should -HaveCount 2
       }
-    }
-    Context 'Other parameters' {
       It 'gets table data from database protected with Password' {
         Initialize-AccessFixture -Path $accdbPath -Password $password
         $rows = Get-AccessData -LiteralPath $accdbPath -Table Employees -Password $password

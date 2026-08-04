@@ -100,9 +100,16 @@ InModuleScope 'Automation.Office' {
         $table.Path | Should -Be $xlsxPath
         $table.Type | Should -Not -BeNullOrEmpty
       }
+    }
+    Context 'Other parameters' {
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
         $tables = Get-ExcelTable -LiteralPath $xlsmPath
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
+      }
+      It 'gets tables with ReadOnly' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $tables = Get-ExcelTable -LiteralPath $xlsxPath -ReadOnly
         ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
     }
@@ -170,9 +177,16 @@ InModuleScope 'Automation.Office' {
         $id.Ordinal | Should -BeOfType [int]
         $name.DataType | Should -Not -BeNullOrEmpty
       }
+    }
+    Context 'Other parameters' {
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
         $columns = Get-ExcelTableColumn -LiteralPath $xlsmPath -Table Employees$
+        $columns | Should -Not -BeNullOrEmpty
+      }
+      It 'gets table columns with ReadOnly' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $columns = Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Employees$ -ReadOnly
         $columns | Should -Not -BeNullOrEmpty
       }
     }
@@ -295,10 +309,18 @@ InModuleScope 'Automation.Office' {
         $row.Name | Should -Be 'Alice'
         $row.Department | Should -Be 'Sales'
       }
+    }
+    Context 'Other parameters' {
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
         $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
+      }
+      It 'gets rows with ReadOnly' {
+        Initialize-ExcelFixture -Path $xlsxPath
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -ReadOnly
+        $rows | Should -Not -BeNullOrEmpty
+        $rows[0].Path | Should -Be $xlsxPath
       }
     }
     Context 'Edge cases' {

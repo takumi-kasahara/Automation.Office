@@ -28,7 +28,9 @@ function Get-OdbcConnectionString {
     [string]
     $Path,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $ReadOnly
   )
   $resolved = (Resolve-Path -LiteralPath $Path).Path
 
@@ -39,16 +41,17 @@ function Get-OdbcConnectionString {
     $driver = [string]$_
     $builder = [OdbcConnectionStringBuilder]::new()
     $builder.Driver = $driver
+    $builder['Dbq'] = $resolved
     if ($extension -in '.accdb', '.mdb') {
       # https://learn.microsoft.com/en-us/sql/odbc/microsoft/sqldriverconnect-access-driver?view=sql-server-ver17
-      $builder['DBQ'] = $resolved
-      $builder['UID'] = 'Admin'
       if ($Password) {
         $passwordString = [NetworkCredential]::new([string]::Empty, $Password).Password
-        $builder['PWD'] = $passwordString
+        $builder['Pwd'] = $passwordString
       }
     } elseif ($extension -in '.xlsx', '.xls', '.xlsm', '.xlsb') {
-      $builder['DBQ'] = $resolved
+      if ($ReadOnly) {
+        $builder['ReadOnly'] = 1
+      }
     }
     return $builder.ConnectionString
   }
@@ -168,7 +171,9 @@ function Open-DbConnection {
     [switch]
     $NoHeader,
     [switch]
-    $NoIMEX
+    $NoIMEX,
+    [switch]
+    $ReadOnly
   )
   $messages = @()
   foreach ($connectionString in (Get-OleDbConnectionString -Path $Path -Password $Password -NoHeader:$NoHeader -NoIMEX:$NoIMEX)) {
@@ -183,7 +188,7 @@ function Open-DbConnection {
       }
     }
   }
-  foreach ($connectionString in (Get-OdbcConnectionString -Path $Path -Password $Password)) {
+  foreach ($connectionString in (Get-OdbcConnectionString -Path $Path -Password $Password -ReadOnly:$ReadOnly)) {
     $connection = [OdbcConnection]::new($connectionString)
     try {
       $connection.Open()

@@ -23,6 +23,11 @@ function Get-ExcelTable {
   .PARAMETER LiteralPath
     Specifies Excel workbook file paths literally. Wildcards are not interpreted.
 
+  .PARAMETER ReadOnly
+    Opens the connection in read-only mode.
+
+    When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
+
   .OUTPUTS
     System.Management.Automation.PSCustomObject
   #>
@@ -40,7 +45,9 @@ function Get-ExcelTable {
     [string[]]
     $LiteralPath,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $ReadOnly
   )
   process {
     $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
@@ -52,7 +59,7 @@ function Get-ExcelTable {
       }
     }
     foreach ($item in $items) {
-      $connection = Open-DbConnection -Path $item.FullName -Password $Password
+      $connection = Open-DbConnection -Path $item.FullName -Password $Password -ReadOnly:$ReadOnly
       try {
         $schema = Get-DbTableSchema -Connection $connection
         foreach ($row in $schema) {
@@ -91,6 +98,11 @@ function Get-ExcelTableColumn {
   .PARAMETER Table
     Specifies one or more table names whose column metadata is returned.
 
+  .PARAMETER ReadOnly
+    Opens the connection in read-only mode.
+
+    When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
+
   .OUTPUTS
     System.Management.Automation.PSCustomObject
   #>
@@ -112,7 +124,9 @@ function Get-ExcelTableColumn {
     [string[]]
     $Table,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $ReadOnly
   )
   process {
     $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
@@ -124,7 +138,7 @@ function Get-ExcelTableColumn {
       }
     }
     foreach ($item in $items) {
-      $connection = Open-DbConnection -Path $item.FullName -Password $Password
+      $connection = Open-DbConnection -Path $item.FullName -Password $Password -ReadOnly:$ReadOnly
       try {
         $schema = Get-DbTableSchema -Connection $connection
         $tableNames = $schema | ForEach-Object { [string]$_.TABLE_NAME }
@@ -205,6 +219,11 @@ function Get-ExcelData {
     the default `IMEX=1`. With IMEX disabled, the driver may return null for cells
     whose data type does not match the guessed column type.
 
+  .PARAMETER ReadOnly
+    Opens the connection in read-only mode.
+
+    When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
+
   .OUTPUTS
     System.Management.Automation.PSCustomObject
   #>
@@ -254,7 +273,13 @@ function Get-ExcelData {
     [Parameter(ParameterSetName = 'QueryPathSet')]
     [Parameter(ParameterSetName = 'QueryLiteralPathSet')]
     [switch]
-    $NoIMEX
+    $NoIMEX,
+    [Parameter(ParameterSetName = 'TablePathSet')]
+    [Parameter(ParameterSetName = 'TableLiteralPathSet')]
+    [Parameter(ParameterSetName = 'QueryPathSet')]
+    [Parameter(ParameterSetName = 'QueryLiteralPathSet')]
+    [switch]
+    $ReadOnly
   )
   process {
     $items = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
@@ -292,7 +317,7 @@ function Get-ExcelData {
       }
     }
     foreach ($item in $items) {
-      $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX:$NoIMEX
+      $connection = Open-DbConnection -Path $item.FullName -NoHeader:$NoHeader -NoIMEX:$NoIMEX -ReadOnly:$ReadOnly
       try {
         foreach ($target in $targets) {
           $sql = if ($target.ObjectType -eq 'Query') {
