@@ -8,6 +8,17 @@ using namespace System.Net
 Add-Type -AssemblyName System.Data
 Set-StrictMode -Version Latest
 
+function ConvertTo-SqlIdentifier {
+  [CmdletBinding()]
+  [OutputType([string])]
+  param (
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Name
+  )
+  return "[$($Name.Replace(']', ']]'))]"
+}
 function Get-OdbcConnectionString {
   [CmdletBinding()]
   [OutputType([string[]])]
@@ -177,6 +188,59 @@ function Open-DbConnection {
   }
   throw [InvalidOperationException]::new("Failed to open Access file: $Path. $(($messages | Select-Object -Unique) -join ' | ')")
 }
+function Get-DbTableSchema {
+  [CmdletBinding()]
+  [OutputType([System.Data.DataTable])]
+  param (
+    [Parameter(Mandatory)]
+    [IDbConnection]
+    $Connection
+  )
+  if ($Connection -is [OleDbConnection]) {
+    return [DataTable]$Connection.GetOleDbSchemaTable([OleDbSchemaGuid]::Tables, $null)
+  }
+  if ($Connection -is [OdbcConnection]) {
+    return [DataTable]$Connection.GetSchema('Tables')
+  }
+  throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
+}
+function Get-DbViewSchema {
+  [CmdletBinding()]
+  [OutputType([System.Data.DataTable])]
+  param (
+    [Parameter(Mandatory)]
+    [IDbConnection]
+    $Connection
+  )
+  if ($Connection -is [OleDbConnection]) {
+    return [DataTable]$Connection.GetOleDbSchemaTable([OleDbSchemaGuid]::Views, $null)
+  }
+  if ($Connection -is [OdbcConnection]) {
+    return [DataTable]$Connection.GetSchema('Views')
+  }
+  throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
+}
+function Get-DbColumn {
+  [CmdletBinding()]
+  [OutputType([System.Data.DataColumn[]])]
+  param (
+    [Parameter(Mandatory)]
+    [IDbConnection]
+    $Connection,
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $ObjectName
+  )
+  $escapedName = ConvertTo-SqlIdentifier -Name $ObjectName
+  $sql = "SELECT * FROM $escapedName WHERE 1 = 0"
+  $queryOutput = Invoke-Query -Connection $Connection -Query $sql
+  $dataTable = $queryOutput.Table
+  if (-not ($dataTable -is [DataTable])) {
+    throw [InvalidOperationException]::new("Invalid query result type: $($dataTable.GetType().FullName)")
+  }
+  return $dataTable.Columns
+}
 function Invoke-Query {
   [CmdletBinding()]
   [OutputType([PSCustomObject])]
@@ -212,4 +276,15 @@ function Invoke-Query {
     return [PSCustomObject]@{ Table = $dataTable }
   }
   throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
+}
+function Test-SelectQuery {
+  [CmdletBinding()]
+  [OutputType([bool])]
+  param (
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $Query
+  )
+  return $Query.TrimStart() -match '^(?i)SELECT\b'
 }

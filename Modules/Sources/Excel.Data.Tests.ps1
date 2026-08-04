@@ -44,7 +44,7 @@ InModuleScope 'Automation.Office' {
       New-ExcelFile -Path $Path -FileFormat $fileFormat -PasswordToOpen $PasswordToOpen -Initialize {
         param($Workbook)
         $sheet = $Workbook.Worksheets.Item(1)
-        $sheet.Name = 'Sheet1'
+        $sheet.Name = 'Employees'
         $sheet.Cells.Item(1, 1) = 'Id'
         $sheet.Cells.Item(1, 2) = 'Name'
         $sheet.Cells.Item(1, 3) = 'Department'
@@ -74,28 +74,28 @@ InModuleScope 'Automation.Office' {
       It 'gets tables by Path' {
         Initialize-ExcelFixture -Path $xlsxPath
         $tables = Get-ExcelTable -Path $xlsxPath
-        ($tables | Where-Object -Property Name -EQ 'Sheet1$') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by LiteralPath' {
         Initialize-ExcelFixture -Path $xlsxPath
         $tables = Get-ExcelTable -LiteralPath $xlsxPath
-        ($tables | Where-Object -Property Name -EQ 'Sheet1$') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by ValueFromPipeline' {
         Initialize-ExcelFixture -Path $xlsxPath
         $tables = $xlsxPath | Get-ExcelTable
-        ($tables | Where-Object -Property Name -EQ 'Sheet1$') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
       It 'gets tables by ValueFromPipelineByPropertyName' {
         Initialize-ExcelFixture -Path $xlsxPath
         $tables = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelTable
-        ($tables | Where-Object -Property Name -EQ 'Sheet1$') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected properties' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $table = Get-ExcelTable -LiteralPath $xlsxPath | Where-Object -Property Name -EQ 'Sheet1$' | Select-Object -First 1
+        $table = Get-ExcelTable -LiteralPath $xlsxPath | Where-Object -Property Name -EQ 'Employees$' | Select-Object -First 1
         $table | Should -Not -BeNullOrEmpty
         $table.Path | Should -Be $xlsxPath
         $table.Type | Should -Not -BeNullOrEmpty
@@ -103,7 +103,7 @@ InModuleScope 'Automation.Office' {
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
         $tables = Get-ExcelTable -LiteralPath $xlsmPath
-        ($tables | Where-Object -Property Name -EQ 'Sheet1$') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees$') | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Edge cases' {
@@ -137,42 +137,42 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'gets table columns by Path' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $columns = Get-ExcelTableColumn -Path $xlsxPath -Table Sheet1$
+        $columns = Get-ExcelTableColumn -Path $xlsxPath -Table Employees$
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets table columns by LiteralPath' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $columns = Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Sheet1$
+        $columns = Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Employees$
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets table columns by ValueFromPipeline' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $columns = $xlsxPath | Get-ExcelTableColumn -Table Sheet1$
+        $columns = $xlsxPath | Get-ExcelTableColumn -Table Employees$
         $columns | Should -Not -BeNullOrEmpty
       }
       It 'gets table columns by ValueFromPipelineByPropertyName' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $columns = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelTableColumn -Table Sheet1$
+        $columns = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelTableColumn -Table Employees$
         $columns | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Output' {
       It 'returns expected column metadata' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $columns = Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Sheet1$
+        $columns = Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Employees$
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $id | Should -Not -BeNullOrEmpty
         $name | Should -Not -BeNullOrEmpty
         $id.Path | Should -Be $xlsxPath
         $id.ObjectType | Should -Be 'Table'
-        $id.ObjectName | Should -Be 'Sheet1$'
+        $id.ObjectName | Should -Be 'Employees$'
         $id.Ordinal | Should -BeOfType [int]
         $name.DataType | Should -Not -BeNullOrEmpty
       }
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
-        $columns = Get-ExcelTableColumn -LiteralPath $xlsmPath -Table Sheet1$
+        $columns = Get-ExcelTableColumn -LiteralPath $xlsmPath -Table Employees$
         $columns | Should -Not -BeNullOrEmpty
       }
     }
@@ -183,7 +183,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when protected with PasswordToOpen' {
         Initialize-ExcelFixture -Path $xlsxPath -PasswordToOpen $password
-        { Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Sheet1$ } | Should -Throw
+        { Get-ExcelTableColumn -LiteralPath $xlsxPath -Table Employees$ } | Should -Throw
       }
     }
   }
@@ -203,34 +203,34 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'gets rows by Path' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -Path $xlsxPath -Table 'Sheet1$'
+        $rows = Get-ExcelData -Path $xlsxPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
-        $rows[0].TableName | Should -Be 'Sheet1$'
+        $rows[0].TableName | Should -Be 'Employees$'
         $rows[0].Name | Should -Be 'Alice'
         $rows[0].Department | Should -Be 'Sales'
       }
       It 'gets rows by LiteralPath' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$'
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
         $rows[0].Path | Should -Be $xlsxPath
       }
       It 'gets rows by ValueFromPipeline' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = $xlsxPath | Get-ExcelData -Table 'Sheet1$'
+        $rows = $xlsxPath | Get-ExcelData -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
       It 'gets rows by ValueFromPipelineByPropertyName' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelData -Table 'Sheet1$'
+        $rows = [PSCustomObject]@{ PSPath = $xlsxPath } | Get-ExcelData -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
     }
     Context 'Other parameters' {
       It 'gets rows with selected columns' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$' -Columns Id, Name
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' -Columns Id, Name
         $rows | Should -HaveCount 2
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Id'
         @($rows[0].PSObject.Properties.Name) | Should -Contain 'Name'
@@ -238,25 +238,25 @@ InModuleScope 'Automation.Office' {
       }
       It 'gets rows by Query' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $rows = Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT Id, Name FROM [Sheet1$] WHERE Id = 1'
+        $rows = Get-ExcelData -LiteralPath $xlsxPath -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
         $rows | Should -HaveCount 1
         $rows[0].Id | Should -Be 1
         $rows[0].Name | Should -Be 'Alice'
       }
     }
     Context 'Output' {
-      It 'returns expected row metadata and column values' {
+      It 'returns row metadata and column values for table data' {
         Initialize-ExcelFixture -Path $xlsxPath
-        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Sheet1$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
+        $row = Get-ExcelData -LiteralPath $xlsxPath -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
         $row | Should -Not -BeNullOrEmpty
         $row.Path | Should -Be $xlsxPath
-        $row.TableName | Should -Be 'Sheet1$'
+        $row.TableName | Should -Be 'Employees$'
         $row.Name | Should -Be 'Alice'
         $row.Department | Should -Be 'Sales'
       }
       It 'works with xlsm files' {
         Initialize-ExcelFixture -Path $xlsmPath
-        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Sheet1$'
+        $rows = Get-ExcelData -LiteralPath $xlsmPath -Table 'Employees$'
         $rows | Should -Not -BeNullOrEmpty
       }
     }
@@ -269,7 +269,7 @@ InModuleScope 'Automation.Office' {
         $password = Get-Password
         $path = Get-TempFile -Extension '.xlsx'
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelData -LiteralPath $path -Table 'Sheet1$' } | Should -Throw
+        { Get-ExcelData -LiteralPath $path -Table 'Employees$' } | Should -Throw
       }
     }
   }

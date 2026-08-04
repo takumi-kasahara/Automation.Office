@@ -7,25 +7,6 @@ using namespace System.IO
 Add-Type -AssemblyName System.Data
 Set-StrictMode -Version Latest
 
-#region Private
-function Get-ExcelTableSchema {
-  [CmdletBinding()]
-  [OutputType([System.Data.DataTable])]
-  param (
-    [Parameter(Mandatory)]
-    [IDbConnection]
-    $Connection
-  )
-  if ($Connection -is [OleDbConnection]) {
-    return [DataTable]$Connection.GetOleDbSchemaTable([OleDbSchemaGuid]::Tables, $null)
-  }
-  if ($Connection -is [OdbcConnection]) {
-    return [DataTable]$Connection.GetSchema('Tables')
-  }
-  throw [InvalidOperationException]::new("Unsupported connection type: $($Connection.GetType().FullName)")
-}
-#endregion
-#region Public
 function Get-ExcelTable {
   <#
   .SYNOPSIS
@@ -145,20 +126,21 @@ function Get-ExcelTableColumn {
     foreach ($item in $items) {
       $connection = Open-DbConnection -Path $item.FullName -Password $Password
       try {
-        $schema = Get-ExcelTableSchema -Connection $connection
-        foreach ($row in $schema) {
-          $tableName = $row['TABLE_NAME']
-          if ($Table -contains $tableName) {
-            $columns = Get-AccessDataColumn -Connection $connection -ObjectName $tableName
-            foreach ($column in $columns) {
-              [PSCustomObject]@{
-                Path       = $item.FullName
-                ObjectType = 'Table'
-                ObjectName = $tableName
-                ColumnName = $column.ColumnName
-                Ordinal    = [int]$column.Ordinal
-                DataType   = $column.DataType.FullName
-              }
+        $schema = Get-DbTableSchema -Connection $connection
+        $tableNames = $schema | ForEach-Object { [string]$_.TABLE_NAME }
+        foreach ($tableName in $Table) {
+          if ($tableNames -notcontains $tableName) {
+            throw [ArgumentException]::new("Table not found: $tableName", 'Table')
+          }
+          $columns = Get-DbColumn -Connection $connection -ObjectName $tableName
+          foreach ($column in $columns) {
+            [PSCustomObject]@{
+              Path       = $item.FullName
+              ObjectType = 'Table'
+              ObjectName = $tableName
+              ColumnName = $column.ColumnName
+              Ordinal    = [int]$column.Ordinal
+              DataType   = $column.DataType.FullName
             }
           }
         }
@@ -243,26 +225,36 @@ function Get-ExcelData {
     $targets = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
       { $_ -in 'TablePathSet', 'TableLiteralPathSet' } {
         $Table | ForEach-Object {
-          [PSCustomObject]@{ Name = $_ }
+          [PSCustomObject]@{
+            Name       = $_
+            ObjectType = 'Table'
+          }
         }
       }
       { $_ -in 'QueryPathSet', 'QueryLiteralPathSet' } {
-        [PSCustomObject]@{ Name = $Query.TrimStart() }
+        if (-not (Test-SelectQuery -Query $Query)) {
+          throw [ArgumentException]::new('Only SELECT statements are allowed for -Query. Use a SELECT statement that returns rows.', 'Query')
+        }
+        [PSCustomObject]@{
+          Name       = $Query.TrimStart()
+          ObjectType = 'Query'
+        }
       }
     }
     foreach ($item in $items) {
       $connection = Open-DbConnection -Path $item.FullName
       try {
         foreach ($target in $targets) {
-          $sql = if ($PSCmdlet.ParameterSetName -like 'Query*') {
+          $sql = if ($target.ObjectType -eq 'Query') {
             $target.Name
           } else {
+            $escapedName = ConvertTo-SqlIdentifier -Name $target.Name
             $selectList = if ($Columns) {
-              ($Columns | ForEach-Object { "[$_]" }) -join ', '
+              ($Columns | ForEach-Object { ConvertTo-SqlIdentifier -Name $_ }) -join ', '
             } else {
               '*'
             }
-            "SELECT $selectList FROM [$($target.Name)]"
+            "SELECT $selectList FROM $escapedName"
           }
           $queryOutput = Invoke-Query -Connection $connection -Query $sql
           $dataTable = $queryOutput.Table
@@ -272,7 +264,8 @@ function Get-ExcelData {
           foreach ($rowData in $dataTable.Rows) {
             $result = [ordered]@{}
             $result.Path = $item.FullName
-            $result.TableName = $target.Name
+            $result.ObjectType = $target.ObjectType
+            $result.ObjectName = $target.Name
             foreach ($column in $dataTable.Columns) {
               $value = $rowData[$column.ColumnName]
               $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
@@ -288,4 +281,3 @@ function Get-ExcelData {
     }
   }
 }
-#endregion
