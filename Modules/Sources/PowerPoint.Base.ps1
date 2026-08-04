@@ -6,7 +6,8 @@ using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 #region Private

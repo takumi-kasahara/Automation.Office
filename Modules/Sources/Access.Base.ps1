@@ -4,7 +4,8 @@ using namespace System.IO
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-Add-Type -AssemblyName Microsoft.Office.Interop.Access
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 #region Private

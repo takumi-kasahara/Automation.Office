@@ -1,7 +1,8 @@
-﻿using namespace Microsoft.Office.Interop.Excel
-using namespace System.IO
+﻿using namespace System.IO
 using namespace System.Text
 
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 function Export-ExcelVBProject {
@@ -78,14 +79,12 @@ function Export-ExcelVBProject {
         )
         return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -175,14 +174,12 @@ function Import-ExcelVBProject {
         Import-VBProject -VBProject $file.VBProject -Source $Source -TargetExe 'EXCEL.EXE'
         $file.Save()
       }
-    }
-    finally {
+    } finally {
       try {
         if ($app) {
           $app.Quit()
         }
-      }
-      finally {
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false

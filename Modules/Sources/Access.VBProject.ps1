@@ -1,8 +1,8 @@
-﻿using namespace Microsoft.Office.Interop.Access
-using namespace Microsoft.Vbe.Interop
-using namespace System.IO
+﻿using namespace System.IO
 using namespace System.Text
 
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 function Export-AccessVBProject {

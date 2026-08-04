@@ -1,5 +1,8 @@
 ﻿using namespace Microsoft.Office.Interop.Excel
+using namespace Microsoft.Office.Core
 
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 function Get-ExcelDocumentProperty {

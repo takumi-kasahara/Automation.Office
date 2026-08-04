@@ -1,7 +1,8 @@
-﻿using namespace Microsoft.Office.Interop.PowerPoint
-using namespace System.IO
+﻿using namespace System.IO
 using namespace System.Text
 
+$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
+Import-Module -Name $modulePath
 Set-StrictMode -Version Latest
 
 function Export-PowerPointVBProject {
