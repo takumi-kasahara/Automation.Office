@@ -80,7 +80,13 @@ InModuleScope 'Automation.Office' {
     }
     $root = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin'
     $bin = Get-Fixture
-    New-AccessFile -Path $bin -RemovePersonalInformation -Force
+    New-AccessFile -Path $bin -RemovePersonalInformation -Force -InitializeDb {
+      param($db)
+      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
+      $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
+      $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
+      $db.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
+    }
     try {
       Import-AccessVBProject -Path $bin -Source (Get-FixtureSource)
     } catch {

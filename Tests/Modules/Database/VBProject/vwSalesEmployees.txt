@@ -1,0 +1,6 @@
+dbMemo "SQL" ="SELECT Id, Name\015\012FROM Employees\015\012WHERE Department = 'Sales';\015\012"
+dbMemo "Connect" =""
+dbBoolean "ReturnsRecords" ="-1"
+dbInteger "ODBCTimeout" ="60"
+Begin
+End

@@ -1,9 +1,10 @@
 ﻿using namespace Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access.Dao
 using namespace Microsoft.Vbe.Interop
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
-using namespace System.Text
 using namespace System.Runtime.InteropServices
+using namespace System.Text
 
 # https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop?view=office-pia
 Add-Type -AssemblyName Microsoft.Office.Interop.Access
@@ -224,11 +225,24 @@ function Export-VBProjectComponent {
         try {
           # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-save-as-text
           # stringified FileName to ensure correct type for COM interop.
-          $Application.SaveAsText(
-            [AcObjectType]$_.Type # ObjectType
-            , $_.Name             # ObjectName
-            , "$path"             # FileName
-          )
+          if ([AcObjectType]$_.Type -eq [AcObjectType]::acTable) {
+            # TODO Export table definitions.
+            # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
+            $Application.DoCmd.TransferText(
+              [AcTextTransferType]::acExportDelim # TransferType
+              , [type]::Missing                   # SpecificationName
+              , $_.Name                           # TableName
+              , "$path"                           # FileName
+              , $true                             # HasFieldNames
+            )
+          } else {
+            # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-save-as-text
+            $Application.SaveAsText(
+              [AcObjectType]$_.Type # ObjectType
+              , $_.Name             # ObjectName
+              , "$path"             # FileName
+            )
+          }
         } finally {
           if ($isReadOnly -and $Force) {
             (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
@@ -320,12 +334,6 @@ function Import-VBProjectComponent {
     }
     $components = @($Components)
     if ($Application) {
-      Get-AccessObject -Application $Application |
-      ForEach-Object {
-        Write-Progress -Activity $activity -Status "Removing: $($_.Name) as $([AcObjectType]$_.Type)"
-        $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
-        "Removed:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
-      }
       $components |
       Where-Object -Property Type -NE ([AcObjectType]::acModule) |
       Where-Object -Property Type -NotIn ([Enum]::GetValues([vbext_ComponentType])) |
@@ -362,11 +370,40 @@ function Import-VBProjectComponent {
           Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $componentPath as $([AcObjectType]$_.Type)"
           # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-load-from-text
           # stringified FileName to ensure correct type for COM interop.
-          $Application.LoadFromText(
-            [AcObjectType]$_.Type # ObjectType
-            , $_.Name             # ObjectName
-            , "$importPath"       # FileName
-          )
+          if ([AcObjectType]$_.Type -eq [AcObjectType]::acTable) {
+            # TODO Import table definitions.
+            try {
+              $db = $Application.CurrentDb()
+              # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/database-execute-method-dao
+              $db.Execute("DELETE FROM [$($_.Name)]", [RecordsetOptionEnum]::dbFailOnError)
+              # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
+              $Application.DoCmd.TransferText(
+                [AcTextTransferType]::acImportDelim # TransferType
+                , [type]::Missing                   # SpecificationName
+                , $_.Name                           # TableName
+                , "$importPath"                     # FileName
+                , $true                             # HasFieldNames
+              )
+            } catch [COMException] {
+              Write-Warning -Message $_.Exception.Message
+            } finally {
+              if ($db) {
+                $db.Close()
+              }
+            }
+          } else {
+            try {
+              $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
+              "Removed:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
+            } catch [COMException] {
+              Write-Warning -Message $_.Exception.Message
+            }
+            $Application.LoadFromText(
+              [AcObjectType]$_.Type # ObjectType
+              , $_.Name             # ObjectName
+              , "$importPath"       # FileName
+            )
+          }
           "Imported:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
         } finally {
           if ($null -ne $tempDir -and (Test-Path -LiteralPath $tempDir -PathType Container)) {

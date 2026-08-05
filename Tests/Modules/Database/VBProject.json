@@ -6,6 +6,16 @@
       "Type": "acMacro"
     },
     {
+      "Name": "Employees",
+      "Path": ".\\VBProject\\Employees.txt",
+      "Type": "acTable"
+    },
+    {
+      "Name": "vwSalesEmployees",
+      "Path": ".\\VBProject\\vwSalesEmployees.txt",
+      "Type": "acQuery"
+    },
+    {
       "Name": "Class1",
       "Path": ".\\VBProject\\Class1.cls",
       "Type": "vbext_ct_ClassModule"
