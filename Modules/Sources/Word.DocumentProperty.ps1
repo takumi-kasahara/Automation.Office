@@ -1,7 +1,7 @@
-﻿using namespace Microsoft.Office.Interop.Word
+﻿using module .\DocumentProperty.psm1
 using namespace Microsoft.Office.Core
+using namespace Microsoft.Office.Interop.Word
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1')
 Set-StrictMode -Version Latest
 
 function Get-WordDocumentProperty {

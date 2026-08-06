@@ -1,4 +1,5 @@
 ﻿using assembly Microsoft.Office.Interop.Excel
+using module .\Base.psm1
 using namespace Microsoft.Office.Interop.Excel
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
@@ -6,7 +7,6 @@ using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private

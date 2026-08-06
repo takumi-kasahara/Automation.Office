@@ -1,7 +1,7 @@
-﻿using namespace System.IO
+﻿using module .\VBProject.psm1
+using namespace System.IO
 using namespace System.Text
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1')
 Set-StrictMode -Version Latest
 
 function Export-WordVBProject {

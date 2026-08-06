@@ -1,11 +1,11 @@
-﻿using namespace System.Data
+﻿using module .\Data.psm1
+using namespace System.Data
 using namespace System.Data.Odbc
 using namespace System.Data.OleDb
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Net
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Data.psm1')
 Set-StrictMode -Version Latest
 
 function Get-AccessTable {

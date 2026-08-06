@@ -1,4 +1,5 @@
-﻿using namespace System.IO
+﻿using module .\Modules\Automation.Office.psd1
+using namespace System.IO
 using namespace System.Xml
 
 [CmdletBinding()]

@@ -1,4 +1,6 @@
-﻿[CmdletBinding()]
+﻿using module .\Modules\Automation.Office.psd1
+
+[CmdletBinding()]
 param (
   [switch]
   $Release
@@ -6,7 +8,7 @@ param (
 if ($PSEdition -ne 'Desktop') {
   return
 }
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Modules\Automation.Office.psd1') -Force
+
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

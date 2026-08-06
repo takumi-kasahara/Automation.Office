@@ -1,4 +1,5 @@
 ﻿using assembly Microsoft.Office.Interop.PowerPoint
+using module .\Base.psm1
 using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Diagnostics.CodeAnalysis
@@ -7,7 +8,6 @@ using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private

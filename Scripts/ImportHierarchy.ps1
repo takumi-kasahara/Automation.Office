@@ -1,9 +1,9 @@
-﻿using namespace System.IO
+﻿using module .\Modules\Automation.Office.psd1
+using namespace System.IO
 
 [CmdletBinding()]
 param ()
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Modules\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

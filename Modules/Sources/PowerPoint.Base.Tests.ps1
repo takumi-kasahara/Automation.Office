@@ -1,5 +1,6 @@
 ﻿using assembly Microsoft.Office.Interop.PowerPoint
 using assembly System.Web
+using module .\..\Automation.Office.psd1
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
@@ -9,7 +10,6 @@ using namespace System.Management.Automation
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
