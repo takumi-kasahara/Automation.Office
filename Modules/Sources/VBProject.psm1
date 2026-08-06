@@ -204,6 +204,13 @@ function Export-VBProjectComponent {
     }
     $exported = [VBComponentInfo[]]@()
     if ($Application) {
+      $tableDefinition = $resolved | Join-Path -ChildPath 'TableDefs.accdb'
+      New-AccessFile -Path $tableDefinition -RemovePersonalInformation -Force | Out-Null
+      $exported += [VBComponentInfo]@{
+        Name = 'TableDefs'
+        Path = [PathCompatibility]::GetRelativePath($resolved, $tableDefinition)
+        type = [AcObjectType]::acTable
+      }
       Get-AccessObject -Application $Application |
       ForEach-Object {
         $filename = "$($_.Name).txt"
@@ -224,16 +231,27 @@ function Export-VBProjectComponent {
         Write-Progress -Activity $activity -Status "Exporting: $($_.Name) to $path as $([AcObjectType]$_.Type)"
         try {
           # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-save-as-text
-          # stringified FileName to ensure correct type for COM interop.
           if ([AcObjectType]$_.Type -eq [AcObjectType]::acTable) {
-            # TODO Export table definitions.
+            # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transferdatabase
+            $Application.DoCmd.TransferDatabase(
+              [AcDataTransferType]::acExport  # TransferType
+              , 'Microsoft Access'            # DatabaseType
+              , $tableDefinition              # DatabaseName
+              , [AcObjectType]$_.Type         # ObjectType
+              , $_.Name                       # Source
+              , $_.Name                       # Destination
+              , $true                         # StructureOnly
+            )
             # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
+            # NOTE stringified FileName to ensure correct type for COM interop.
             $Application.DoCmd.TransferText(
               [AcTextTransferType]::acExportDelim # TransferType
               , [type]::Missing                   # SpecificationName
               , $_.Name                           # TableName
               , "$path"                           # FileName
               , $true                             # HasFieldNames
+              , [type]::Missing                   # HTMLTableName
+              , 1200                              # CodePage
             )
           } else {
             # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-save-as-text
@@ -248,10 +266,9 @@ function Export-VBProjectComponent {
             (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
           }
         }
-        $relative = [PathCompatibility]::GetRelativePath($resolved, $path)
         $exported += [VBComponentInfo]@{
           Name = $_.Name
-          Path = $relative
+          Path = [PathCompatibility]::GetRelativePath($resolved, $path)
           Type = [AcObjectType]$_.Type
         }
         "Exported:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
@@ -291,10 +308,9 @@ function Export-VBProjectComponent {
           (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
         }
       }
-      $relative = [PathCompatibility]::GetRelativePath($resolved, $path)
       $exported += [VBComponentInfo]@{
         Name = $_.Name
-        Path = $relative
+        Path = [PathCompatibility]::GetRelativePath($resolved, $path)
         Type = [vbext_ComponentType]$_.Type
       }
       "Exported:`t$($_.Name)`t$([vbext_ComponentType]$_.Type)" | Out-Host
@@ -332,17 +348,19 @@ function Import-VBProjectComponent {
     if (-not (Test-Path -LiteralPath $root -PathType Container)) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemNotFound' -TargetObject $root))
     }
-    $components = @($Components)
     if ($Application) {
-      $components |
+      $tableDefinition = $Components |
+      Where-Object -Property Type -EQ ([AcObjectType]::acTable) |
+      Where-Object { [Path]::GetFileName($_.Path) -eq 'TableDefs.accdb' } |
+      Where-Object { Test-Path -LiteralPath ([Path]::GetFullPath(($root | Join-Path -ChildPath $_.Path))) -PathType Leaf } |
+      ForEach-Object { [Path]::GetFullPath(($root | Join-Path -ChildPath $_.Path)) } |
+      Select-Object -First 1
+      $Components |
       Where-Object -Property Type -NE ([AcObjectType]::acModule) |
       Where-Object -Property Type -NotIn ([Enum]::GetValues([vbext_ComponentType])) |
+      Where-Object { $_.Type -ne [AcObjectType]::acTable -or [Path]::GetFileName($_.Path) -ne 'TableDefs.accdb' } |
       ForEach-Object {
-        $componentPath = if ($_.Path -is [array]) {
-          [string]$_.Path[0]
-        } else {
-          [string]$_.Path
-        }
+        $componentPath = [string]$_.Path
         $path = Join-Path -Path $root -ChildPath $componentPath
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
           $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($componentPath))
@@ -351,13 +369,15 @@ function Import-VBProjectComponent {
           }
         }
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-          $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemNotFound' -TargetObject $path))
+          Write-Warning -Message "Skipping import of $($_.Name) as $([AcObjectType]$_.Type) because the file $path does not exist."
+          return
         }
         $tempDir = $null
         $importPath = $path
         if ([Path]::GetExtension($path) -in '.bas', '.cls', '.frm', '.vba') {
           $content = [File]::ReadAllText($path)
           if ($content -match '(?<!\r)\n') {
+            # Normalize line endings to CRLF and ensure UTF-8 encoding without BOM for proper COM interop
             $normalized = $content -replace "`r`n|`n|`r", "`r`n"
             $tempDir = $env:TEMP | Join-Path -ChildPath ([Path]::GetRandomFileName())
             New-Item -Path $tempDir -ItemType Directory -Force -WhatIf:$false -Confirm:$false | Out-Null
@@ -368,14 +388,22 @@ function Import-VBProjectComponent {
         }
         try {
           Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $componentPath as $([AcObjectType]$_.Type)"
-          # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-load-from-text
-          # stringified FileName to ensure correct type for COM interop.
           if ([AcObjectType]$_.Type -eq [AcObjectType]::acTable) {
-            # TODO Import table definitions.
             try {
-              $db = $Application.CurrentDb()
-              # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/database-execute-method-dao
-              $db.Execute("DELETE FROM [$($_.Name)]", [RecordsetOptionEnum]::dbFailOnError)
+              if ($null -ne $tableDefinition -and (Test-Path -LiteralPath $tableDefinition -PathType Leaf)) {
+                # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
+                $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
+                # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transferdatabase
+                $Application.DoCmd.TransferDatabase(
+                  [AcDataTransferType]::acImport  # TransferType
+                  , 'Microsoft Access'            # DatabaseType
+                  , $tableDefinition              # DatabaseName
+                  , [AcObjectType]$_.Type         # ObjectType
+                  , $_.Name                       # Source
+                  , $_.Name                       # Destination
+                  , $true                         # StructureOnly
+                )
+              }
               # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
               $Application.DoCmd.TransferText(
                 [AcTextTransferType]::acImportDelim # TransferType
@@ -383,21 +411,22 @@ function Import-VBProjectComponent {
                 , $_.Name                           # TableName
                 , "$importPath"                     # FileName
                 , $true                             # HasFieldNames
+                , [type]::Missing                   # HTMLTableName
+                , 1200                              # CodePage
               )
             } catch [COMException] {
               Write-Warning -Message $_.Exception.Message
-            } finally {
-              if ($db) {
-                $db.Close()
-              }
             }
           } else {
             try {
+              # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
               $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
               "Removed:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
             } catch [COMException] {
               Write-Warning -Message $_.Exception.Message
             }
+            # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-load-from-text
+            # NOTE stringified FileName to ensure correct type for COM interop.
             $Application.LoadFromText(
               [AcObjectType]$_.Type # ObjectType
               , $_.Name             # ObjectName
@@ -543,7 +572,7 @@ function Export-VBProject {
     }
     $components = @($components) |
     ForEach-Object {
-      $absoluteComponentPath = $resolvedComponentRoot | Join-Path -ChildPath $_.Path | ForEach-Object { [Path]::GetFullPath($_) }
+      $absoluteComponentPath = [Path]::GetFullPath(($resolvedComponentRoot | Join-Path -ChildPath $_.Path))
       [VBComponentInfo]@{
         Name = $_.Name
         Path = [PathCompatibility]::GetRelativePath($destinationDirectory, $absoluteComponentPath)

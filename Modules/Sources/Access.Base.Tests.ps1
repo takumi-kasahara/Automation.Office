@@ -532,13 +532,13 @@ InModuleScope 'Automation.Office' {
         try {
           Open-AccessFile -Application $app -Path $path -ActionDb {
             param($db)
-            $db.Execute('CREATE TABLE Test (Id INTEGER)')
+            $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
           }
           # Close the database after ActionDb completes
           $app.CloseCurrentDatabase()
           # Now verify the table was created
           $tables = Get-AccessTable -Path $path
-          ($tables | Where-Object -Property Name -EQ 'Test') | Should -Not -BeNullOrEmpty
+          ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
         } finally {
           try {
             if ($app) {

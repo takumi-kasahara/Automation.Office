@@ -278,7 +278,7 @@ function Open-AccessFile {
   .EXAMPLE
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
       param($db)
-      $db.Execute('CREATE TABLE Test (Id INTEGER)')
+      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
 
     Opens a database, creates a table using DAO, and closes the database.

@@ -1,6 +1,11 @@
 ﻿{
   "VBComponents": [
     {
+      "Name": "TableDefs",
+      "Path": ".\\VBProject\\TableDefs.accdb",
+      "Type": "acTable"
+    },
+    {
       "Name": "Macro1",
       "Path": ".\\VBProject\\Macro1.txt",
       "Type": "acMacro"

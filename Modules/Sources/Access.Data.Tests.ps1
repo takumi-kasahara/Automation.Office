@@ -34,7 +34,7 @@ InModuleScope 'Automation.Office' {
         [SecureString]
         $Password = $null
       )
-      New-AccessFile -Path $Path -Password $Password -Force -InitializeDb {
+      New-AccessFile -Path $Path -Password $Password -RemovePersonalInformation -Force -InitializeDb {
         param($db)
         $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
         $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
