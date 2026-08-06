@@ -3,8 +3,6 @@
 [CmdletBinding()]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
 Set-StrictMode -Version Latest
 
 Describe 'Add-Type' {

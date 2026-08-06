@@ -1,8 +1,7 @@
 ﻿using namespace Microsoft.Office.Interop.PowerPoint
 using namespace Microsoft.Office.Core
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1')
 Set-StrictMode -Version Latest
 
 function Get-PowerPointDocumentProperty {
@@ -106,7 +105,7 @@ function Get-PowerPointDocumentProperty {
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           return Get-DocumentProperty -InputObject $Presentation -Name $Name -Custom:$Custom
@@ -357,7 +356,7 @@ function Set-PowerPointDocumentProperty {
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           if ($Presentation.ReadOnly) {
@@ -513,7 +512,7 @@ function Remove-PowerPointDocumentProperty {
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           if ($Presentation.ReadOnly) {

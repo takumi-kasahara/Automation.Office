@@ -1,4 +1,6 @@
-﻿using namespace Microsoft.Office.Interop.Access
+﻿using assembly Microsoft.Office.Interop.Access
+using assembly Microsoft.Vbe.Interop
+using namespace Microsoft.Office.Interop.Access
 using namespace Microsoft.Office.Interop.Access.Dao
 using namespace Microsoft.Vbe.Interop
 using namespace System.Diagnostics.CodeAnalysis
@@ -6,9 +8,6 @@ using namespace System.IO
 using namespace System.Runtime.InteropServices
 using namespace System.Text
 
-# https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop?view=office-pia
-Add-Type -AssemblyName Microsoft.Office.Interop.Access
-Add-Type -AssemblyName Microsoft.Vbe.Interop
 Set-StrictMode -Version Latest
 
 # https://learn.microsoft.com/en-us/dotnet/api/microsoft.vbe.interop.vbcomponent?view=office-pia

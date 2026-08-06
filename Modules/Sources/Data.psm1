@@ -1,11 +1,11 @@
-﻿using namespace System.Collections.Generic
+﻿using assembly System.Data
+using namespace System.Collections.Generic
 using namespace System.Data
 using namespace System.Data.Odbc
 using namespace System.Data.OleDb
 using namespace System.IO
 using namespace System.Net
 
-Add-Type -AssemblyName System.Data
 Set-StrictMode -Version Latest
 
 function ConvertTo-SqlIdentifier {

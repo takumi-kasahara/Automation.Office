@@ -16,19 +16,19 @@ function Get-MsoDocProperty {
     $Type
   )
   if ($Type -in [byte], [sbyte], [int16], [uint16], [int], [uint32], [long], [uint64]) {
-    return [MsoDocProperties]::msoPropertyTypeNumber
+    return [Microsoft.Office.Core.MsoDocProperties]::msoPropertyTypeNumber
   }
   if ($Type -in [bool]) {
-    return [MsoDocProperties]::msoPropertyTypeBoolean
+    return [Microsoft.Office.Core.MsoDocProperties]::msoPropertyTypeBoolean
   }
   if ($Type -in [datetime]) {
-    return [MsoDocProperties]::msoPropertyTypeDate
+    return [Microsoft.Office.Core.MsoDocProperties]::msoPropertyTypeDate
   }
   if ($Type -in [double], [float]) {
-    return [MsoDocProperties]::msoPropertyTypeFloat
+    return [Microsoft.Office.Core.MsoDocProperties]::msoPropertyTypeFloat
   }
   if ($Type -in [string]) {
-    return [MsoDocProperties]::msoPropertyTypeString
+    return [Microsoft.Office.Core.MsoDocProperties]::msoPropertyTypeString
   }
   throw [ArgumentException]::new("Unsupported:$Type")
 }

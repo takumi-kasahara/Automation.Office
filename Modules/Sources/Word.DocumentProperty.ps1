@@ -1,8 +1,7 @@
 ﻿using namespace Microsoft.Office.Interop.Word
 using namespace Microsoft.Office.Core
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1')
 Set-StrictMode -Version Latest
 
 function Get-WordDocumentProperty {
@@ -106,7 +105,7 @@ function Get-WordDocumentProperty {
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param (
             [Parameter(Mandatory)]
-            [Document]
+            [Microsoft.Office.Interop.Word.Document]
             $Document
           )
           return Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
@@ -356,7 +355,7 @@ function Set-WordDocumentProperty {
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Parameter(Mandatory)]
-            [Document]
+            [Microsoft.Office.Interop.Word.Document]
             $Document
           )
           if ($Document.ReadOnly) {
@@ -512,7 +511,7 @@ function Remove-WordDocumentProperty {
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Parameter(Mandatory)]
-            [Document]
+            [Microsoft.Office.Interop.Word.Document]
             $Document
           )
           if ($Document.ReadOnly) {

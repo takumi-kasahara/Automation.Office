@@ -1,23 +1,22 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using assembly Microsoft.Office.Interop.PowerPoint
+using assembly System.Web
+using namespace Microsoft.Office.Interop.PowerPoint
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
-using namespace System.Security
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
-    Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
-    Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
@@ -50,7 +49,7 @@ InModuleScope 'Automation.Office' {
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "New-PowerPointFile -Path '$escapedPath' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -123,7 +122,7 @@ InModuleScope 'Automation.Office' {
         Open-PowerPointFile -Path $path -PasswordToOpen $password -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $Presentation.Password | Should -Match '^\*+$'
@@ -136,7 +135,7 @@ InModuleScope 'Automation.Office' {
         Open-PowerPointFile -Path $path -PasswordToModify $password -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $Presentation.WritePassword | Should -Match '^\*+$'
@@ -149,7 +148,7 @@ InModuleScope 'Automation.Office' {
         Open-PowerPointFile -Path $path -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $Presentation.ReadOnlyRecommended | Should -BeTrue
@@ -160,10 +159,10 @@ InModuleScope 'Automation.Office' {
         $item = New-PowerPointFile -Path $path -Initialize {
           param (
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
-          $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+          $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
         }
         $item | Should -BeOfType [System.IO.FileInfo]
         $item.FullName | Should -Be ([Path]::GetFullPath($path))
@@ -269,10 +268,10 @@ InModuleScope 'Automation.Office' {
         $result = Open-PowerPointFile -Path $path -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
-          $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+          $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
           return $Presentation.Slides.Count
         }
         $result | Should -Be 1
@@ -446,7 +445,7 @@ InModuleScope 'Automation.Office' {
             '$false'
           }
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Set-PowerPointFileProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value $escapedValue -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host

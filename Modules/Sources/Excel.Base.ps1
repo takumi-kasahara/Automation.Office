@@ -1,12 +1,12 @@
-﻿using namespace Microsoft.Office.Interop.Excel
+﻿using assembly Microsoft.Office.Interop.Excel
+using namespace Microsoft.Office.Interop.Excel
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private
@@ -581,7 +581,7 @@ function Get-ExcelFileProperty {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
           $properties = Get-ObjectProperty -InputObject $file
@@ -780,7 +780,7 @@ function Set-ExcelFileProperty {
         Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           param(
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
           if ($file.ReadOnly) {

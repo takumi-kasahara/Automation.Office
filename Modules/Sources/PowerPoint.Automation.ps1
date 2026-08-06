@@ -1,11 +1,11 @@
-﻿using namespace Microsoft.Office.Core
+﻿using assembly Microsoft.Office.Interop.PowerPoint
+using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Collections.Generic
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Runtime.InteropServices
 
-Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint
 Set-StrictMode -Version Latest
 
 #region Private
@@ -168,7 +168,7 @@ function Get-PowerPointSpeakerNote {
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $notes = @()
@@ -278,7 +278,7 @@ function Export-PowerPointAsFixedFormat {
         Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $printRange = $Presentation.PrintOptions.Ranges.Add(1, $Presentation.Slides.Count)

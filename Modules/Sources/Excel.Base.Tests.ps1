@@ -1,23 +1,22 @@
-﻿using namespace Microsoft.Office.Interop.Excel
+﻿using assembly Microsoft.Office.Interop.Excel
+using assembly System.Web
+using namespace Microsoft.Office.Interop.Excel
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
-using namespace System.Security
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
-    Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
@@ -50,7 +49,7 @@ InModuleScope 'Automation.Office' {
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "New-ExcelFile -Path '$escapedPath' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -124,7 +123,7 @@ InModuleScope 'Automation.Office' {
         Open-ExcelFile -Path $path -PasswordToOpen $password -Action {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.HasPassword | Should -BeTrue
@@ -138,7 +137,7 @@ InModuleScope 'Automation.Office' {
         Open-ExcelFile -Path $path -PasswordToModify $password -Action {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.HasPassword | Should -BeTrue
@@ -152,7 +151,7 @@ InModuleScope 'Automation.Office' {
         Open-ExcelFile -Path $path -Action {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.ReadOnlyRecommended | Should -BeTrue
@@ -165,7 +164,7 @@ InModuleScope 'Automation.Office' {
         Open-ExcelFile -Path $path -Action {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.RemovePersonalInformation | Should -BeTrue
@@ -176,7 +175,7 @@ InModuleScope 'Automation.Office' {
         $item = New-ExcelFile -Path $path -Initialize {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.Worksheets.Item(1).Name = 'TestData'
@@ -187,7 +186,7 @@ InModuleScope 'Automation.Office' {
         Open-ExcelFile -Path $path -Action {
           param (
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.Worksheets.Item(1).Name | Should -Be 'TestData'
@@ -297,7 +296,7 @@ InModuleScope 'Automation.Office' {
         $result = Open-ExcelFile -Path $path -Action {
           param(
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
           $Workbook.Worksheets.Item(1).Name = 'Sheet1'
@@ -470,7 +469,7 @@ InModuleScope 'Automation.Office' {
             '$false'
           }
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Set-ExcelFileProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value $escapedValue -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host

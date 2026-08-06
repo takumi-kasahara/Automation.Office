@@ -1,12 +1,12 @@
-﻿using namespace Microsoft.Office.Interop.Word
+﻿using assembly Microsoft.Office.Interop.Word
+using namespace Microsoft.Office.Interop.Word
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private
@@ -33,7 +33,7 @@ function New-WordObject {
   try {
     if (-not $NoSetup) {
       # https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.interop.word.wdalertlevel?view=word-pia
-      $app.DisplayAlerts = [WdAlertLevel]::wdAlertsNone
+      $app.DisplayAlerts = [Microsoft.Office.Interop.Word.WdAlertLevel]::wdAlertsNone
       $app.Visible = $false
       $app.ScreenUpdating = $false
     }
@@ -575,7 +575,7 @@ function Get-WordFileProperty {
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param (
             [Parameter(Mandatory)]
-            [Document]
+            [Microsoft.Office.Interop.Word.Document]
             $Document
           )
           $properties = Get-ObjectProperty -InputObject $Document
@@ -766,7 +766,7 @@ function Set-WordFileProperty {
         Open-WordFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Parameter(Mandatory)]
-            [Document]
+            [Microsoft.Office.Interop.Word.Document]
             $Document
           )
           if ($Document.ReadOnly) {

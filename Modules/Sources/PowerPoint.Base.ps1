@@ -1,4 +1,5 @@
-﻿using namespace Microsoft.Office.Core
+﻿using assembly Microsoft.Office.Interop.PowerPoint
+using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
@@ -6,8 +7,7 @@ using namespace System.Management.Automation
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private
@@ -34,7 +34,7 @@ function New-PowerPointObject {
   try {
     if (-not $NoSetup) {
       # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.ppalertlevel
-      $app.DisplayAlerts = [PpAlertLevel]::ppAlertsNone
+      $app.DisplayAlerts = [Microsoft.Office.Interop.PowerPoint.PpAlertLevel]::ppAlertsNone
     }
     return $app
   } catch {
@@ -132,7 +132,7 @@ function New-PowerPointFile {
   .EXAMPLE
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Initialize {
       param($Presentation)
-      $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+      $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
 
     Creates a presentation and adds a title slide.
@@ -284,7 +284,7 @@ function Open-PowerPointFile {
   .EXAMPLE
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Action {
       param($Presentation)
-      $Presentation.Slides.Add(1, [PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+      $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
 
     Opens a presentation, adds a title slide, and closes the presentation.
@@ -573,7 +573,7 @@ function Get-PowerPointFileProperty {
         Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           $properties = Get-ObjectProperty -InputObject $Presentation
@@ -766,7 +766,7 @@ function Set-PowerPointFileProperty {
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
             [Parameter(Mandatory)]
-            [Presentation]
+            [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
           try {

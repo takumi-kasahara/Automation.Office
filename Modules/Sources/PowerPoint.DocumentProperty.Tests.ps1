@@ -1,6 +1,6 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using assembly System.Web
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
-using namespace System.Security
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
@@ -12,10 +12,9 @@ Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
-    Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
@@ -183,7 +182,7 @@ InModuleScope 'Automation.Office' {
           $escapedName = $Name.Replace("'", "''")
           $escapedValue = $Value.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Set-PowerPointDocumentProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value '$escapedValue' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -380,7 +379,7 @@ InModuleScope 'Automation.Office' {
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Remove-PowerPointDocumentProperty -LiteralPath '$escapedPath' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host

@@ -1,8 +1,7 @@
 ﻿using namespace System.IO
 using namespace System.Text
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1')
 Set-StrictMode -Version Latest
 
 function Export-AccessVBProject {

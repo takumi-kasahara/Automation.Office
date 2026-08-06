@@ -1,8 +1,7 @@
 ﻿using namespace System.IO
 using namespace System.Text
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1')
 Set-StrictMode -Version Latest
 
 function Export-WordVBProject {
@@ -75,7 +74,7 @@ function Export-WordVBProject {
       Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
           [Parameter(Mandatory)]
-          [Document]
+          [Microsoft.Office.Interop.Word.Document]
           $Document
         )
         return Export-VBProject -VBProject $Document.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
@@ -118,9 +117,6 @@ function Import-WordVBProject {
   .PARAMETER Source
     Specifies the source file path for `VBProject.json`.
 
-  .PARAMETER Force
-    Forces import processing when a file is marked as read-only recommended.
-
   .OUTPUTS
     None.
   #>
@@ -153,7 +149,7 @@ function Import-WordVBProject {
       Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
         param (
           [Parameter(Mandatory)]
-          [Document]
+          [Microsoft.Office.Interop.Word.Document]
           $Document
         )
         if ($Document.ReadOnly) {

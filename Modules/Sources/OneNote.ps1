@@ -1,9 +1,9 @@
-﻿using namespace Microsoft.Office.Interop.OneNote
+﻿using assembly Microsoft.Office.Interop.OneNote
+using namespace Microsoft.Office.Interop.OneNote
 using namespace System.IO
 using namespace System.Runtime.InteropServices
-using namespace System.Xml
 
-Add-Type -AssemblyName Microsoft.Office.Interop.OneNote
+[Type]::GetTypeFromProgID('OneNote.Application').Assembly.GetType('Microsoft.Office.Interop.OneNote.XMLSchema')
 Set-StrictMode -Version Latest
 
 #region Public
@@ -63,10 +63,10 @@ function New-OneNoteNotebook {
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
     $app.OpenHierarchy(
-      $Path                           # BSTR            bstrPath
-      , [string]::Empty               # BSTR            bstrRelativeToObjectID
-      , [ref]$objectId                # BSTR*           pbstrObjectID
-      , [CreateFileType]::cftNotebook # CreateFileType  cftIfNotExist
+      $Path                                                             # BSTR            bstrPath
+      , [string]::Empty                                                 # BSTR            bstrRelativeToObjectID
+      , [ref]$objectId                                                  # BSTR*           pbstrObjectID
+      , [Microsoft.Office.Interop.OneNote.CreateFileType]::cftNotebook  # CreateFileType  cftIfNotExist
     )
     return $objectId
   } finally {
@@ -155,10 +155,10 @@ function New-OneNoteSection {
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
     $app.OpenHierarchy(
-      $resolved                       # BSTR            bstrPath
-      , $relativeToObjectId           # BSTR            bstrRelativeToObjectID
-      , [ref]$objectId                # BSTR*           pbstrObjectID
-      , [CreateFileType]::cftSection  # CreateFileType  cftIfNotExist
+      $resolved                                                       # BSTR            bstrPath
+      , $relativeToObjectId                                           # BSTR            bstrRelativeToObjectID
+      , [ref]$objectId                                                # BSTR*           pbstrObjectID
+      , [Microsoft.Office.Interop.OneNote.CreateFileType]::cftSection # CreateFileType  cftIfNotExist
     )
     return $objectId
   } finally {
@@ -246,10 +246,10 @@ function New-OneNoteSectionGroup {
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
     $app.OpenHierarchy(
-      $resolved         # BSTR            bstrPath
-      , $relativeToObjectId         # BSTR            bstrRelativeToObjectID
-      , [ref]$objectId              # BSTR*           pbstrObjectID
-      , [CreateFileType]::cftFolder # CreateFileType  cftIfNotExist
+      $resolved                                                       # BSTR            bstrPath
+      , $relativeToObjectId                                           # BSTR            bstrRelativeToObjectID
+      , [ref]$objectId                                                # BSTR*           pbstrObjectID
+      , [Microsoft.Office.Interop.OneNote.CreateFileType]::cftFolder  # CreateFileType  cftIfNotExist
     )
     return $objectId
   } finally {
@@ -306,9 +306,9 @@ function New-OneNotePage {
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#createnewpage-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
     $app.CreateNewPage(
-      $SectionId                    # BSTR          bstrSectionID
-      , [ref]$pageId                # BSTR*         pbstrPageID
-      , [NewPageStyle]::npsDefault  # NewPageStyle  npsNewPageStyle
+      $SectionId                                                    # BSTR          bstrSectionID
+      , [ref]$pageId                                                # BSTR*         pbstrPageID
+      , [Microsoft.Office.Interop.OneNote.NewPageStyle]::npsDefault # NewPageStyle  npsNewPageStyle
     )
     return $pageId
   } finally {
@@ -372,17 +372,17 @@ function Get-OneNoteHierarchy {
     $Id,
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#hierarchyscope
     [Microsoft.Office.Interop.OneNote.HierarchyScope]
-    $HierarchyScope = [HierarchyScope]::hsSelf
+    $HierarchyScope = [Microsoft.Office.Interop.OneNote.HierarchyScope]::hsSelf
   )
   $app = Get-OneNoteApplication
   try {
     [xml]$xml = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#gethierarchy-method
     $app.GetHierarchy(
-      $Id                       # BSTR            bstrStartNodeID
-      , $HierarchyScope         # HierarchyScope  hsScope
-      , [ref]$xml               # BSTR*           pbstrHierarchyXmlOut
-      , [XMLSchema]::xsCurrent  # XMLSchema       xsSchema
+      $Id                                                       # BSTR            bstrStartNodeID
+      , $HierarchyScope                                         # HierarchyScope  hsScope
+      , [ref]$xml                                               # BSTR*           pbstrHierarchyXmlOut
+      , [Microsoft.Office.Interop.OneNote.XMLSchema]::xsCurrent # XMLSchema       xsSchema
     )
     return $xml
   } finally {
@@ -439,17 +439,17 @@ function Get-OneNotePageContent {
     $Id,
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#pageinfo-updated-for-onenote-2013
     [Microsoft.Office.Interop.OneNote.PageInfo]
-    $PageInfo = [PageInfo]::piBasic
+    $PageInfo = [Microsoft.Office.Interop.OneNote.PageInfo]::piBasic
   )
   $app = Get-OneNoteApplication
   try {
     [xml]$xml = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#page-content-methods
     $app.GetPageContent(
-      $Id                       # BSTR      bstrPageID
-      , [ref]$xml               # BSTR*     pbstrPageXmlOut
-      , $PageInfo               # PageInfo  pageInfoToExport
-      , [XMLSchema]::xsCurrent  # XMLSchema xsSchema
+      $Id                                                       # BSTR      bstrPageID
+      , [ref]$xml                                               # BSTR*     pbstrPageXmlOut
+      , $PageInfo                                               # PageInfo  pageInfoToExport
+      , [Microsoft.Office.Interop.OneNote.XMLSchema]::xsCurrent # XMLSchema xsSchema
     )
     return $xml
   } finally {
@@ -518,7 +518,7 @@ function Export-OneNoteHierarchy {
     $Destination,
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#hierarchyscope
     [Microsoft.Office.Interop.OneNote.HierarchyScope]
-    $HierarchyScope = [HierarchyScope]::hsSelf,
+    $HierarchyScope = [Microsoft.Office.Interop.OneNote.HierarchyScope]::hsSelf,
     [switch]
     $Force,
     [switch]
@@ -633,7 +633,7 @@ function Export-OneNotePageContent {
     $Destination,
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#pageinfo-updated-for-onenote-2013
     [Microsoft.Office.Interop.OneNote.PageInfo]
-    $PageInfo = [PageInfo]::piBasic,
+    $PageInfo = [Microsoft.Office.Interop.OneNote.PageInfo]::piBasic,
     [switch]
     $Force,
     [switch]
@@ -752,7 +752,7 @@ function Export-OneNotePageAsDocument {
     $Destination,
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#publishformat
     [Microsoft.Office.Interop.OneNote.PublishFormat]
-    $PublishFormat = [PublishFormat]::pfOneNote,
+    $PublishFormat = [Microsoft.Office.Interop.OneNote.PublishFormat]::pfOneNote,
     [switch]
     $Force,
     [switch]
@@ -1029,8 +1029,8 @@ function Import-OneNoteHierarchy {
         $content = $_ | Get-Content -Force -Raw
         # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#updatehierarchy-method
         $app.UpdateHierarchy(
-          $content                  # BSTR      bstrChangesXmlIn
-          , [XMLSchema]::xsCurrent  # XMLSchema xsSchema
+          $content                                                  # BSTR      bstrChangesXmlIn
+          , [Microsoft.Office.Interop.OneNote.XMLSchema]::xsCurrent # XMLSchema xsSchema
         )
       }
     } catch {
@@ -1123,10 +1123,10 @@ function Import-OneNotePageContent {
         $content = $_ | Get-Content -Force -Raw
         # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#updatepagecontent-method
         $app.UpdatePageContent(
-          $content                  # BSTR          bstrPageChangesXmlIn
-          , 0                       # DATE          dateExpectedLastModified
-          , [XMLSchema]::xsCurrent  # XMLSchema     xsSchema
-          , $false                  # VARIANT_BOOL  force
+          $content                                                  # BSTR          bstrPageChangesXmlIn
+          , 0                                                       # DATE          dateExpectedLastModified
+          , [Microsoft.Office.Interop.OneNote.XMLSchema]::xsCurrent # XMLSchema     xsSchema
+          , $false                                                  # VARIANT_BOOL  force
         )
       }
     } catch {
@@ -1200,31 +1200,31 @@ function Get-ExtensionByPublishFormat {
   )
   # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#odc_PublishFormat
   switch ($PublishFormat) {
-    { $_ -in [PublishFormat]::pfOneNote } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfOneNote } {
       return '.one'
     }
-    { $_ -in [PublishFormat]::pfOneNotePackage } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfOneNotePackage } {
       return '.onepkg'
     }
-    { $_ -in [PublishFormat]::pfMHTML } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfMHTML } {
       return '.mht'
     }
-    { $_ -in [PublishFormat]::pfPDF } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfPDF } {
       return '.pdf'
     }
-    { $_ -in [PublishFormat]::pfXPS } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfXPS } {
       return '.xps'
     }
-    { $_ -in [PublishFormat]::pfWord } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfWord } {
       return '.docx'
     }
-    { $_ -in [PublishFormat]::pfEMF } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfEMF } {
       return '.emf'
     }
-    { $_ -in [PublishFormat]::pfHTML } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfHTML } {
       return '.html'
     }
-    { $_ -in [PublishFormat]::pfOneNote2007 } {
+    { $_ -in [Microsoft.Office.Interop.OneNote.PublishFormat]::pfOneNote2007 } {
       return '.one'
     }
   }

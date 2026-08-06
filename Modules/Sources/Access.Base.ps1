@@ -1,11 +1,12 @@
-﻿using namespace Microsoft.Office.Interop.Access
+﻿using assembly Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access.Dao
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Net
 using namespace System.Runtime.InteropServices
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Base.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Base.psm1')
 Set-StrictMode -Version Latest
 
 #region Private
@@ -204,11 +205,11 @@ function New-AccessFile {
         $app.CurrentProject.RemovePersonalInformation = $true
       }
       if ($InitializeDb) {
-        $db = $app.CurrentDb()
+        $database = $app.CurrentDb()
         try {
-          & $InitializeDb $db
+          & $InitializeDb $database
         } finally {
-          $db.Close()
+          $database.Close()
         }
       }
       if ($InitializeProject) {

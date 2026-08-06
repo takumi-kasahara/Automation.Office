@@ -1,8 +1,7 @@
 ﻿using namespace System.IO
 using namespace System.Text
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1')
 Set-StrictMode -Version Latest
 
 function Export-PowerPointVBProject {
@@ -74,7 +73,7 @@ function Export-PowerPointVBProject {
       Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
           [Parameter(Mandatory)]
-          [Presentation]
+          [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )
         return Export-VBProject -VBProject $Presentation.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
@@ -154,18 +153,20 @@ function Import-PowerPointVBProject {
     }
     $app = New-PowerPointObject
     try {
-      $file = Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify
-      try {
-        if ($file.ReadOnly) {
+      Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
+        param (
+          [Parameter(Mandatory)]
+          [Microsoft.Office.Interop.PowerPoint.Presentation]
+          $Presentation
+        )
+        if ($Presentation.ReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $Path))
         }
-        if ($file.Windows.Count -gt 0) {
-          $file.Windows(1).Visible = -not $Hidden
+        if ($Presentation.Windows.Count -gt 0) {
+          $Presentation.Windows(1).Visible = -not $Hidden
         }
-        Import-VBProject -VBProject $file.VBProject -Source $Source -TargetExe 'POWERPNT.EXE'
-        $file.Save()
-      } finally {
-        $file.Close()
+        Import-VBProject -VBProject $Presentation.VBProject -Source $Source -TargetExe 'POWERPNT.EXE'
+        $Presentation.Save()
       }
     } finally {
       try {

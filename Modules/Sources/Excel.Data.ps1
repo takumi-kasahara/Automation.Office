@@ -4,8 +4,7 @@ using namespace System.Data.OleDb
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Data.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Data.psm1')
 Set-StrictMode -Version Latest
 
 function Get-ExcelTable {

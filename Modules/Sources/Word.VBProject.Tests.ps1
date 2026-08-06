@@ -1,21 +1,19 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using assembly System.Web
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
-using namespace System.Security
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
-    Add-Type -AssemblyName System.Web
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
@@ -121,7 +119,7 @@ InModuleScope 'Automation.Office' {
           $escapedFilePath = $Path.Replace("'", "''")
           $escapedDestination = $Destination.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Export-WordVBProject -Path '$escapedFilePath' -Destination '$escapedDestination' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -313,7 +311,7 @@ InModuleScope 'Automation.Office' {
           $escapedFilePath = $Path.Replace("'", "''")
           $escapedSource = $Source.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "Import-WordVBProject -Path '$escapedFilePath' -Source '$escapedSource' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -358,7 +356,7 @@ InModuleScope 'Automation.Office' {
       It 'does not import VBProject when WhatIf is specified' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
-        Import-WordVBProject -Path $path -Source $source -Force -WhatIf
+        Import-WordVBProject -Path $path -Source $source -WhatIf
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($post | ConvertTo-Json) | Should -Be ($ante | ConvertTo-Json)
       }

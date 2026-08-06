@@ -5,8 +5,7 @@ using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Net
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'Data.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'Data.psm1')
 Set-StrictMode -Version Latest
 
 function Get-AccessTable {

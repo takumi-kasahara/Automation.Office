@@ -1,8 +1,7 @@
 ﻿using namespace Microsoft.Office.Interop.Excel
 using namespace Microsoft.Office.Core
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'DocumentProperty.psm1')
 Set-StrictMode -Version Latest
 
 function Get-ExcelDocumentProperty {
@@ -106,7 +105,7 @@ function Get-ExcelDocumentProperty {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
           return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
@@ -363,7 +362,7 @@ function Set-ExcelDocumentProperty {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           param(
             [Parameter(Mandatory)]
-            [Workbook]
+            [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
           if ($file.ReadOnly) {

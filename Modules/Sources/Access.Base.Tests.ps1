@@ -1,20 +1,21 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using assembly Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access.Dao
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
-using namespace System.Security
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([guid]::NewGuid().ToString('N').SubString(0, 20)) -AsPlainText -Force
@@ -47,7 +48,7 @@ InModuleScope 'Automation.Office' {
           $escapedModulePath = $modulePath.Replace("'", "''")
           $escapedPath = $Path.Replace("'", "''")
           $command = @(
-            "Import-Module '$escapedModulePath' -Force"
+            "Import-Module -Name '$escapedModulePath' -Force"
             "New-AccessFile -Path '$escapedPath' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
@@ -168,8 +169,12 @@ InModuleScope 'Automation.Office' {
       It 'creates a database with InitializeDb script block' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeDb {
-          param($db)
-          $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+          param(
+            [Parameter(Mandatory)]
+            [Microsoft.Office.Interop.Access.Dao.Database]
+            $database
+          )
+          $database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
         }
         $item | Should -BeOfType [System.IO.FileInfo]
         $item.FullName | Should -Be ([Path]::GetFullPath($path))
@@ -180,7 +185,11 @@ InModuleScope 'Automation.Office' {
       It 'creates a database with InitializeProject script block' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeProject {
-          param($Project)
+          param(
+            [Parameter(Mandatory)]
+            [Microsoft.Office.Interop.Access.CurrentProject]
+            $Project
+          )
           $Project.FullName | Should -Be $path
         }
         $item | Should -BeOfType [System.IO.FileInfo]

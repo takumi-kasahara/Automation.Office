@@ -1,19 +1,21 @@
-﻿using namespace System.Diagnostics.CodeAnalysis
+﻿using assembly Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access.Dao
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'
-Import-Module -Name $modulePath -Force
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1') -Force
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
     function Get-Password {
       [CmdletBinding()]
-      [OutputType([SecureString])]
+      [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
       param ()
       return ConvertTo-SecureString -String ([guid]::NewGuid().ToString('N').SubString(0, 20)) -AsPlainText -Force
@@ -35,11 +37,15 @@ InModuleScope 'Automation.Office' {
         $Password = $null
       )
       New-AccessFile -Path $Path -Password $Password -RemovePersonalInformation -Force -InitializeDb {
-        param($db)
-        $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
-        $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
-        $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
-        $db.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
+        param(
+          [Parameter(Mandatory)]
+          [Microsoft.Office.Interop.Access.Dao.Database]
+          $database
+        )
+        $database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
+        $database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
+        $database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
+        $database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
       }
     }
   }

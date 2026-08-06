@@ -1,8 +1,7 @@
 ﻿using namespace System.IO
 using namespace System.Text
 
-$modulePath = $PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1'
-Import-Module -Name $modulePath
+Import-Module -Name ($PSScriptRoot | Join-Path -ChildPath 'VBProject.psm1')
 Set-StrictMode -Version Latest
 
 function Export-ExcelVBProject {
@@ -74,7 +73,7 @@ function Export-ExcelVBProject {
       Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param(
           [Parameter(Mandatory)]
-          [Workbook]
+          [Microsoft.Office.Interop.Excel.Workbook]
           $file
         )
         return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
@@ -162,7 +161,7 @@ function Import-ExcelVBProject {
       Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
         param(
           [Parameter(Mandatory)]
-          [Workbook]
+          [Microsoft.Office.Interop.Excel.Workbook]
           $file
         )
         if ($file.ReadOnly) {
