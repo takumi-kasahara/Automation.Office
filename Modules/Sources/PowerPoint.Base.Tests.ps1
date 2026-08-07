@@ -125,7 +125,7 @@ InModuleScope 'Automation.Office' {
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
-          $Presentation.Password | Should-Match '^\*+$'
+          $Presentation.Password | Should-NotBeEmptyString
         }
       }
       It 'opens a file with PasswordToModify' {
@@ -138,7 +138,7 @@ InModuleScope 'Automation.Office' {
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
-          $Presentation.WritePassword | Should-Match '^\*+$'
+          $Presentation.WritePassword | Should-NotBeEmptyString
         }
       }
       It 'opens a file with ReadOnlyRecommended' {

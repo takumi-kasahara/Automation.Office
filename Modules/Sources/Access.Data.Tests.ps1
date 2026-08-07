@@ -240,7 +240,7 @@ InModuleScope 'Automation.Office' {
         $view = Get-AccessView -LiteralPath $accdbPath | Where-Object -Property Name -EQ 'vwSalesEmployees' | Select-Object -First 1
         $view | Should-NotBeNull
         $view.Path | Should-Be $accdbPath
-        $view.Type | Should-Match 'VIEW'
+        $view.Type | Should-Be 'VIEW'
         $view.Name | Should-Be 'vwSalesEmployees'
       }
     }
