@@ -278,7 +278,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
 
         { Export-PowerPointVBProject -Path 'dummy.pptx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
@@ -409,7 +409,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
 
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {

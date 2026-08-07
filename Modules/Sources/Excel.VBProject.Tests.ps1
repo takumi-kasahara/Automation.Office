@@ -278,7 +278,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'must not be called' }
 
         { Export-ExcelVBProject -Path 'dummy.xlsx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-ExcelObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
@@ -418,7 +418,7 @@ InModuleScope 'Automation.Office' {
 
         { Import-ExcelVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
 
-        Should -Invoke -CommandName New-ExcelObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {

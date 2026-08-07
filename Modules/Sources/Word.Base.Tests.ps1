@@ -276,7 +276,6 @@ InModuleScope 'Automation.Office' {
   Describe 'New-WordFile.Unit' {
     BeforeEach {
       $path = Get-TempFile
-      $script:called = 0
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -285,25 +284,19 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-WordObject
 
         { New-WordFile -Path $path -Force -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-WordObject
       }
     }
     Context 'Edge cases' {
       It 'throws and does not call New-WordObject when path exists and Force is not specified' {
         New-Item -Path $path -ItemType File -Force | Out-Null
-        Mock -CommandName New-WordObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-WordObject
 
         { New-WordFile -Path $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-WordObject
       }
     }
   }
@@ -384,11 +377,11 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-WordObject fails and Application is not specified' {
+      It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
 
         { Open-WordFile -Path $path } | Should-Throw
-        Should -Invoke -CommandName New-WordObject -Times 1 -Exactly
+        Should-Invoke -CommandName New-WordObject -Times 1 -Exactly
       }
     }
   }
@@ -398,11 +391,11 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Get-WordAppProperty.Unit' {
-    It 'throws when New-WordObject fails and requests NoSetup' {
+    It 'throws when New-WordObject fails' {
       Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
 
       { Get-WordAppProperty } | Should-Throw
-      Should -Invoke -CommandName New-WordObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
+      Should-Invoke -CommandName New-WordObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
     }
   }
   Describe 'Set-WordAppProperty' {
@@ -428,7 +421,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
 
         { Set-WordAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-WordObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
       }
     }
     Context 'ParameterSetName' {
@@ -645,22 +638,16 @@ InModuleScope 'Automation.Office' {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
 
-      $script:saveCalled = 0
-      $script:called = 0
-
       $app = [PSCustomObject]@{}
       $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
 
       $file = [PSCustomObject]@{ ReadOnly = $false }
-      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { $script:saveCalled++ }
+      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { }
       $file | Add-Member -MemberType ScriptMethod -Name Close -Value { }
 
       Mock -CommandName New-WordObject -MockWith { $app }
-      Mock -CommandName Open-WordFile -MockWith {
-        $script:called++
-        $file
-      }
-      Mock -CommandName Set-ObjectProperty -MockWith { }
+      Mock -CommandName Open-WordFile -MockWith { $file }
+      Mock -CommandName Set-ObjectProperty
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -670,7 +657,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         Set-WordFileProperty -LiteralPath $path -Name Final -Value $true -WhatIf
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-WordFile
       }
     }
     Context 'Edge cases' {

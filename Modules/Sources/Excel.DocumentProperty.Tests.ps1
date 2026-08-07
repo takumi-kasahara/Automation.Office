@@ -327,17 +327,13 @@ InModuleScope 'Automation.Office' {
       $value = [guid]::NewGuid().ToString('N')
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-ExcelObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-ExcelFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-ExcelFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -347,7 +343,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-ExcelFile when WhatIf is specified' {
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
     }
     Context 'Edge cases' {
@@ -355,7 +351,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
@@ -489,17 +485,13 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-ExcelObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-ExcelFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-ExcelFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -509,7 +501,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-ExcelFile when WhatIf is specified' {
         { Remove-ExcelDocumentProperty -LiteralPath $path -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
     }
     Context 'Edge cases' {
@@ -517,7 +509,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }

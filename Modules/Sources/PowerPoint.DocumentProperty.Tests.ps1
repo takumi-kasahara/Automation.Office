@@ -322,17 +322,13 @@ InModuleScope 'Automation.Office' {
       $value = [guid]::NewGuid().ToString('N')
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-PowerPointObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-PowerPointFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-PowerPointFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -343,7 +339,7 @@ InModuleScope 'Automation.Office' {
       It 'does not call Open-PowerPointFile when WhatIf is specified' {
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -WhatIf } | Should -Not -Throw
 
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }
     Context 'Edge cases' {
@@ -351,7 +347,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
       It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
@@ -479,17 +475,13 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-PowerPointObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-PowerPointFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-PowerPointFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -499,8 +491,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-PowerPointFile when WhatIf is specified' {
         { Remove-PowerPointDocumentProperty -LiteralPath $path -WhatIf } | Should -Not -Throw
-
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }
     Context 'Edge cases' {
@@ -508,7 +499,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
       It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }

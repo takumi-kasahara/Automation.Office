@@ -285,7 +285,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
 
         { Export-AccessVBProject -Path $path -Destination $destination -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-AccessObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
         Test-Path -LiteralPath $destination | Should-BeFalse
       }
     }
@@ -403,7 +403,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
 
         { Import-AccessVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-AccessObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {

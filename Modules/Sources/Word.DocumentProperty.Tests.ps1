@@ -322,17 +322,13 @@ InModuleScope 'Automation.Office' {
       $value = [guid]::NewGuid().ToString('N')
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-WordObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-WordFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-WordFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -342,7 +338,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-WordFile
       }
     }
     Context 'Edge cases' {
@@ -350,7 +346,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-WordFile
       }
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
@@ -478,17 +474,13 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
-      $script:called = 0
 
       Mock -CommandName New-WordObject -MockWith {
         $app = [PSCustomObject]@{}
         $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
         return $app
       }
-      Mock -CommandName Open-WordFile -MockWith {
-        $script:called++
-        throw 'must not be called in this test'
-      }
+      Mock -CommandName Open-WordFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -498,7 +490,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         { Remove-WordDocumentProperty -LiteralPath $path -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-WordFile
       }
     }
     Context 'Edge cases' {
@@ -506,7 +498,7 @@ InModuleScope 'Automation.Office' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-WordFile
       }
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }

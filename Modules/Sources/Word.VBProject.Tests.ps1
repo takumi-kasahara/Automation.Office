@@ -278,7 +278,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
 
         { Export-WordVBProject -Path 'dummy.docx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-WordObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
@@ -409,7 +409,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
 
         { Import-WordVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-WordObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {

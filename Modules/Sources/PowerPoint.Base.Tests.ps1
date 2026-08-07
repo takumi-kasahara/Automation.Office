@@ -180,7 +180,6 @@ InModuleScope 'Automation.Office' {
   Describe 'New-PowerPointFile.Unit' {
     BeforeEach {
       $path = Get-TempFile
-      $script:called = 0
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -189,26 +188,20 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-PowerPointObject
 
         { New-PowerPointFile -Path $path -Force -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-PowerPointObject
         Test-Path -LiteralPath $path | Should-BeFalse
       }
     }
     Context 'Edge cases' {
       It 'throws and does not call New-PowerPointObject when path exists and Force is not specified' {
         New-Item -Path $path -ItemType File -Force | Out-Null
-        Mock -CommandName New-PowerPointObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-PowerPointObject
 
         { New-PowerPointFile -Path $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-PowerPointObject
       }
     }
   }
@@ -289,11 +282,11 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails and Application is not specified' {
+      It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
 
         { Open-PowerPointFile -Path $path } | Should-Throw
-        Should -Invoke -CommandName New-PowerPointObject -Times 1 -Exactly
+        Should-Invoke -CommandName New-PowerPointObject -Times 1 -Exactly
       }
     }
   }
@@ -303,11 +296,11 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Get-PowerPointAppProperty.Unit' {
-    It 'throws when New-PowerPointObject fails and requests NoSetup' {
+    It 'throws when New-PowerPointObject fails' {
       Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
 
       { Get-PowerPointAppProperty } | Should-Throw
-      Should -Invoke -CommandName New-PowerPointObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
+      Should-Invoke -CommandName New-PowerPointObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
     }
   }
   Describe 'Set-PowerPointAppProperty' {
@@ -333,7 +326,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
 
         { Set-PowerPointAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
     Context 'ParameterSetName' {
@@ -556,22 +549,16 @@ InModuleScope 'Automation.Office' {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
 
-      $script:saveCalled = 0
-      $script:called = 0
-
       $app = [PSCustomObject]@{}
       $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
 
       $file = [PSCustomObject]@{ ReadOnly = $false }
-      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { $script:saveCalled++ }
+      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { }
       $file | Add-Member -MemberType ScriptMethod -Name Close -Value { }
 
       Mock -CommandName New-PowerPointObject -MockWith { $app }
-      Mock -CommandName Open-PowerPointFile -MockWith {
-        $script:called++
-        $file
-      }
-      Mock -CommandName Set-ObjectProperty -MockWith { }
+      Mock -CommandName Open-PowerPointFile -MockWith { $file }
+      Mock -CommandName Set-ObjectProperty
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -581,7 +568,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-PowerPointFile when WhatIf is specified' {
         Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $false -WhatIf
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }
     Context 'Edge cases' {

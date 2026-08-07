@@ -204,7 +204,6 @@ InModuleScope 'Automation.Office' {
   Describe 'New-ExcelFile.Unit' {
     BeforeEach {
       $path = Get-TempFile
-      $script:called = 0
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -213,26 +212,20 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-ExcelObject
 
         { New-ExcelFile -Path $path -Force -WhatIf } | Should -Not -Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-ExcelObject
         Test-Path -LiteralPath $path | Should-BeFalse
       }
     }
     Context 'Edge cases' {
       It 'throws and does not call New-ExcelObject when path exists and Force is not specified' {
         New-Item -Path $path -ItemType File -Force | Out-Null
-        Mock -CommandName New-ExcelObject -MockWith {
-          $script:called++
-          throw 'must not be called'
-        }
+        Mock -CommandName New-ExcelObject
 
         { New-ExcelFile -Path $path } | Should-Throw
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName New-ExcelObject
       }
     }
   }
@@ -317,11 +310,11 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-ExcelObject fails and Application is not specified' {
+      It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
 
         { Open-ExcelFile -Path $path } | Should-Throw
-        Should -Invoke -CommandName New-ExcelObject -Times 1 -Exactly
+        Should-Invoke -CommandName New-ExcelObject -Times 1 -Exactly
       }
     }
   }
@@ -331,11 +324,11 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Get-ExcelAppProperty.Unit' {
-    It 'throws when New-ExcelObject fails and requests NoSetup' {
+    It 'throws when New-ExcelObject fails' {
       Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
 
       { Get-ExcelAppProperty } | Should-Throw
-      Should -Invoke -CommandName New-ExcelObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
+      Should-Invoke -CommandName New-ExcelObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
     }
   }
   Describe 'Set-ExcelAppProperty' {
@@ -361,7 +354,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'must not be called' }
 
         { Set-ExcelAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should -Invoke -CommandName New-ExcelObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
     Context 'ParameterSetName' {
@@ -585,22 +578,16 @@ InModuleScope 'Automation.Office' {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
 
-      $script:saveCalled = 0
-      $script:called = 0
-
       $app = [PSCustomObject]@{}
       $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
 
       $file = [PSCustomObject]@{ ReadOnly = $false }
-      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { $script:saveCalled++ }
+      $file | Add-Member -MemberType ScriptMethod -Name Save -Value { }
       $file | Add-Member -MemberType ScriptMethod -Name Close -Value { }
 
       Mock -CommandName New-ExcelObject -MockWith { $app }
-      Mock -CommandName Open-ExcelFile -MockWith {
-        $script:called++
-        $file
-      }
-      Mock -CommandName Set-ObjectProperty -MockWith { }
+      Mock -CommandName Open-ExcelFile -MockWith { $file }
+      Mock -CommandName Set-ObjectProperty
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -610,7 +597,7 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-ExcelFile when WhatIf is specified' {
         Set-ExcelFileProperty -LiteralPath $path -Name Final -Value $false -WhatIf
-        $script:called | Should-Be 0
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
     }
     Context 'Edge cases' {
