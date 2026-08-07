@@ -61,24 +61,24 @@ InModuleScope 'Automation.Office' {
       It 'reads built-in properties by Path' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
         $properties = @(Get-ExcelDocumentProperty -Path $pathSet.Path)
-        $properties.Count | Should -Be 2
-        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should -BeGreaterThan 0 }
+        $properties.Count | Should-Be 2
+        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
         $properties = @($pathSet.Path | Get-ExcelDocumentProperty)
-        $properties.Count | Should -Be 2
-        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should -BeGreaterThan 0 }
+        $properties.Count | Should-Be 2
+        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by LiteralPath' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelDocumentProperty -LiteralPath $path
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-ExcelDocumentProperty
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
     }
     Context 'Other parameters' {
@@ -87,24 +87,24 @@ InModuleScope 'Automation.Office' {
         $allProperties = Get-ExcelDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-ExcelDocumentProperty -Path $path -Name $name
-        @($properties.PSObject.Properties.Name) | Should -Contain $name
-        @($properties.PSObject.Properties).Count | Should -Be 1
+        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
+        @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should -Throw
+        { Get-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen $password
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads properties from a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify (Get-Password)
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'does not return built-in properties when Custom is specified' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -Custom
-        @($properties.PSObject.Properties).Count | Should -Be 0
+        @($properties.PSObject.Properties).Count | Should-Be 0
       }
     }
     Context 'Edge cases' {
@@ -124,7 +124,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
 
-        { Get-ExcelDocumentProperty -Path $path } | Should -Throw
+        { Get-ExcelDocumentProperty -Path $path } | Should-Throw
       }
     }
   }
@@ -137,7 +137,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName Get-ExcelDocumentProperty
 
         $result = Get-ExcelPropertyValue -LiteralPath $path -Name Title
-        $result | Should -BeNullOrEmpty
+        $result | Should-BeNull
       }
       It 'returns property values from Get-ExcelDocumentProperty output' {
         Mock -CommandName Get-ExcelDocumentProperty -MockWith {
@@ -150,8 +150,8 @@ InModuleScope 'Automation.Office' {
         }
 
         $result = @(Get-ExcelPropertyValue -LiteralPath 'dummy.xlsx' -Name Title)
-        $result.Count | Should -Be 2
-        $result | Should -Be @('A', 'B')
+        $result.Count | Should-Be 2
+        $result | Should-BeCollection @('A', 'B')
       }
     }
   }
@@ -209,15 +209,15 @@ InModuleScope 'Automation.Office' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
         Set-ExcelDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         $values = @(Get-ExcelPropertyValue -Path $pathSet.Path -Name $name)
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | Should -Be (@($value) * $pathSet.ChildItem.Count)
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | Should-Be (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets a built-in property by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
         $pathSet.Path | Set-ExcelDocumentProperty -Name $name -Value $value
         $values = @(Get-ExcelPropertyValue -Path $pathSet.Path -Name $name)
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | Should -Be (@($value) * $pathSet.ChildItem.Count)
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | Should-Be (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets multiple built-in properties by Path with InputObject' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
@@ -226,18 +226,18 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         Set-ExcelDocumentProperty -Path $pathSet.Path -InputObject $properties
-        @(Get-ExcelPropertyValue -Path $pathSet.Path -Name 'Title') | Should -Be (@($properties.Title) * $pathSet.ChildItem.Count)
-        @(Get-ExcelPropertyValue -Path $pathSet.Path -Name 'Subject') | Should -Be (@($properties.Subject) * $pathSet.ChildItem.Count)
+        @(Get-ExcelPropertyValue -Path $pathSet.Path -Name 'Title') | Should-Be (@($properties.Title) * $pathSet.ChildItem.Count)
+        @(Get-ExcelPropertyValue -Path $pathSet.Path -Name 'Subject') | Should-Be (@($properties.Subject) * $pathSet.ChildItem.Count)
       }
       It 'sets a built-in property by LiteralPath' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets a built-in property by LiteralPath with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         [PSCustomObject]@{ PSPath = $path } | Set-ExcelDocumentProperty -Name $name -Value $value
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets multiple built-in properties by LiteralPath with InputObject' {
         New-ExcelFile -Path $path
@@ -246,8 +246,8 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         Set-ExcelDocumentProperty -LiteralPath $path -InputObject $properties
-        Get-ExcelPropertyValue -LiteralPath $path -Name 'Title' | Should -Be $properties.Title
-        Get-ExcelPropertyValue -LiteralPath $path -Name 'Subject' | Should -Be $properties.Subject
+        Get-ExcelPropertyValue -LiteralPath $path -Name 'Title' | Should-Be $properties.Title
+        Get-ExcelPropertyValue -LiteralPath $path -Name 'Subject' | Should-Be $properties.Subject
       }
     }
     Context 'SupportsShouldProcess' {
@@ -255,39 +255,39 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -Force -WhatIf
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be 'ante value'
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value 'ante confirm'
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
-        $exitCode | Should -Be 0
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be 'ante confirm'
+        $exitCode | Should-Be 0
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante confirm'
       }
       It 'updates a read-only recommended workbook when Force is specified' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -Force -Confirm
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
     }
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should -Throw
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-Be $value
       }
       It 'updates a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should -Throw
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-Be $value
       }
       It 'returns the updated built-in property when PassThru is specified' {
         New-ExcelFile -Path $path
         $property = Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.$name | Should -Be $value
+        $property | Should-HaveType ([PSCustomObject])
+        $property.$name | Should-Be $value
       }
       It 'returns updated properties when PassThru is specified with InputObject' {
         New-ExcelFile -Path $path
@@ -296,28 +296,28 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         $property = Set-ExcelDocumentProperty -LiteralPath $path -InputObject $properties -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.Title | Should -Be $properties.Title
-        $property.Subject | Should -Be $properties.Subject
+        $property | Should-HaveType ([PSCustomObject])
+        $property.Title | Should-Be $properties.Title
+        $property.Subject | Should-Be $properties.Subject
       }
       It 'sets a custom property' {
         New-ExcelFile -Path $path
         $name = 'MyProperty'
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name -Custom | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name -Custom | Should-Be $value
       }
       It 'returns the updated custom property when PassThru is specified' {
         New-ExcelFile -Path $path
         $name = 'MyProperty'
         $property = Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.$name | Should -Be $value
+        $property | Should-HaveType ([PSCustomObject])
+        $property.$name | Should-Be $value
       }
     }
     Context 'Edge cases' {
       It 'throws an error when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should -Throw
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
@@ -347,20 +347,20 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-ExcelFile when WhatIf is specified' {
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -WhatIf } | Should -Not -Throw
-        $script:called | Should -Be 0
+        $script:called | Should-Be 0
       }
     }
     Context 'Edge cases' {
       It 'throws when target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should -Throw
-        $script:called | Should -Be 0
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
+        $script:called | Should-Be 0
       }
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
 
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should -Throw
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
@@ -411,28 +411,28 @@ InModuleScope 'Automation.Office' {
         Set-ExcelDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         Remove-ExcelDocumentProperty -Path $pathSet.Path
         $values = Get-ExcelPropertyValue -Path $pathSet.Path -Name $name
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | ForEach-Object { $_ | Should -BeNullOrEmpty }
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | ForEach-Object { $_ | Should-BeNull }
       }
       It 'removes built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-ExcelFile -Path $_ }
         Set-ExcelDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         $pathSet.Path | Remove-ExcelDocumentProperty
         $values = Get-ExcelPropertyValue -Path $pathSet.Path -Name $name
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | ForEach-Object { $_ | Should -BeNullOrEmpty }
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | ForEach-Object { $_ | Should-BeNull }
       }
       It 'removes built-in properties by LiteralPath' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-ExcelDocumentProperty -LiteralPath $path
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
       It 'removes built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
         [PSCustomObject]@{ PSPath = $path } | Remove-ExcelDocumentProperty
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
     }
     Context 'SupportsShouldProcess' {
@@ -440,48 +440,48 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-ExcelDocumentProperty -LiteralPath $path -Force -WhatIf
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'asks for confirmation when Confirm is specified' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
         $exitCode = 'N' | Invoke-Confirm -Path $path
-        $exitCode | Should -Be 0
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        $exitCode | Should-Be 0
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'removes properties from a read-only recommended workbook when Force is specified' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -Force -Confirm
         Remove-ExcelDocumentProperty -LiteralPath $path -Force -Confirm
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
     }
     Context 'Other parameters' {
       It 'removes properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-        { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should -Throw
+        { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen $password
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-BeNull
       }
       It 'removes properties from a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
-        { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Throw
+        { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should-Throw
         Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToModify $password
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-BeNull
       }
       It 'uses RemoveDocInfoType when removing properties' {
         New-ExcelFile -Path $path
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-ExcelDocumentProperty -LiteralPath $path -RemoveDocInfoType xlRDIAll
-        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-ExcelPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
     }
     Context 'Edge cases' {
       It 'throws an error when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
-        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should -Throw
+        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }
@@ -509,20 +509,20 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-ExcelFile when WhatIf is specified' {
         { Remove-ExcelDocumentProperty -LiteralPath $path -WhatIf } | Should -Not -Throw
-        $script:called | Should -Be 0
+        $script:called | Should-Be 0
       }
     }
     Context 'Edge cases' {
       It 'throws when target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should -Throw
-        $script:called | Should -Be 0
+        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
+        $script:called | Should-Be 0
       }
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
 
-        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should -Throw
+        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }

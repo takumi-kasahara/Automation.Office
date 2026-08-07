@@ -104,29 +104,29 @@ InModuleScope 'Automation.Office' {
 
         $result = Get-PowerPointSpeakerNote -Path $path
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Path | Should -Be ([Path]::GetFullPath($path))
-        $result.Items -is [SpeakerNote[]] | Should -BeTrue
-        $result.Items[0].Page | Should -Be 1
-        $result.Items[0].Text | Should -Be 'page 1 note'
+        $result | Should-NotBeNull
+        $result.Path | Should-Be ([Path]::GetFullPath($path))
+        $result.Items -is [SpeakerNote[]] | Should-BeTrue
+        $result.Items[0].Page | Should-Be 1
+        $result.Items[0].Text | Should-Be 'page 1 note'
       }
       It 'returns speaker notes by LiteralPath' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
 
         $result = Get-PowerPointSpeakerNote -LiteralPath $path
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items[1].Page | Should -Be 2
-        $result.Items[1].Text | Should -Be 'page 2 note'
+        $result | Should-NotBeNull
+        $result.Items[1].Page | Should-Be 2
+        $result.Items[1].Text | Should-Be 'page 2 note'
       }
       It 'returns speaker notes by ValueFromPipelineByPropertyName' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
 
         $result = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointSpeakerNote
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items[0].Page | Should -Be 1
-        $result.Items[0].Text | Should -Be 'page 1 note'
+        $result | Should-NotBeNull
+        $result.Items[0].Page | Should-Be 1
+        $result.Items[0].Text | Should-Be 'page 1 note'
       }
     }
     Context 'Other parameters' {
@@ -135,58 +135,58 @@ InModuleScope 'Automation.Office' {
 
         $result = Get-PowerPointSpeakerNote -Path $path
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Count | Should -Be 1
-        $result.Items[0].Page | Should -Be 1
-        $result.Items[0].Text | Should -Be 'visible note'
+        $result | Should-NotBeNull
+        $result.Items.Count | Should-Be 1
+        $result.Items[0].Page | Should-Be 1
+        $result.Items[0].Text | Should-Be 'visible note'
       }
       It 'returns notes from hidden slides when Force is specified' {
         New-PowerPointFileWithHiddenSpeakerNote -Path $path
 
         $result = Get-PowerPointSpeakerNote -Path $path -Force
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Count | Should -Be 2
-        $result.Items[1].Page | Should -Be 2
-        $result.Items[1].Text | Should -Be 'hidden note'
+        $result | Should-NotBeNull
+        $result.Items.Count | Should-Be 2
+        $result.Items[1].Page | Should-Be 2
+        $result.Items[1].Text | Should-Be 'hidden note'
       }
       It 'throws when PasswordToOpen is incorrect' {
         New-PowerPointFile -Path $path -PasswordToOpen $password | Out-Null
 
-        { Get-PowerPointSpeakerNote -Path $path -PasswordToOpen (Get-Password) } | Should -Throw
+        { Get-PowerPointSpeakerNote -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
       }
       It 'returns notes only for requested discrete and range mix' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 8
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '1-3, 5, 7-8'
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Page | Should -Be @(1, 2, 3, 5, 7, 8)
-        $result.Items.Text | Should -Be @('page 1 note', 'page 2 note', 'page 3 note', 'page 5 note', 'page 7 note', 'page 8 note')
+        $result | Should-NotBeNull
+        $result.Items.Page | Should-BeCollection @(1, 2, 3, 5, 7, 8)
+        $result.Items.Text | Should-BeCollection @('page 1 note', 'page 2 note', 'page 3 note', 'page 5 note', 'page 7 note', 'page 8 note')
       }
       It 'supports spaces in range expression' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 6
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '2, 4-5'
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Page | Should -Be @(2, 4, 5)
+        $result | Should-NotBeNull
+        $result.Items.Page | Should-BeCollection @(2, 4, 5)
       }
       It 'works with non sorted range token order' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 6
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '4-6, 2'
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Page | Should -Be @(4, 5, 6, 2)
+        $result | Should-NotBeNull
+        $result.Items.Page | Should-BeCollection @(4, 5, 6, 2)
       }
       It 'supports reverse order range' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 5
 
         $result = Get-PowerPointSpeakerNote -Path $path -Range '3-1'
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.Items.Page | Should -Be @(3, 2, 1)
+        $result | Should-NotBeNull
+        $result.Items.Page | Should-BeCollection @(3, 2, 1)
       }
     }
   }
@@ -204,12 +204,12 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
 
-        { Get-PowerPointSpeakerNote -Path $path } | Should -Throw
+        { Get-PowerPointSpeakerNote -Path $path } | Should-Throw
       }
       It 'throws for invalid characters in Range' {
-        { Get-PowerPointSpeakerNote -Path $path -Range 'a' } | Should -Throw
-        { Get-PowerPointSpeakerNote -Path $path -Range '1-' } | Should -Throw
-        { Get-PowerPointSpeakerNote -Path $path -Range '1:2' } | Should -Throw
+        { Get-PowerPointSpeakerNote -Path $path -Range 'a' } | Should-Throw
+        { Get-PowerPointSpeakerNote -Path $path -Range '1-' } | Should-Throw
+        { Get-PowerPointSpeakerNote -Path $path -Range '1:2' } | Should-Throw
       }
     }
   }
@@ -237,18 +237,18 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
       It 'exports by ValueFromPipelineByPropertyName using FullName alias' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         $result = [PSCustomObject]@{ FullName = $path } |
         Export-PowerPointAsFixedFormat -Destination $pdf
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
     }
     Context 'SupportShouldProcess' {
@@ -256,22 +256,22 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -WhatIf
 
-        Test-Path -LiteralPath $pdf | Should -BeFalse
+        Test-Path -LiteralPath $pdf | Should-BeFalse
       }
       It 'overwrites existing file when Force is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Not -Throw
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Throw
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should-Throw
 
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -Force
-        $result | Should -Not -BeNullOrEmpty
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
       It 'throws when file exists and NoClobber is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         Export-PowerPointAsFixedFormat -Path $path -Destination $pdf | Out-Null
 
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -NoClobber } | Should -Throw
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -NoClobber } | Should-Throw
       }
     }
     Context 'Other parameters' {
@@ -279,48 +279,48 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFileWithSpeakerNote -Path $path -PasswordToOpen $passwordToOpen -SlideCount 2
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen $passwordToOpen
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
       It 'exports a presentation to PDF with PasswordToModify' {
         New-PowerPointFileWithSpeakerNote -Path $path -PasswordToModify $passwordToModify -SlideCount 2
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToModify $passwordToModify
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
       It 'throws when PasswordToOpen is incorrect' {
         New-PowerPointFileWithSpeakerNote -Path $path -PasswordToOpen $passwordToOpen -SlideCount 2
 
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen (Get-Password) } | Should -Throw
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen (Get-Password) } | Should-Throw
       }
       It 'exports a presentation with FixedFormatType' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $xps -FixedFormatType ([PpFixedFormatType]::ppFixedFormatTypeXPS)
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($xps))
-        Test-Path -LiteralPath $xps | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($xps))
+        Test-Path -LiteralPath $xps | Should-BeTrue
       }
       It 'exports a presentation with IncludeDocumentProperties' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -IncludeDocumentProperties
 
-        $result | Should -Not -BeNullOrEmpty
-        $result.FullName | Should -Be ([Path]::GetFullPath($pdf))
-        Test-Path -LiteralPath $pdf | Should -BeTrue
+        $result | Should-NotBeNull
+        $result.FullName | Should-Be ([Path]::GetFullPath($pdf))
+        Test-Path -LiteralPath $pdf | Should-BeTrue
       }
     }
     Context 'Edge cases' {
       It 'throws when source file does not exist' {
         $invalidPath = $env:TEMP | Join-Path -ChildPath 'NonExistent.pptx'
-        { Export-PowerPointAsFixedFormat -Path $invalidPath -Destination $pdf } | Should -Throw
+        { Export-PowerPointAsFixedFormat -Path $invalidPath -Destination $pdf } | Should-Throw
       }
       It 'throws when destination is an invalid path' {
         $invalidDest = 'Z:\Invalid\Path\File.pdf'
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $invalidDest } | Should -Throw
+        { Export-PowerPointAsFixedFormat -Path $path -Destination $invalidDest } | Should-Throw
       }
     }
   }

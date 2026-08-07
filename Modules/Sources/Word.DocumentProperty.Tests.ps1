@@ -61,24 +61,24 @@ InModuleScope 'Automation.Office' {
       It 'reads built-in properties by Path' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
         $properties = @(Get-WordDocumentProperty -Path $pathSet.Path)
-        $properties.Count | Should -Be 2
-        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should -BeGreaterThan 0 }
+        $properties.Count | Should-Be 2
+        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
         $properties = @($pathSet.Path | Get-WordDocumentProperty)
-        $properties.Count | Should -Be 2
-        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should -BeGreaterThan 0 }
+        $properties.Count | Should-Be 2
+        $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by LiteralPath' {
         New-WordFile -Path $path
         $properties = Get-WordDocumentProperty -LiteralPath $path
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-WordDocumentProperty
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
     }
     Context 'Other parameters' {
@@ -87,24 +87,24 @@ InModuleScope 'Automation.Office' {
         $allProperties = Get-WordDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-WordDocumentProperty -Path $path -Name $name
-        @($properties.PSObject.Properties.Name) | Should -Contain $name
-        @($properties.PSObject.Properties).Count | Should -Be 1
+        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
+        @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
-        { Get-WordDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should -Throw
+        { Get-WordDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         $properties = Get-WordDocumentProperty -LiteralPath $path -PasswordToOpen $password
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify (Get-Password)
         $properties = Get-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
-        @($properties.PSObject.Properties).Count | Should -BeGreaterThan 0
+        @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'does not return built-in properties when Custom is specified' {
         New-WordFile -Path $path
         $properties = Get-WordDocumentProperty -LiteralPath $path -Custom
-        @($properties.PSObject.Properties).Count | Should -Be 0
+        @($properties.PSObject.Properties).Count | Should-Be 0
       }
     }
     Context 'Edge cases' {
@@ -124,7 +124,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
 
-        { Get-WordDocumentProperty -Path $path } | Should -Throw
+        { Get-WordDocumentProperty -Path $path } | Should-Throw
       }
     }
   }
@@ -137,7 +137,7 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName Get-WordDocumentProperty
 
         $result = Get-WordPropertyValue -LiteralPath 'dummy.docx' -Name Title
-        $result | Should -BeNullOrEmpty
+        $result | Should-BeNull
       }
       It 'returns property values from Get-WordDocumentProperty output' {
         Mock -CommandName Get-WordDocumentProperty -MockWith {
@@ -150,8 +150,8 @@ InModuleScope 'Automation.Office' {
         }
 
         $result = @(Get-WordPropertyValue -LiteralPath 'dummy.docx' -Name Title)
-        $result.Count | Should -Be 2
-        $result | Should -Be @('A', 'B')
+        $result.Count | Should-Be 2
+        $result | Should-BeCollection @('A', 'B')
       }
     }
   }
@@ -209,15 +209,15 @@ InModuleScope 'Automation.Office' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
         Set-WordDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         $values = @(Get-WordPropertyValue -Path $pathSet.Path -Name $name)
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | Should -Be (@($value) * $pathSet.ChildItem.Count)
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | Should-Be (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets a built-in property by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
         $pathSet.Path | Set-WordDocumentProperty -Name $name -Value $value
         $values = @(Get-WordPropertyValue -Path $pathSet.Path -Name $name)
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | Should -Be (@($value) * $pathSet.ChildItem.Count)
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | Should-Be (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets multiple built-in properties by Path with InputObject' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
@@ -226,18 +226,18 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         Set-WordDocumentProperty -Path $pathSet.Path -InputObject $properties
-        @(Get-WordPropertyValue -Path $pathSet.Path -Name 'Title') | Should -Be (@($properties.Title) * $pathSet.ChildItem.Count)
-        @(Get-WordPropertyValue -Path $pathSet.Path -Name 'Subject') | Should -Be (@($properties.Subject) * $pathSet.ChildItem.Count)
+        @(Get-WordPropertyValue -Path $pathSet.Path -Name 'Title') | Should-Be (@($properties.Title) * $pathSet.ChildItem.Count)
+        @(Get-WordPropertyValue -Path $pathSet.Path -Name 'Subject') | Should-Be (@($properties.Subject) * $pathSet.ChildItem.Count)
       }
       It 'sets a built-in property by LiteralPath' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets a built-in property by LiteralPath with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
         [PSCustomObject]@{ PSPath = $path } | Set-WordDocumentProperty -Name $name -Value $value
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets multiple built-in properties by LiteralPath with InputObject' {
         New-WordFile -Path $path
@@ -246,8 +246,8 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         Set-WordDocumentProperty -LiteralPath $path -InputObject $properties
-        Get-WordPropertyValue -LiteralPath $path -Name 'Title' | Should -Be $properties.Title
-        Get-WordPropertyValue -LiteralPath $path -Name 'Subject' | Should -Be $properties.Subject
+        Get-WordPropertyValue -LiteralPath $path -Name 'Title' | Should-Be $properties.Title
+        Get-WordPropertyValue -LiteralPath $path -Name 'Subject' | Should-Be $properties.Subject
       }
     }
     Context 'SupportsShouldProcess' {
@@ -255,34 +255,34 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -Force -WhatIf
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be 'ante value'
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'ante confirm'
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
-        $exitCode | Should -Be 0
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be 'ante confirm'
+        $exitCode | Should-Be 0
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante confirm'
       }
     }
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToOpen (Get-Password) } | Should -Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToOpen (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-Be $value
       }
       It 'updates a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToModify (Get-Password) } | Should -Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToModify (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
-        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-Be $value
       }
       It 'returns the updated built-in property when PassThru is specified' {
         New-WordFile -Path $path
         $property = Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.$name | Should -Be $value
+        $property | Should-HaveType ([PSCustomObject])
+        $property.$name | Should-Be $value
       }
       It 'returns updated properties when PassThru is specified with InputObject' {
         New-WordFile -Path $path
@@ -291,28 +291,28 @@ InModuleScope 'Automation.Office' {
           Subject = [guid]::NewGuid().ToString('N')
         }
         $property = Set-WordDocumentProperty -LiteralPath $path -InputObject $properties -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.Title | Should -Be $properties.Title
-        $property.Subject | Should -Be $properties.Subject
+        $property | Should-HaveType ([PSCustomObject])
+        $property.Title | Should-Be $properties.Title
+        $property.Subject | Should-Be $properties.Subject
       }
       It 'sets a custom property' {
         New-WordFile -Path $path
         $name = 'MyProperty'
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom
-        Get-WordPropertyValue -LiteralPath $path -Name $name -Custom | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name -Custom | Should-Be $value
       }
       It 'returns the updated custom property when PassThru is specified' {
         New-WordFile -Path $path
         $name = 'MyProperty'
         $property = Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom -PassThru
-        $property | Should -BeOfType [PSCustomObject]
-        $property.$name | Should -Be $value
+        $property | Should-HaveType ([PSCustomObject])
+        $property.$name | Should-Be $value
       }
     }
     Context 'Edge cases' {
       It 'throws an error when read-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
-        { Set-WordDocumentProperty -LiteralPath $path -Name 'Title' -Value ([guid]::NewGuid().ToString('N')) } | Should -Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name 'Title' -Value ([guid]::NewGuid().ToString('N')) } | Should-Throw
       }
     }
   }
@@ -342,20 +342,20 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -WhatIf } | Should -Not -Throw
-        $script:called | Should -Be 0
+        $script:called | Should-Be 0
       }
     }
     Context 'Edge cases' {
       It 'throws when target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should -Throw
-        $script:called | Should -Be 0
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
+        $script:called | Should-Be 0
       }
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
 
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should -Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
@@ -406,28 +406,28 @@ InModuleScope 'Automation.Office' {
         Set-WordDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         Remove-WordDocumentProperty -Path $pathSet.Path
         $values = Get-WordPropertyValue -Path $pathSet.Path -Name $name
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | ForEach-Object { $_ | Should -BeNullOrEmpty }
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | ForEach-Object { $_ | Should-BeNull }
       }
       It 'removes built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-WordFile -Path $_ }
         Set-WordDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         $pathSet.Path | Remove-WordDocumentProperty
         $values = Get-WordPropertyValue -Path $pathSet.Path -Name $name
-        $values.Count | Should -Be $pathSet.ChildItem.Count
-        $values | ForEach-Object { $_ | Should -BeNullOrEmpty }
+        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values | ForEach-Object { $_ | Should-BeNull }
       }
       It 'removes built-in properties by LiteralPath' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-WordDocumentProperty -LiteralPath $path
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
       It 'removes built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
         [PSCustomObject]@{ PSPath = $path } | Remove-WordDocumentProperty
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
     }
     Context 'SupportsShouldProcess' {
@@ -435,42 +435,42 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-WordDocumentProperty -LiteralPath $path -Force -WhatIf
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'asks for confirmation when Confirm is specified' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
         $exitCode = 'N' | Invoke-Confirm -Path $path
-        $exitCode | Should -Be 0
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -Be $value
+        $exitCode | Should-Be 0
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
     }
     Context 'Other parameters' {
       It 'removes properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-        { Remove-WordDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should -Throw
+        { Remove-WordDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         Remove-WordDocumentProperty -LiteralPath $path -PasswordToOpen $password
-        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should -BeNullOrEmpty
+        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-BeNull
       }
       It 'removes properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
-        { Remove-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Throw
+        { Remove-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should-Throw
         Remove-WordDocumentProperty -LiteralPath $path -PasswordToModify $password
-        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should -BeNullOrEmpty
+        Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-BeNull
       }
       It 'uses RemoveDocInfoType when removing properties' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
         Remove-WordDocumentProperty -LiteralPath $path -RemoveDocInfoType wdRDIAll
-        Get-WordPropertyValue -LiteralPath $path -Name $name | Should -BeNullOrEmpty
+        Get-WordPropertyValue -LiteralPath $path -Name $name | Should-BeNull
       }
     }
     Context 'Edge cases' {
       It 'throws an error when read- la-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
-        { Remove-WordDocumentProperty -LiteralPath $path } | Should -Throw
+        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }
@@ -498,20 +498,20 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         { Remove-WordDocumentProperty -LiteralPath $path -WhatIf } | Should -Not -Throw
-        $script:called | Should -Be 0
+        $script:called | Should-Be 0
       }
     }
     Context 'Edge cases' {
       It 'throws when target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Remove-WordDocumentProperty -LiteralPath $path } | Should -Throw
-        $script:called | Should -Be 0
+        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
+        $script:called | Should-Be 0
       }
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
 
-        { Remove-WordDocumentProperty -LiteralPath $path } | Should -Throw
+        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }

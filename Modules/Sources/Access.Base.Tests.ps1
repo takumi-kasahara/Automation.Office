@@ -68,61 +68,61 @@ InModuleScope 'Automation.Office' {
       It 'creates a database by Path' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a database by Path with ValueFromPipeline' {
         $path = Get-TempFile
         $item = $path | New-AccessFile
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a database by Path with ValueFromPipelineByPropertyName' {
         $path = Get-TempFile
         $item = [PSCustomObject]@{ FullName = $path } | New-AccessFile
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not create a database when WhatIf is specified' {
         $path = Get-TempFile
         New-AccessFile -Path $path -Force -WhatIf
-        Test-Path -LiteralPath $path | Should -BeFalse
+        Test-Path -LiteralPath $path | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         $path = Get-TempFile
         $exitCode = 'N' | Invoke-Confirm -Path $path
-        $exitCode | Should -Be 0
-        Test-Path -LiteralPath $path | Should -BeFalse
+        $exitCode | Should-Be 0
+        Test-Path -LiteralPath $path | Should-BeFalse
       }
       It 'overwrites an existing database when Force is specified' {
         $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
         New-AccessFile -Path $path -Force -Confirm
-        (Get-Item -LiteralPath $path).Length | Should -BeGreaterThan 0
+        (Get-Item -LiteralPath $path).Length | Should-BeGreaterThan 0
       }
     }
     Context 'Other parameters' {
       It 'creates a database using the requested file format' {
         $path = Get-TempFile -Extension '.mdb'
         $item = New-AccessFile -Path $path -FileFormat acNewDatabaseFormatAccess2007
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a database with Password' {
         $path = Get-TempFile
         New-AccessFile -Path $path -Password $password
-        Test-Path -LiteralPath $path | Should -BeTrue
+        Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-AccessObject
         try {
           Open-AccessFile -Application $app -Path $path -Password $password
           try {
-            $app.CurrentProject.FullName | Should -Be $path
+            $app.CurrentProject.FullName | Should-Be $path
           } finally {
             $app.CloseCurrentDatabase()
           }
@@ -143,12 +143,12 @@ InModuleScope 'Automation.Office' {
       It 'creates a database with RemovePersonalInformation' {
         $path = Get-TempFile
         New-AccessFile -Path $path -RemovePersonalInformation
-        Test-Path -LiteralPath $path | Should -BeTrue
+        Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-AccessObject
         try {
           Open-AccessFile -Application $app -Path $path
           try {
-            $app.CurrentProject.RemovePersonalInformation | Should -BeTrue
+            $app.CurrentProject.RemovePersonalInformation | Should-BeTrue
           } finally {
             $app.CloseCurrentDatabase()
           }
@@ -176,11 +176,11 @@ InModuleScope 'Automation.Office' {
           )
           $database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
         }
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
         $tables = Get-AccessTable -Path $path
-        ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
       }
       It 'creates a database with InitializeProject script block' {
         $path = Get-TempFile
@@ -190,18 +190,18 @@ InModuleScope 'Automation.Office' {
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
-          $Project.FullName | Should -Be $path
+          $Project.FullName | Should-Be $path
         }
-        $item | Should -BeOfType [System.IO.FileInfo]
-        $item.FullName | Should -Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should -BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+        Test-Path -LiteralPath $path | Should-BeTrue
       }
     }
     Context 'Edge cases' {
       It 'fails when the path already exists and Force is not specified' {
         $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
-        { New-AccessFile -Path $path } | Should -Throw
+        { New-AccessFile -Path $path } | Should-Throw -ExceptionType [System.IO.IOException]
       }
     }
   }
@@ -223,8 +223,8 @@ InModuleScope 'Automation.Office' {
         }
 
         { New-AccessFile -Path $path -Force -WhatIf } | Should -Not -Throw
-        $script:called | Should -Be 0
-        Test-Path -LiteralPath $path | Should -BeFalse
+        $script:called | Should-Be 0
+        Test-Path -LiteralPath $path | Should-BeFalse
       }
     }
     Context 'Edge cases' {
@@ -235,8 +235,8 @@ InModuleScope 'Automation.Office' {
           throw 'must not be called'
         }
 
-        { New-AccessFile -Path $path } | Should -Throw
-        $script:called | Should -Be 0
+        { New-AccessFile -Path $path } | Should-Throw -ExceptionType [System.IO.IOException]
+        $script:called | Should-Be 0
       }
     }
   }
@@ -244,15 +244,15 @@ InModuleScope 'Automation.Office' {
     It 'returns application properties' {
       $properties = Get-AccessAppProperty
 
-      $properties.Visible | Should -Not -BeNullOrEmpty
+      $properties.Visible | Should-NotBeNull
     }
   }
   Describe 'Get-AccessAppProperty.Unit' {
     It 'throws when New-AccessObject fails and requests NoSetup' {
       Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
 
-      { Get-AccessAppProperty } | Should -Throw
-      Assert-MockCalled -CommandName New-AccessObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
+      { Get-AccessAppProperty } | Should-Throw -ExceptionType [System.InvalidOperationException]
+      Should -Invoke -CommandName New-AccessObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
     }
   }
   Describe 'Set-AccessAppProperty' {
@@ -266,7 +266,7 @@ InModuleScope 'Automation.Office' {
     }
     It 'throws when trying to set a property that does not exist.' {
       $properties = [PSCustomObject]@{ NonExistentProperty = 'Value' }
-      { Set-AccessAppProperty -Properties $properties } | Should -Throw
+      { Set-AccessAppProperty -Properties $properties } | Should-Throw -ExceptionType [System.Management.Automation.RuntimeException]
     }
   }
   Describe 'Set-AccessAppProperty.Unit' {
@@ -278,14 +278,14 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
 
         { Set-AccessAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Assert-MockCalled -CommandName New-AccessObject -Times 0 -Exactly
+        Should -Invoke -CommandName New-AccessObject -Times 0 -Exactly
       }
     }
     Context 'ParameterSetName' {
       It 'throws when New-AccessObject fails' {
         Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
 
-        { Set-AccessAppProperty -Properties $properties } | Should -Throw
+        { Set-AccessAppProperty -Properties $properties } | Should-Throw -ExceptionType [System.InvalidOperationException]
       }
     }
   }
@@ -303,30 +303,30 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'retrieves file properties by Path' {
         $properties = Get-AccessFileProperty -Path $path
-        $properties | Should -Not -BeNullOrEmpty
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'retrieves file properties by LiteralPath' {
         $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties | Should -Not -BeNullOrEmpty
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'retrieves file properties by Path with ValueFromPipeline' {
         $properties = $path | Get-AccessFileProperty -Name RemovePersonalInformation
-        $properties | Should -Not -BeNullOrEmpty
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'retrieves file properties by Path with ValueFromPipelineByPropertyName' {
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-AccessFileProperty -Name RemovePersonalInformation
-        $properties | Should -Not -BeNullOrEmpty
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
       }
     }
     Context 'Other parameters' {
       It 'retrieves file properties with -Name filter' {
         $properties = Get-AccessFileProperty -Path $path -Name RemovePersonalInformation
-        $properties.RemovePersonalInformation | Should -Be $true
-        @($properties.PSObject.Properties).Count | Should -Be 1
+        $properties.RemovePersonalInformation | Should-Be $true
+        @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'opens a file protected with Password' {
         $password = Get-Password
@@ -334,7 +334,7 @@ InModuleScope 'Automation.Office' {
         try {
           New-AccessFile -Path $protectedPath -Password $password
           $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
-          $properties | Should -Not -BeNullOrEmpty
+          $properties | Should-NotBeNull
         } finally {
           if (Test-Path -LiteralPath $protectedPath) {
             Remove-Item -LiteralPath $protectedPath -Force
@@ -357,7 +357,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-AccessObject fails' {
         Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
 
-        { Get-AccessFileProperty -Path $path } | Should -Throw
+        { Get-AccessFileProperty -Path $path } | Should-Throw
       }
     }
   }
@@ -377,29 +377,29 @@ InModuleScope 'Automation.Office' {
       It 'sets file property by Path' {
         Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'sets file property by LiteralPath' {
         Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'sets file property by Path with ValueFromPipeline' {
         $path | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'sets file property by Path with ValueFromPipelineByPropertyName' {
         [PSCustomObject]@{ PSPath = $path } | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
         $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties.RemovePersonalInformation | Should-Be $true
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update property when WhatIf is specified' {
         Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -WhatIf
         $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should -Be $false
+        $properties.RemovePersonalInformation | Should-Be $false
       }
     }
     Context 'Other parameters' {
@@ -407,12 +407,12 @@ InModuleScope 'Automation.Office' {
         $inputObject = [PSCustomObject]@{ RemovePersonalInformation = $true }
         Set-AccessFileProperty -Path $path -InputObject $inputObject
         $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should -Be $true
+        $properties.RemovePersonalInformation | Should-Be $true
       }
       It 'returns updated file properties when PassThru is specified' {
         $result = Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -PassThru
-        $result | Should -Not -BeNullOrEmpty
-        $result.RemovePersonalInformation | Should -Be $true
+        $result | Should-NotBeNull
+        $result.RemovePersonalInformation | Should-Be $true
       }
       It 'updates a file protected with Password' {
         $password = Get-Password
@@ -421,7 +421,7 @@ InModuleScope 'Automation.Office' {
           New-AccessFile -Path $protectedPath -Password $password
           Set-AccessFileProperty -Path $protectedPath -Name RemovePersonalInformation -Value $true -Password $password
           $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
-          $properties.RemovePersonalInformation | Should -Be $true
+          $properties.RemovePersonalInformation | Should-Be $true
         } finally {
           if (Test-Path -LiteralPath $protectedPath) {
             Remove-Item -LiteralPath $protectedPath -Force
@@ -431,7 +431,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist' {
-        { Set-AccessFileProperty -Path $path -Name NonExistentProperty -Value 'test' } | Should -Throw
+        { Set-AccessFileProperty -Path $path -Name NonExistentProperty -Value 'test' } | Should-Throw
       }
     }
   }
@@ -454,7 +454,7 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           $result = Open-AccessFile -Application $app -Path $path
-          $result | Should -BeNullOrEmpty
+          $result | Should-BeNull
         } finally {
           try {
             if ($app) {
@@ -475,7 +475,7 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           $result = $path | Open-AccessFile -Application $app
-          $result | Should -BeNullOrEmpty
+          $result | Should-BeNull
         } finally {
           try {
             if ($app) {
@@ -496,7 +496,7 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           $result = [PSCustomObject]@{ FullName = $path } | Open-AccessFile -Application $app
-          $result | Should -BeNullOrEmpty
+          $result | Should-BeNull
         } finally {
           try {
             if ($app) {
@@ -519,7 +519,7 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           Open-AccessFile -Application $app -Path $path -Password $password | Out-Null
-          Test-Path -LiteralPath $path | Should -BeTrue
+          Test-Path -LiteralPath $path | Should-BeTrue
         } finally {
           try {
             if ($app) {
@@ -547,7 +547,7 @@ InModuleScope 'Automation.Office' {
           $app.CloseCurrentDatabase()
           # Now verify the table was created
           $tables = Get-AccessTable -Path $path
-          ($tables | Where-Object -Property Name -EQ 'Employees') | Should -Not -BeNullOrEmpty
+          ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
         } finally {
           try {
             if ($app) {
@@ -571,7 +571,7 @@ InModuleScope 'Automation.Office' {
             param($project)
             return $project.Connection
           }
-          $connection | Should -Not -BeNullOrEmpty
+          $connection | Should-NotBeNull
         } finally {
           try {
             if ($app) {
@@ -600,8 +600,8 @@ InModuleScope 'Automation.Office' {
             param($project)
             $script:projectApp2 = $project.Application
           }
-          $script:projectApp1 | Should -Be $app1
-          $script:projectApp2 | Should -Be $app2
+          $script:projectApp1 | Should-Be $app1
+          $script:projectApp2 | Should-Be $app2
         } finally {
           try {
             if ($app1) {
@@ -627,7 +627,7 @@ InModuleScope 'Automation.Office' {
       It 'fails when the path does not exist' {
         $path = [IO.Path]::GetTempFileName()
         Remove-Item -LiteralPath $path -Force
-        { Open-AccessFile -Path $path } | Should -Throw
+        { Open-AccessFile -Path $path } | Should-Throw
       }
     }
   }
