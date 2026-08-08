@@ -1,5 +1,6 @@
 ﻿using assembly Microsoft.Office.Interop.Access
 using assembly Microsoft.Vbe.Interop
+using module .\DialogSuppressor.psm1
 using namespace Microsoft.Office.Interop.Access
 using namespace Microsoft.Office.Interop.Access.Dao
 using namespace Microsoft.Vbe.Interop
@@ -359,10 +360,10 @@ function Import-VBProjectComponent {
       Where-Object -Property Type -NotIn ([Enum]::GetValues([vbext_ComponentType])) |
       Where-Object { $_.Type -ne [AcObjectType]::acTable -or [Path]::GetFileName($_.Path) -ne 'TableDefs.accdb' } |
       ForEach-Object {
-        $componentPath = [string]$_.Path
-        $path = Join-Path -Path $root -ChildPath $componentPath
+        $_.Path = [string]$_.Path
+        $path = Join-Path -Path $root -ChildPath $_.Path
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-          $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($componentPath))
+          $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($_.Path))
           if (Test-Path -LiteralPath $fallbackPath -PathType Leaf) {
             $path = $fallbackPath
           }
@@ -386,7 +387,7 @@ function Import-VBProjectComponent {
           }
         }
         try {
-          Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $componentPath as $([AcObjectType]$_.Type)"
+          Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $_.Path as $([AcObjectType]$_.Type)"
           try {
             # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
             $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
@@ -450,14 +451,9 @@ function Import-VBProjectComponent {
     $components |
     Where-Object -Property Type -In ([Enum]::GetValues([vbext_ComponentType])) |
     ForEach-Object {
-      $componentPath = if ($_.Path -is [array]) {
-        [string]$_.Path[0]
-      } else {
-        [string]$_.Path
-      }
-      $path = Join-Path -Path $root -ChildPath $componentPath
+      $path = Join-Path -Path $root -ChildPath $_.Path
       if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($componentPath))
+        $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($_.Path))
         if (Test-Path -LiteralPath $fallbackPath -PathType Leaf) {
           $path = $fallbackPath
         }
@@ -485,7 +481,7 @@ function Import-VBProjectComponent {
         }
       }
       try {
-        Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $componentPath as $([vbext_ComponentType]$_.Type)"
+        Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $($_.Path) as $([vbext_ComponentType]$_.Type)"
         if ([vbext_ComponentType]$_.Type -ne [vbext_ComponentType]::vbext_ct_Document) {
           $component = $VBProject.VBComponents.Import($importPath)
           $component.Name = $_.Name
@@ -688,44 +684,5 @@ function Convert-VBProjectComponentToCrLf {
     $content = [File]::ReadAllText($item.FullName)
     $normalized = $content -replace "`r`n|`n|`r", "`r`n"
     [File]::WriteAllText($item.FullName, $normalized, [UTF8Encoding]::new($false))
-  }
-}
-function Start-VBProjectDialogSuppressor {
-  [CmdletBinding()]
-  [OutputType([System.Management.Automation.Job])]
-  [SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-  param (
-    [Parameter(Mandatory)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $TargetExe
-  )
-  $csPath = $PSScriptRoot | Join-Path -ChildPath 'DialogSuppressor.cs'
-  $stopFilePath = $env:TEMP | Join-Path -ChildPath ("VBProjectDialogSuppressor.$([guid]::NewGuid().ToString('N')).stop")
-  $job = Start-Job -ScriptBlock {
-    param()
-    Add-Type -LiteralPath $using:csPath
-    [VBProjectDialogSuppressor]::Run($using:stopFilePath, $using:TargetExe)
-  }
-  $job | Add-Member -MemberType NoteProperty -Name StopFilePath -Value $stopFilePath
-  return $job
-}
-function Stop-VBProjectDialogSuppressor {
-  [CmdletBinding()]
-  [OutputType([void])]
-  [SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-  param (
-    [Parameter(Mandatory)]
-    [System.Management.Automation.Job]
-    $Job
-  )
-  $stopFilePath = $Job.StopFilePath
-  try {
-    New-Item -Path $stopFilePath -ItemType File -Force -WhatIf:$false -Confirm:$false | Out-Null
-    Receive-Job -Job $Job -Wait -AutoRemoveJob
-  } finally {
-    if (Test-Path -LiteralPath $stopFilePath) {
-      Remove-Item -LiteralPath $stopFilePath -Force -WhatIf:$false -Confirm:$false
-    }
   }
 }

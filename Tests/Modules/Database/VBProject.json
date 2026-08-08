@@ -6,6 +6,16 @@
       "Type": "acTable"
     },
     {
+      "Name": "Form1",
+      "Path": ".\\VBProject\\Form1.txt",
+      "Type": "acForm"
+    },
+    {
+      "Name": "Report1",
+      "Path": ".\\VBProject\\Report1.txt",
+      "Type": "acReport"
+    },
+    {
       "Name": "Macro1",
       "Path": ".\\VBProject\\Macro1.txt",
       "Type": "acMacro"

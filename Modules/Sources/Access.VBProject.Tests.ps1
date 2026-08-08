@@ -78,6 +78,17 @@ InModuleScope 'Automation.Office' {
       $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
       $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
       $Database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
+    } -InitializeProject {
+      param(
+        [Microsoft.Office.Interop.Access.CurrentProject]
+        $Project
+      )
+      # https://learn.microsoft.com/en-us/office/vba/api/access.application.createform
+      $form = $Project.Application.CreateForm()
+      $Project.Application.DoCmd.Save([Microsoft.Office.Interop.Access.AcObjectType]::acForm, $form.Name)
+      # https://learn.microsoft.com/en-us/office/vba/api/access.application.createreport
+      $report = $Project.Application.CreateReport()
+      $Project.Application.DoCmd.Save([Microsoft.Office.Interop.Access.AcObjectType]::acReport, $report.Name)
     }
     try {
       Import-AccessVBProject -Path $fixture -Source $source

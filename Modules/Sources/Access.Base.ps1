@@ -212,6 +212,11 @@ function New-AccessFile {
           $database.Close()
         }
       }
+      $dialogSuppressor = if ($InitializeProject) {
+        Start-VBProjectDialogSuppressor -TargetExe 'MSACCESS.EXE'
+      } else {
+        $null
+      }
       if ($InitializeProject) {
         & $InitializeProject $app.CurrentProject
       }
@@ -220,6 +225,9 @@ function New-AccessFile {
       try {
         if ($app) {
           $app.Quit()
+        }
+        if ($dialogSuppressor) {
+          Stop-VBProjectDialogSuppressor -Job $dialogSuppressor
         }
       } finally {
         Get-Variable |

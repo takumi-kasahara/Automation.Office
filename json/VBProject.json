@@ -5,10 +5,7 @@
   "description": "Schema for unified VBProject.json format.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "VBComponents",
-    "References"
-  ],
+  "required": ["VBComponents", "References"],
   "properties": {
     "VBComponents": {
       "type": "array",
@@ -27,11 +24,7 @@
     "VBComponentInfo": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "Name",
-        "Path",
-        "Type"
-      ],
+      "required": ["Name", "Path", "Type"],
       "properties": {
         "Name": {
           "type": "string",
@@ -39,7 +32,7 @@
         },
         "Path": {
           "type": "string",
-          "pattern": "^\\.\\\\.+\\.(bas|cls|frm|vba|txt)$"
+          "pattern": "^\\.\\\\.+\\.(bas|cls|frm|vba|txt|accdb)$"
         },
         "Type": {
           "type": "string",
