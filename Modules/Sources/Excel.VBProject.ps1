@@ -69,14 +69,20 @@ function Export-ExcelVBProject {
       return
     }
     $app = New-ExcelObject
+    $arguments = @{
+      Destination   = $Destination
+      ComponentRoot = $ComponentRoot
+      Force         = $Force
+      NoClobber     = $NoClobber
+    }
     try {
       Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param(
           [Parameter(Mandatory)]
           [Microsoft.Office.Interop.Excel.Workbook]
-          $file
+          $Workbook
         )
-        return Export-VBProject -VBProject $file.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
+        return Export-VBProject -VBProject $Workbook.VBProject @arguments
       }
     } finally {
       try {

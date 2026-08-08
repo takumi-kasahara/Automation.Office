@@ -70,6 +70,12 @@ function Export-WordVBProject {
       return
     }
     $app = New-WordObject
+    $arguments = @{
+      Destination   = $Destination
+      ComponentRoot = $ComponentRoot
+      Force         = $Force
+      NoClobber     = $NoClobber
+    }
     try {
       Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
@@ -77,7 +83,7 @@ function Export-WordVBProject {
           [Microsoft.Office.Interop.Word.Document]
           $Document
         )
-        return Export-VBProject -VBProject $Document.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
+        return Export-VBProject -VBProject $Document.VBProject @arguments
       }
     } finally {
       try {

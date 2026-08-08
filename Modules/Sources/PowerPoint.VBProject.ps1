@@ -69,6 +69,12 @@ function Export-PowerPointVBProject {
       return
     }
     $app = New-PowerPointObject
+    $arguments = @{
+      Destination   = $Destination
+      ComponentRoot = $ComponentRoot
+      Force         = $Force
+      NoClobber     = $NoClobber
+    }
     try {
       Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
@@ -76,7 +82,7 @@ function Export-PowerPointVBProject {
           [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )
-        return Export-VBProject -VBProject $Presentation.VBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
+        return Export-VBProject -VBProject $Presentation.VBProject @arguments
       }
     } finally {
       try {

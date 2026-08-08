@@ -64,10 +64,16 @@ function Export-AccessVBProject {
       return
     }
     $app = New-AccessObject
+    $arguments = @{
+      Destination   = $Destination
+      ComponentRoot = $ComponentRoot
+      Force         = $Force
+      NoClobber     = $NoClobber
+    }
     try {
       Open-AccessFile -Application $app -Path $Path -Password $Password
       try {
-        return Export-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject -Destination $Destination -ComponentRoot $ComponentRoot -Force:$Force -NoClobber:$NoClobber
+        return Export-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject @arguments
       } finally {
         $app.CloseCurrentDatabase()
       }
