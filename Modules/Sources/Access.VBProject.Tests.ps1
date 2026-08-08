@@ -1,4 +1,7 @@
-﻿using module .\..\Automation.Office.psd1
+﻿using assembly Microsoft.Office.Interop.Access
+using module .\..\Automation.Office.psd1
+using namespace Microsoft.Office.Interop.Access
+using namespace Microsoft.Office.Interop.Access.Dao
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 
@@ -79,11 +82,14 @@ InModuleScope 'Automation.Office' {
     $root = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin'
     $bin = Get-Fixture
     New-AccessFile -Path $bin -RemovePersonalInformation -Force -InitializeDb {
-      param($db)
-      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
-      $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
-      $db.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
-      $db.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
+      param(
+        [Microsoft.Office.Interop.Access.Dao.Database]
+        $Database
+      )
+      $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
+      $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
+      $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
+      $Database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
     }
     try {
       Import-AccessVBProject -Path $bin -Source (Get-FixtureSource)

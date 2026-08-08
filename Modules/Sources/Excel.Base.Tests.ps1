@@ -122,7 +122,6 @@ InModuleScope 'Automation.Office' {
         $app = New-ExcelObject
         Open-ExcelFile -Path $path -PasswordToOpen $password -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -136,7 +135,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-ExcelFile -Path $path -PasswordToModify $password -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -150,7 +148,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-ExcelFile -Path $path -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -163,7 +160,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-ExcelFile -Path $path -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -174,7 +170,6 @@ InModuleScope 'Automation.Office' {
         $path = Get-TempFile
         $item = New-ExcelFile -Path $path -Initialize {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -185,7 +180,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-ExcelFile -Path $path -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -288,7 +282,6 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         $result = Open-ExcelFile -Path $path -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )

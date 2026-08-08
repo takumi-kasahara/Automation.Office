@@ -104,7 +104,6 @@ function Get-WordDocumentProperty {
       ForEach-Object {
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
@@ -354,7 +353,6 @@ function Set-WordDocumentProperty {
         }
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
@@ -510,7 +508,6 @@ function Remove-WordDocumentProperty {
         }
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )

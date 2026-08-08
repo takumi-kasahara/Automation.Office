@@ -50,7 +50,6 @@ InModuleScope 'Automation.Office' {
       )
       New-PowerPointFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )
@@ -75,7 +74,6 @@ InModuleScope 'Automation.Office' {
       )
       New-PowerPointFile @PSBoundParameters -Initialize {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )

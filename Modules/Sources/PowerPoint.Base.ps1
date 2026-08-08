@@ -572,7 +572,6 @@ function Get-PowerPointFileProperty {
       ForEach-Object {
         Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )

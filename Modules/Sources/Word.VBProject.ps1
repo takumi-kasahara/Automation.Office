@@ -79,7 +79,6 @@ function Export-WordVBProject {
     try {
       Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.Word.Document]
           $Document
         )
@@ -154,7 +153,6 @@ function Import-WordVBProject {
     try {
       Open-WordFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.Word.Document]
           $Document
         )

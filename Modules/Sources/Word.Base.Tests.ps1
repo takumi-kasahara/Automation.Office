@@ -121,7 +121,6 @@ InModuleScope 'Automation.Office' {
         try {
           Open-WordFile -Application $app -Path $path -PasswordToOpen $password -Action {
             param (
-              [Parameter(Mandatory)]
               [Microsoft.Office.Interop.Word.Document]
               $Document
             )
@@ -150,7 +149,6 @@ InModuleScope 'Automation.Office' {
         try {
           Open-WordFile -Application $app -Path $path -PasswordToModify $password -Action {
             param (
-              [Parameter(Mandatory)]
               [Microsoft.Office.Interop.Word.Document]
               $Document
             )
@@ -179,7 +177,6 @@ InModuleScope 'Automation.Office' {
         try {
           Open-WordFile -Application $app -Path $path -Action {
             param (
-              [Parameter(Mandatory)]
               [Microsoft.Office.Interop.Word.Document]
               $Document
             )
@@ -207,7 +204,6 @@ InModuleScope 'Automation.Office' {
         try {
           Open-WordFile -Application $app -Path $path -Action {
             param (
-              [Parameter(Mandatory)]
               [Microsoft.Office.Interop.Word.Document]
               $Document
             )
@@ -231,7 +227,6 @@ InModuleScope 'Automation.Office' {
         $path = Get-TempFile
         $item = New-WordFile -Path $path -Initialize {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
@@ -244,7 +239,6 @@ InModuleScope 'Automation.Office' {
         try {
           Open-WordFile -Application $app -Path $path -Action {
             param (
-              [Parameter(Mandatory)]
               [Microsoft.Office.Interop.Word.Document]
               $Document
             )
@@ -355,7 +349,6 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         $result = Open-WordFile -Path $path -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )

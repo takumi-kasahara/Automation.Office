@@ -121,7 +121,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -PasswordToOpen $password -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -134,7 +133,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -PasswordToModify $password -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -147,7 +145,6 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -158,7 +155,6 @@ InModuleScope 'Automation.Office' {
         $path = Get-TempFile
         $item = New-PowerPointFile -Path $path -Initialize {
           param (
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -260,7 +256,6 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path
         $result = Open-PowerPointFile -Path $path -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )

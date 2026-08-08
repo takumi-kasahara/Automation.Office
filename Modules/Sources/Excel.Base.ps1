@@ -580,11 +580,10 @@ function Get-ExcelFileProperty {
       ForEach-Object {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
-            $file
+            $Workbook
           )
-          $properties = Get-ObjectProperty -InputObject $file
+          $properties = Get-ObjectProperty -InputObject $Workbook
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {
@@ -779,7 +778,6 @@ function Set-ExcelFileProperty {
         }
         Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )

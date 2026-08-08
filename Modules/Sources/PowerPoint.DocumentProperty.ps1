@@ -104,7 +104,6 @@ function Get-PowerPointDocumentProperty {
       ForEach-Object {
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -355,7 +354,6 @@ function Set-PowerPointDocumentProperty {
         $parameterSetName = $PSCmdlet.ParameterSetName
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -511,7 +509,6 @@ function Remove-PowerPointDocumentProperty {
         }
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )

@@ -170,11 +170,10 @@ InModuleScope 'Automation.Office' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeDb {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Access.Dao.Database]
-            $database
+            $Database
           )
-          $database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+          $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
         }
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
@@ -186,7 +185,6 @@ InModuleScope 'Automation.Office' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeProject {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
@@ -533,8 +531,11 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           Open-AccessFile -Application $app -Path $path -ActionDb {
-            param($db)
-            $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+            param(
+              [Microsoft.Office.Interop.Access.Dao.Database]
+              $Database
+            )
+            $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
           }
           # Close the database after ActionDb completes
           $app.CloseCurrentDatabase()
@@ -561,8 +562,11 @@ InModuleScope 'Automation.Office' {
         $app = New-AccessObject
         try {
           $connection = Open-AccessFile -Application $app -Path $path -ActionProject {
-            param($project)
-            return $project.Connection
+            param(
+              [Microsoft.Office.Interop.Access.CurrentProject]
+              $Project
+            )
+            return $Project.Connection
           }
           $connection | Should-NotBeNull
         } finally {

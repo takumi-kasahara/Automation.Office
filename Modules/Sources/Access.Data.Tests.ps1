@@ -38,14 +38,13 @@ InModuleScope 'Automation.Office' {
       )
       New-AccessFile -Path $Path -Password $Password -RemovePersonalInformation -Force -InitializeDb {
         param(
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.Access.Dao.Database]
-          $database
+          $Database
         )
-        $database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
-        $database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
-        $database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
-        $database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
+        $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
+        $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
+        $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
+        $Database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
       }
     }
   }

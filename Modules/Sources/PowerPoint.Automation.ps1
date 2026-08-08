@@ -167,7 +167,6 @@ function Get-PowerPointSpeakerNote {
         $item = $_
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param(
-            [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )

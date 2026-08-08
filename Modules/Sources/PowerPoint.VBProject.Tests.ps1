@@ -273,6 +273,9 @@ InModuleScope 'Automation.Office' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
+    BeforeEach {
+      $destination = Get-Destination
+    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject
@@ -285,7 +288,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
+        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
       }
     }
   }

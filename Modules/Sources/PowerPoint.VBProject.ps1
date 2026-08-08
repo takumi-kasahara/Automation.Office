@@ -78,7 +78,6 @@ function Export-PowerPointVBProject {
     try {
       Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )
@@ -161,7 +160,6 @@ function Import-PowerPointVBProject {
     try {
       Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
         param (
-          [Parameter(Mandatory)]
           [Microsoft.Office.Interop.PowerPoint.Presentation]
           $Presentation
         )

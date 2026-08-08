@@ -113,19 +113,19 @@ function New-AccessFile {
 
   .EXAMPLE
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeDb {
-      param($db)
-      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+      param($Database)
+      $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
 
     Creates a database and creates a table using DAO.
 
   .EXAMPLE
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeProject {
-      param($project)
-      $project.Connection = 'Provider=Microsoft.ACE.OLEDB.12.0;Data Source=$env:TEMP\Database.accdb;'
+      param($Project)
+      return $Project.Connection
     }
 
-    Creates a database and sets the connection string.
+    Returns the connection string of the new database project.
 
   .OUTPUTS
     System.IO.FileInfo
@@ -278,19 +278,19 @@ function Open-AccessFile {
 
   .EXAMPLE
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
-      param($db)
-      $db.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
+      param($Database)
+      $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
 
     Opens a database, creates a table using DAO, and closes the database.
 
   .EXAMPLE
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionProject {
-      param($project)
-      $project.Connection = 'Provider=Microsoft.ACE.OLEDB.12.0;'
+      param($Project)
+      return $Project.Connection
     }
 
-    Opens a database and sets the connection string.
+    Opens a database and returns the connection string.
 
   .OUTPUTS
     __ComObject
@@ -335,7 +335,7 @@ function Open-AccessFile {
       if ($Password) {
         # Validate credentials through DAO first to avoid Access password UI prompts.
         # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/dbengine-opendatabase-method-dao
-        $Application.DBEngine.OpenDatabase(
+        $app.DBEngine.OpenDatabase(
           $resolved                 # Name
           , $false                  # Options
           , $true                   # ReadOnly
@@ -343,7 +343,7 @@ function Open-AccessFile {
         ).Close()
       }
       # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
-      $Application.OpenCurrentDatabase(
+      $app.OpenCurrentDatabase(
         $resolved         # filePath
         , $true           # exclusive
         , $passwordString # bstrPassword
