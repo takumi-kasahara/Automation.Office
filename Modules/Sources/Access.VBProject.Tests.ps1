@@ -248,6 +248,32 @@ InModuleScope 'Automation.Office' {
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
+      It 'exports VBProject with filtered AcObjectType when IncludeAcObjectType is specified' {
+        $include = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
+        Export-AccessVBProject -Path $fixture -Destination $destination -IncludeAcObjectType $include
+        $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
+        @($exported.VBComponents).Count | Should-BeGreaterThan 0
+        @($exported.References).Count | Should-BeGreaterThan 0
+        @($exported.VBComponents | Where-Object -Property Type -In $include).Count | Should-Be 1
+      }
+      It 'exports VBProject with filtered AcObjectType when ExcludeAcObjectType is specified' {
+        $exclude = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
+        Export-AccessVBProject -Path $fixture -Destination $destination -ExcludeAcObjectType $exclude
+        $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
+        @($exported.VBComponents).Count | Should-BeGreaterThan 0
+        @($exported.References).Count | Should-BeGreaterThan 0
+        @($exported.VBComponents | Where-Object -Property Type -In $exclude).Count | Should-Be 0
+      }
+      It 'exports VBProject with filtered AcObjectType when both IncludeAcObjectType and ExcludeAcObjectType are specified' {
+        $include = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm, [Microsoft.Office.Interop.Access.AcObjectType]::acReport)
+        $exclude = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
+        Export-AccessVBProject -Path $fixture -Destination $destination -IncludeAcObjectType $include -ExcludeAcObjectType $exclude
+        $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
+        @($exported.VBComponents).Count | Should-BeGreaterThan 0
+        @($exported.References).Count | Should-BeGreaterThan 0
+        @($exported.VBComponents | Where-Object -Property Type -In $include).Count | Should-Be 1
+        @($exported.VBComponents | Where-Object -Property Type -In $exclude).Count | Should-Be 0
+      }
     }
     Context 'Edge cases' {
       It 'throws when the destination is an existing directory' {

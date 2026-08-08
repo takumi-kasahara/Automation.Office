@@ -35,6 +35,16 @@ function Export-AccessVBProject {
   .PARAMETER NoClobber
     Produces an error if -Destination already exists. If omitted, existing output is overwritten.
 
+  .PARAMETER IncludeAcObjectType
+    Specifies an array of AcObjectType values to include when exporting the VBProject.
+    When specified, only the specified object types are included in the export.
+    Corresponds to the IncludeAcObjectType parameter in the Access VBA object model.
+
+  .PARAMETER ExcludeAcObjectType
+    Specifies an array of AcObjectType values to exclude when exporting the VBProject.
+    When specified, the specified object types are omitted from the export.
+    Corresponds to the ExcludeAcObjectType parameter in the Access VBA object model.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created export file.

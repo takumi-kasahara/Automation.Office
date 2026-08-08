@@ -208,14 +208,41 @@ function Export-VBProjectComponent {
     }
     $exported = [VBComponentInfo[]]@()
     if ($Application) {
-      $tableDefs = $resolved | Join-Path -ChildPath 'TableDefs.accdb'
-      New-AccessFile -Path $tableDefs -RemovePersonalInformation -Force | Out-Null
-      $exported += [VBComponentInfo]@{
-        Name = 'TableDefs'
-        Path = [PathCompatibility]::GetRelativePath($resolved, $tableDefs)
-        type = [AcObjectType]::acTable
+      $included = $true
+      if ($includeAcObjectType) {
+        $included = $IncludeAcObjectType -contains [AcObjectType]::acTable
+        if ($included -and $ExcludeAcObjectType) {
+          $included = $included -and -not ($ExcludeAcObjectType -contains [AcObjectType]::acTable)
+        }
+      } elseif ($ExcludeAcObjectType) {
+        $included = -not ($ExcludeAcObjectType -contains [AcObjectType]::acTable)
+      } else {
+        $included = $true
+      }
+      if ($included) {
+        $tableDefs = $resolved | Join-Path -ChildPath 'TableDefs.accdb'
+        New-AccessFile -Path $tableDefs -RemovePersonalInformation -Force | Out-Null
+        $exported += [VBComponentInfo]@{
+          Name = 'TableDefs'
+          Path = [PathCompatibility]::GetRelativePath($resolved, $tableDefs)
+          type = [AcObjectType]::acTable
+        }
       }
       Get-AccessObject -Application $Application |
+      Where-Object {
+        $included = $true
+        if ($IncludeAcObjectType) {
+          $included = $IncludeAcObjectType -contains [AcObjectType]$_.Type
+          if ($included -and $ExcludeAcObjectType) {
+            $included = $included -and -not ($ExcludeAcObjectType -contains [AcObjectType]$_.Type)
+          }
+        } elseif ($ExcludeAcObjectType) {
+          $included = -not ($ExcludeAcObjectType -contains [AcObjectType]$_.Type)
+        } else {
+          $included = $true
+        }
+        return $included
+      } |
       ForEach-Object {
         $filename = "$($_.Name).txt"
         $path = $resolved | Join-Path -ChildPath $fileName
