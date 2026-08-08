@@ -271,7 +271,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Export-ExcelVBProject.Unit' {
     BeforeAll {
-      Mock -CommandName Test-Path -MockWith { $true }
+      Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
@@ -414,16 +414,16 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
+        Mock -CommandName New-ExcelObject -MockWith { throw } -ModuleName 'Automation.Office'
 
         { Import-ExcelVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
 
-        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
+        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly -ModuleName 'Automation.Office'
       }
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
+        Mock -CommandName New-ExcelObject -MockWith { throw } -ModuleName 'Automation.Office'
 
         { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
       }

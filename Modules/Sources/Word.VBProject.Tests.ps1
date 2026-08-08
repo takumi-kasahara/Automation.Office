@@ -271,7 +271,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Export-WordVBProject.Unit' {
     BeforeAll {
-      Mock -CommandName Test-Path -MockWith { $true }
+      Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {

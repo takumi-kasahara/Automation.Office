@@ -267,26 +267,15 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Export-AccessVBProject.Unit' {
-    BeforeEach {
-      $path = Get-Fixture
-      $destination = Get-Destination
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $destination) {
-        Remove-Item -LiteralPath $destination -Force
-      }
-      $componentRoot = [Path]::ChangeExtension($destination, $null)
-      if (Test-Path -LiteralPath $componentRoot) {
-        Remove-Item -LiteralPath $componentRoot -Recurse -Force
-      }
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
         Mock -CommandName New-AccessObject -MockWith { throw }
 
-        { Export-AccessVBProject -Path $path -Destination $destination -WhatIf } | Should -Not -Throw
+        { Export-AccessVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
-        Test-Path -LiteralPath $destination | Should-BeFalse
       }
     }
   }

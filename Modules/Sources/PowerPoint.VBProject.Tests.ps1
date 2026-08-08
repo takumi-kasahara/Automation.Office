@@ -271,7 +271,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Export-PowerPointVBProject.Unit' {
     BeforeAll {
-      Mock -CommandName Test-Path -MockWith { $true }
+      Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
