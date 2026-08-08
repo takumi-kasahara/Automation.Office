@@ -270,11 +270,14 @@ InModuleScope 'Automation.Office' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
+    BeforeEach {
+      $destination = Get-Destination
+    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
         Mock -CommandName New-AccessObject -MockWith { throw }
 
-        { Export-AccessVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
+        { Export-AccessVBProject -Path (Get-Fixture) -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
       }
     }
@@ -378,14 +381,12 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Import-AccessVBProject.Unit' {
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $true }
+    }
     BeforeEach {
       $path = Get-TempFile
       $source = Get-FixtureSource
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {

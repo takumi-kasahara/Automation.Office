@@ -277,7 +277,7 @@ InModuleScope 'Automation.Office' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject
 
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
+        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
@@ -395,14 +395,12 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Import-PowerPointVBProject.Unit' {
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $true }
+    }
     BeforeEach {
       $path = Get-TempFile
       $source = Get-FixtureSource
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {

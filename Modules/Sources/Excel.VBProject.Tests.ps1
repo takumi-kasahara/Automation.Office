@@ -273,11 +273,14 @@ InModuleScope 'Automation.Office' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
+    BeforeEach {
+      $destination = Get-Destination
+    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
         Mock -CommandName New-ExcelObject -MockWith { throw }
 
-        { Export-ExcelVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
@@ -285,7 +288,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-ExcelObject fails' {
         Mock -CommandName New-ExcelObject -MockWith { throw }
 
-        { Export-ExcelVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
       }
     }
   }
@@ -402,28 +405,25 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Import-ExcelVBProject.Unit' {
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $true }
+    }
     BeforeEach {
       $path = Get-TempFile
-      New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled
       $source = Get-FixtureSource
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw } -ModuleName 'Automation.Office'
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Import-ExcelVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
 
-        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly -ModuleName 'Automation.Office'
+        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw } -ModuleName 'Automation.Office'
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
       }

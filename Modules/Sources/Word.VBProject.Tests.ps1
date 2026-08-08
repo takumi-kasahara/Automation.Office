@@ -273,11 +273,14 @@ InModuleScope 'Automation.Office' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
+    BeforeEach {
+      $destination = Get-Destination
+    }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
         Mock -CommandName New-WordObject
 
-        { Export-WordVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
+        { Export-WordVBProject -Path (Get-Fixture) -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
       }
     }
@@ -285,7 +288,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-WordObject fails' {
         Mock -CommandName New-WordObject -MockWith { throw }
 
-        { Export-WordVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
+        { Export-WordVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
       }
     }
   }
@@ -395,14 +398,12 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Import-WordVBProject.Unit' {
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $true }
+    }
     BeforeEach {
       $path = Get-TempFile
       $source = Get-FixtureSource
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
