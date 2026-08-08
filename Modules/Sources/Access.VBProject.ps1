@@ -1,4 +1,5 @@
-﻿using module .\VBProject.psm1
+﻿using assembly Microsoft.Office.Interop.Access
+using module .\VBProject.psm1
 using namespace System.IO
 using namespace System.Text
 
@@ -57,7 +58,11 @@ function Export-AccessVBProject {
     [switch]
     $Force,
     [switch]
-    $NoClobber
+    $NoClobber,
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $IncludeAcObjectType,
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $ExcludeAcObjectType
   )
   process {
     if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($Path, "Export VBProject to $Destination"))) {
@@ -65,15 +70,17 @@ function Export-AccessVBProject {
     }
     $app = New-AccessObject
     $arguments = @{
-      Destination   = $Destination
-      ComponentRoot = $ComponentRoot
-      Force         = $Force
-      NoClobber     = $NoClobber
+      Destination         = $Destination
+      ComponentRoot       = $ComponentRoot
+      Force               = $Force
+      NoClobber           = $NoClobber
+      IncludeAcObjectType = $IncludeAcObjectType
+      ExcludeAcObjectType = $ExcludeAcObjectType
     }
     try {
       Open-AccessFile -Application $app -Path $Path -Password $Password
       try {
-        return Export-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject @arguments
+        return Export-VBProject -Application $app @arguments
       } finally {
         $app.CloseCurrentDatabase()
       }
@@ -140,7 +147,7 @@ function Import-AccessVBProject {
     try {
       Open-AccessFile -Application $app -Path $Path -Password $Password
       try {
-        Import-VBProject -Application $app -VBProject $app.VBE.ActiveVBProject -Source $Source -TargetExe 'MSACCESS.EXE'
+        Import-VBProject -Application $app -Source $Source -TargetExe 'MSACCESS.EXE'
       } finally {
         $app.CloseCurrentDatabase()
       }

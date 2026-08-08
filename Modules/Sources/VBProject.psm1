@@ -191,7 +191,11 @@ function Export-VBProjectComponent {
     [switch]
     $Force,
     [switch]
-    $NoClobber
+    $NoClobber,
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $IncludeAcObjectType,
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $ExcludeAcObjectType
   )
   $activity = 'Getting Components'
   try {
@@ -514,12 +518,13 @@ function Import-VBProjectComponent {
   }
 }
 function Export-VBProject {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName = 'DefaultSet')]
   [OutputType([System.IO.FileInfo])]
   param (
+    [Parameter(Mandatory, ParameterSetName = 'AccessSet')]
     [__ComObject]
     $Application,
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, ParameterSetName = 'DefaultSet')]
     [__ComObject]
     $VBProject,
     [Parameter(Mandatory)]
@@ -531,7 +536,13 @@ function Export-VBProject {
     [switch]
     $Force,
     [switch]
-    $NoClobber
+    $NoClobber,
+    [Parameter(ParameterSetName = 'AccessSet')]
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $IncludeAcObjectType,
+    [Parameter(ParameterSetName = 'AccessSet')]
+    [Microsoft.Office.Interop.Access.AcObjectType[]]
+    $ExcludeAcObjectType
   )
   $activity = 'Exporting VBProject'
   $resolvedDestination = $null
@@ -555,10 +566,23 @@ function Export-VBProject {
     }
 
     Write-Progress -Activity $activity -Status 'Exporting references'
-    $references = @(Get-VBProjectReference -VBProject $VBProject)
-
+    $references = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      'AccessSet' {
+        @(Get-VBProjectReference -VBProject $Application.VBE.ActiveVBProject)
+      }
+      'DefaultSet' {
+        @(Get-VBProjectReference -VBProject $VBProject)
+      }
+    }
     Write-Progress -Activity $activity -Status 'Exporting components'
-    $components = @(Export-VBProjectComponent -Application $Application -VBProject $VBProject -Destination $resolvedComponentRoot -Force:$Force -NoClobber:$NoClobber)
+    $components = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      'AccessSet' {
+        @(Export-VBProjectComponent -Application $Application -VBProject $Application.VBE.ActiveVBProject -Destination $resolvedComponentRoot -Force:$Force -NoClobber:$NoClobber -IncludeAcObjectType $IncludeAcObjectType -ExcludeAcObjectType $ExcludeAcObjectType)
+      }
+      'DefaultSet' {
+        @(Export-VBProjectComponent -VBProject $VBProject -Destination $resolvedComponentRoot -Force:$Force -NoClobber:$NoClobber)
+      }
+    }
 
     $destinationDirectory = [Path]::GetDirectoryName($resolvedDestination)
     if ([string]::IsNullOrEmpty($destinationDirectory)) {
@@ -591,12 +615,13 @@ function Export-VBProject {
   }
 }
 function Import-VBProject {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName = 'DefaultSet')]
   [OutputType([void])]
   param (
+    [Parameter(Mandatory, ParameterSetName = 'AccessSet')]
     [__ComObject]
     $Application,
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, ParameterSetName = 'DefaultSet')]
     [__ComObject]
     $VBProject,
     [Parameter(Mandatory)]
@@ -624,9 +649,23 @@ function Import-VBProject {
       }
     }
     Write-Progress -Activity $activity -Status 'Importing references'
-    Import-VBProjectReference -VBProject $VBProject -References @($metadata.References)
+    switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      'AccessSet' {
+        Import-VBProjectReference -VBProject $Application.VBE.ActiveVBProject -References @($metadata.References)
+      }
+      'DefaultSet' {
+        Import-VBProjectReference -VBProject $VBProject -References @($metadata.References)
+      }
+    }
     Write-Progress -Activity $activity -Status 'Importing components'
-    Import-VBProjectComponent -Application $Application -VBProject $VBProject -Components $components -ComponentRoot $sourceDirectory
+    switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+      'AccessSet' {
+        Import-VBProjectComponent -Application $Application -VBProject $Application.VBE.ActiveVBProject -Components $components -ComponentRoot $sourceDirectory
+      }
+      'DefaultSet' {
+        Import-VBProjectComponent -VBProject $VBProject -Components $components -ComponentRoot $sourceDirectory
+      }
+    }
   } finally {
     if ($dialogSuppressor) {
       Stop-VBProjectDialogSuppressor -Job $dialogSuppressor
