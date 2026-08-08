@@ -33,18 +33,6 @@ InModuleScope 'Automation.Office' {
       param ()
       return $env:TEMP | Join-Path -ChildPath "VBProject.$([guid]::NewGuid().ToString('N')).json"
     }
-    function Get-Fixture {
-      [CmdletBinding()]
-      [OutputType([string])]
-      param ()
-      return $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin\Presentation.pptm'
-    }
-    function Get-FixtureSource {
-      [CmdletBinding()]
-      [OutputType([string])]
-      param ()
-      return $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Modules\Presentation\VBProject.json'
-    }
     function Get-ComparableVBProjectFromJson {
       [CmdletBinding()]
       [OutputType([PSCustomObject])]
@@ -79,23 +67,22 @@ InModuleScope 'Automation.Office' {
         }
       }
     }
-    $root = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin'
-    $bin = Get-Fixture
-    New-PowerPointFile -Path $bin -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -Force
+    $fixture = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin\Presentation.pptm'
+    $source = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Modules\Presentation\VBProject.json'
+    New-PowerPointFile -Path $fixture -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -Force
     try {
-      Import-PowerPointVBProject -Path $bin -Source (Get-FixtureSource) -Hidden
+      Import-PowerPointVBProject -Path $fixture -Source $source -Hidden
     } catch {
-      Remove-Item -LiteralPath $bin -Force
+      Remove-Item -LiteralPath $fixture -Force
       throw $_
     }
   }
   AfterAll {
-    $destination = Get-FixtureSource
-    $componentRoot = [Path]::ChangeExtension($destination, $null)
+    $componentRoot = [Path]::ChangeExtension($source, $null)
     if (-not (Test-Path -LiteralPath $componentRoot)) {
       New-Item -Path $componentRoot -ItemType Directory | Out-Null
     }
-    Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination
+    Export-PowerPointVBProject -Path $fixture -Destination $source
   }
   Describe 'Export-PowerPointVBProject' {
     BeforeAll {
@@ -146,7 +133,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'exports VBProject by FilePath as JSON' {
-        $item = Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination
+        $item = Export-PowerPointVBProject -Path $fixture -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
@@ -154,7 +141,7 @@ InModuleScope 'Automation.Office' {
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipeline' {
-        $item = (Get-Fixture) | Export-PowerPointVBProject -Destination $destination
+        $item = $fixture | Export-PowerPointVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
@@ -162,7 +149,7 @@ InModuleScope 'Automation.Office' {
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipelineByPropertyName' {
-        $item = [PSCustomObject]@{ Path = (Get-Fixture) } | Export-PowerPointVBProject -Destination $destination
+        $item = [PSCustomObject]@{ Path = $fixture } | Export-PowerPointVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
@@ -172,7 +159,7 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject components to the specified ComponentRoot' {
         $customRoot = $env:TEMP | Join-Path -ChildPath "VBComponents.$([guid]::NewGuid().ToString('N'))"
         try {
-          $item = Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -ComponentRoot $customRoot
+          $item = Export-PowerPointVBProject -Path $fixture -Destination $destination -ComponentRoot $customRoot
           $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
           $item.FullName | Should-Be ([Path]::GetFullPath($destination))
           Test-Path -LiteralPath $customRoot -PathType Container | Should-BeTrue
@@ -188,20 +175,20 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not create outputs when WhatIf is specified' {
-        Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -WhatIf
+        Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -WhatIf
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path (Get-Fixture) -Destination $destination
+        $exitCode = 'N' | Invoke-Confirm -Path $fixture -Destination $destination
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
         (New-Item -Path $destination -ItemType File).IsReadOnly = $true
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
-        Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -Confirm
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
+        Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -209,26 +196,26 @@ InModuleScope 'Automation.Office' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         $bas = New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File
         $bas.IsReadOnly = $true
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
-        Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -Confirm
+        Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm
         $bas.IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
       It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
         New-Item -Path $destination -ItemType File | Out-Null
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should-Throw
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         (Get-Item -LiteralPath $destination).Length | Should-Be 0
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'throws and keeps the existing component content unchanged when NoClobber is specified' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File | Out-Null
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should-Throw
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'Module1.bas') -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -251,19 +238,19 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when the destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
       }
       It 'throws when the destination path already exists as a directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -NoClobber } | Should-Throw
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'throws when the component directory path already exists as a file' {
         New-Item -Path $componentRoot -ItemType File | Out-Null
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -Force } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $componentRoot -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $destination | Should-BeFalse
       }
@@ -280,7 +267,7 @@ InModuleScope 'Automation.Office' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject
 
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination -WhatIf } | Should -Not -Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
@@ -288,7 +275,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when New-PowerPointObject fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination $destination } | Should-Throw
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
       }
     }
   }
@@ -325,7 +312,6 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
-      $source = Get-FixtureSource
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -403,7 +389,6 @@ InModuleScope 'Automation.Office' {
     }
     BeforeEach {
       $path = Get-TempFile
-      $source = Get-FixtureSource
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
