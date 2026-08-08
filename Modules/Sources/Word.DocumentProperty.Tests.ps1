@@ -122,7 +122,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Get-WordDocumentProperty -Path $path } | Should-Throw
       }
@@ -349,7 +349,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-WordFile
       }
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -501,7 +501,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-WordFile
       }
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
       }

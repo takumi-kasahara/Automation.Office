@@ -122,7 +122,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointDocumentProperty -Path $path } | Should-Throw
       }
@@ -350,7 +350,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -502,7 +502,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
       }

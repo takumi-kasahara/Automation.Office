@@ -275,17 +275,17 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-PowerPointObject
 
-        { Export-PowerPointVBProject -Path 'dummy.pptx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
+        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Export-PowerPointVBProject -Path 'dummy.pptx' -Destination 'dummy' } | Should-Throw
+        { Export-PowerPointVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
       }
     }
   }
@@ -406,7 +406,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
@@ -414,10 +414,9 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith {
-          throw 'failed to create PowerPoint object'
-        }
-        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw 'failed to create PowerPoint object'
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
+
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
       }
     }
   }

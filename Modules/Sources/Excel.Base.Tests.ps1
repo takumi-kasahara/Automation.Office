@@ -212,7 +212,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { New-ExcelFile -Path $path -Force -WhatIf } | Should -Not -Throw
         Should-NotInvoke -CommandName New-ExcelObject
@@ -311,7 +311,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject
 
         { Open-ExcelFile -Path $path } | Should-Throw
         Should-Invoke -CommandName New-ExcelObject -Times 1 -Exactly
@@ -325,7 +325,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Get-ExcelAppProperty.Unit' {
     It 'throws when New-ExcelObject fails' {
-      Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+      Mock -CommandName New-ExcelObject -MockWith { throw }
 
       { Get-ExcelAppProperty } | Should-Throw
       Should-Invoke -CommandName New-ExcelObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
@@ -351,7 +351,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Set-ExcelAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
@@ -359,7 +359,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Set-ExcelAppProperty -Properties $properties } | Should-Throw
       }
@@ -426,7 +426,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Get-ExcelFileProperty -Path $path } | Should-Throw
       }

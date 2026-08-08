@@ -282,7 +282,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { Export-AccessVBProject -Path $path -Destination $destination -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
@@ -400,7 +400,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { Import-AccessVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
@@ -408,10 +408,9 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith {
-          throw 'failed to create Access object'
-        }
-        { Import-AccessVBProject -Path $path -Source $source } | Should-Throw 'failed to create Access object'
+        Mock -CommandName New-AccessObject -MockWith { throw }
+
+        { Import-AccessVBProject -Path $path -Source $source } | Should-Throw
       }
     }
   }

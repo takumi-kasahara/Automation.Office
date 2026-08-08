@@ -1,5 +1,6 @@
 ﻿using module .\..\Automation.Office.psd1
 using namespace Microsoft.Office.Interop.OneNote
+using namespace System.Collections.Generic
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 
@@ -19,14 +20,16 @@ InModuleScope 'Automation.Office' {
     function Get-SectionPath {
       [CmdletBinding()]
       param (
-        [string]$NotebookPath
+        [string]
+        $NotebookPath
       )
       return $NotebookPath | Join-Path -ChildPath "Section.$([Guid]::NewGuid().ToString('N')).one"
     }
     function Get-SectionGroupPath {
       [CmdletBinding()]
       param (
-        [string]$NotebookPath
+        [string]
+        $NotebookPath
       )
       return $NotebookPath | Join-Path -ChildPath "$([Guid]::NewGuid().ToString('N'))"
 
@@ -197,15 +200,17 @@ public enum XMLSchema
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
         param ()
-        $app = [PSCustomObject]@{
-          Calls = [System.Collections.Generic.List[object]]::new()
-        }
+        $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetHierarchy -Value {
           param(
-            [string]$Id,
-            [object]$HierarchyScope,
-            [ref]$Xml,
-            [object]$Schema
+            [string]
+            $Id,
+            [object]
+            $HierarchyScope,
+            [ref]
+            $Xml,
+            [object]
+            $Schema
           )
           [void]$this.Calls.Add([PSCustomObject]@{
               Id             = $Id
@@ -223,7 +228,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNoteHierarchy -Id 'notebook-id'
-
         $result | Should-NotBeNull
         $result.DocumentElement.LocalName | Should-Be 'Notebook'
         $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Notebook'
@@ -238,7 +242,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNoteHierarchy -Id 'notebook-id' -HierarchyScope hsPages
-
         $result | Should-NotBeNull
         $app.Calls.Count | Should-Be 1
         $app.Calls[0].HierarchyScope.ToString() | Should-Be 'hsPages'
@@ -286,15 +289,17 @@ public enum XMLSchema
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
         param ()
-        $app = [PSCustomObject]@{
-          Calls = [System.Collections.Generic.List[object]]::new()
-        }
+        $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetPageContent -Value {
           param(
-            [string]$Id,
-            [ref]$Xml,
-            [object]$PageInfo,
-            [object]$Schema
+            [string]
+            $Id,
+            [ref]
+            $Xml,
+            [object]
+            $PageInfo,
+            [object]
+            $Schema
           )
           [void]$this.Calls.Add([PSCustomObject]@{
               Id       = $Id
@@ -312,13 +317,12 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNotePageContent -Id 'page-id'
-
         $result | Should-NotBeNull
         $result.DocumentElement.LocalName | Should-Be 'Page'
         $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Page'
         $app.Calls.Count | Should-Be 1
         $app.Calls[0].Id | Should-Be 'page-id'
-        [int]$app.Calls[0].PageInfo | Should-Be ([int][Microsoft.Office.Interop.OneNote.PageInfo]::piBasic)
+        $app.Calls[0].PageInfo | Should-Be ([Microsoft.Office.Interop.OneNote.PageInfo]::piBasic)
       }
     }
     Context 'Other parameters' {
@@ -330,7 +334,7 @@ public enum XMLSchema
 
         $result | Should-NotBeNull
         $app.Calls.Count | Should-Be 1
-        [int]$app.Calls[0].PageInfo | Should-Be ([int][Microsoft.Office.Interop.OneNote.PageInfo]::piAll)
+        $app.Calls[0].PageInfo | Should-Be ([Microsoft.Office.Interop.OneNote.PageInfo]::piAll)
       }
     }
     Context 'Edge cases' {
@@ -416,58 +420,43 @@ public enum XMLSchema
     }
     Context 'ParameterSetName' {
       It 'returns no output when hierarchy is null' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          $null
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { $null }
 
         $result = Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not create output when WhatIf is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyExportXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyExportXml }
 
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'uses sanitized hierarchy name when UseName is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyExportXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyExportXml }
 
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'SampleHierarchyName.hierarchy.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
       It 'accepts HierarchyScope when WhatIf is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyExportXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyExportXml }
 
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -HierarchyScope hsPages -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
     }
     Context 'Edge cases' {
       It 'throws with NoClobber when output file already exists' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyExportXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyExportXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
-        [IO.File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
+        [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'throws when resolved output path already exists as a directory' {
@@ -477,7 +466,6 @@ public enum XMLSchema
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination } | Should-Throw
       }
     }
@@ -561,68 +549,50 @@ public enum XMLSchema
     }
     Context 'ParameterSetName' {
       It 'returns no output when page content is null' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          $null
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { $null }
 
         $result = Export-OneNotePageContent -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not create output when WhatIf is specified' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentExportXml
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'page-id.content.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'uses sanitized page name when UseName is specified' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentExportXml
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'SampleContentName.content.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
       It 'accepts PageInfo when WhatIf is specified' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentExportXml
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination -PageInfo piAll -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'page-id.content.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
     }
     Context 'Edge cases' {
       It 'throws with NoClobber when output file already exists' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentExportXml
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.content.xml'
-        [IO.File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
+        [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'throws when resolved output path already exists as a directory' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentExportXml
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'page-id.content.xml'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination } | Should-Throw
       }
     }
@@ -706,66 +676,48 @@ public enum XMLSchema
     }
     Context 'SupportsShouldProcess' {
       It 'does not create output when WhatIf is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'page-id.one'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'uses sanitized page name with UseName when WhatIf is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'SamplePageName.one'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
       It 'uses docx extension when PublishFormat is pfWord and WhatIf is specified' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -PublishFormat pfWord -WhatIf } | Should -Not -Throw
-
         $outputPath = $destination | Join-Path -ChildPath 'page-id.docx'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
       It 'returns no output when hierarchy is null' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          $null
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { $null }
 
         $result = Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
     Context 'Edge cases' {
       It 'throws when resolved output path already exists as a directory' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'page-id.one'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination } | Should-Throw
       }
       It 'throws with NoClobber when output file already exists' {
-        Mock -CommandName Get-OneNoteHierarchy -MockWith {
-          Get-OneNoteHierarchyXml
-        }
+        Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.one'
-        [IO.File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
+        [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
     }
@@ -828,14 +780,15 @@ public enum XMLSchema
           [string]
           $Base64 = [Convert]::ToBase64String([byte[]]@(0x50, 0x4B, 0x03, 0x04))
         )
-        $app = [PSCustomObject]@{
-          Base64 = $Base64
-        }
+        $app = [PSCustomObject]@{ Base64 = $Base64 }
         $app | Add-Member -MemberType ScriptMethod -Name GetBinaryPageContent -Value {
           param(
-            [string]$Id,
-            [string]$CallbackId,
-            [ref]$Binary
+            [string]
+            $Id,
+            [string]
+            $CallbackId,
+            [ref]
+            $Binary
           )
           $Binary.Value = $this.Base64
         }
@@ -853,73 +806,48 @@ public enum XMLSchema
     }
     Context 'SupportsShouldProcess' {
       It 'does not create output when WhatIf is specified' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentXml
-        }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentXml }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
-
         $directory = $destination | Join-Path -ChildPath 'page-id'
         Test-Path -LiteralPath $directory | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'uses sanitized page name as output directory when UseName is specified' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentXml
-        }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentXml }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
-
         $safeDirectory = $destination | Join-Path -ChildPath 'SamplePageName'
         Test-Path -LiteralPath $safeDirectory | Should-BeFalse
       }
       It 'returns no output when page content is null' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          $null
-        }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { $null }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $result = Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
     Context 'Edge cases' {
       It 'throws when Destination is an existing file' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentXml
-        }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentXml }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $filePath = $destination | Join-Path -ChildPath 'destination.txt'
         New-Item -Path $filePath -ItemType File -Force | Out-Null
-
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $filePath } | Should-Throw
       }
       It 'throws with NoClobber when output file already exists' {
-        Mock -CommandName Get-OneNotePageContent -MockWith {
-          Get-OneNotePageContentXml
-        }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentXml }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $directory = $destination | Join-Path -ChildPath 'page-id'
         New-Item -Path $directory -ItemType Directory -Force | Out-Null
         $existingFile = $directory | Join-Path -ChildPath 'callback-01.docx'
-        [IO.File]::WriteAllBytes($existingFile, [byte[]]@(0x50, 0x4B, 0x03, 0x04))
-
+        [File]::WriteAllBytes($existingFile, [byte[]]@(0x50, 0x4B, 0x03, 0x04))
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'returns no output when page content has no binary objects' {
@@ -932,12 +860,9 @@ public enum XMLSchema
 </one:Page>
 '@
         }
-        Mock -CommandName Get-OneNoteApplication -MockWith {
-          New-OneNoteMockApplication
-        }
+        Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $result = Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
         Test-Path -LiteralPath ($destination | Join-Path -ChildPath 'page-id') | Should-BeFalse
       }
@@ -992,13 +917,13 @@ public enum XMLSchema
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
         param ()
-        $app = [PSCustomObject]@{
-          Updates = [System.Collections.Generic.List[string]]::new()
-        }
+        $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdateHierarchy -Value {
           param(
-            [string]$Content,
-            [object]$Schema
+            [string]
+            $Content,
+            [object]
+            $Schema
           )
           [void]$this.Updates.Add($Content)
         }
@@ -1038,7 +963,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         { Import-OneNoteHierarchy -LiteralPath $file1 -WhatIf } | Should -Not -Throw
-
         $app.Updates.Count | Should-Be 0
       }
     }
@@ -1096,15 +1020,17 @@ public enum XMLSchema
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
         param ()
-        $app = [PSCustomObject]@{
-          Updates = [System.Collections.Generic.List[string]]::new()
-        }
+        $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdatePageContent -Value {
           param(
-            [string]$Content,
-            [object]$ExpectedLastModified,
-            [object]$Schema,
-            [bool]$Force
+            [string]
+            $Content,
+            [object]
+            $ExpectedLastModified,
+            [object]
+            $Schema,
+            [bool]
+            $Force
           )
           [void]$this.Updates.Add($Content)
         }
@@ -1144,7 +1070,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         { Import-OneNotePageContent -LiteralPath $file1 -WhatIf } | Should -Not -Throw
-
         $app.Updates.Count | Should-Be 0
       }
     }

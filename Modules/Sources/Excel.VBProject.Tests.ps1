@@ -275,17 +275,17 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
-        { Export-ExcelVBProject -Path 'dummy.xlsx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
-        { Export-ExcelVBProject -Path 'dummy.xlsx' -Destination 'dummy' } | Should-Throw
+        { Export-ExcelVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
       }
     }
   }
@@ -414,7 +414,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Import-ExcelVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
 
@@ -423,7 +423,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
       }

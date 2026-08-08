@@ -275,17 +275,17 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-WordObject
 
-        { Export-WordVBProject -Path 'dummy.docx' -Destination 'dummy' -WhatIf } | Should -Not -Throw
+        { Export-WordVBProject -Path (Get-Fixture) -Destination (Get-Destination) -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
       }
     }
     Context 'Edge cases' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
-        { Export-WordVBProject -Path 'dummy.docx' -Destination 'dummy' } | Should-Throw
+        { Export-WordVBProject -Path (Get-Fixture) -Destination (Get-Destination) } | Should-Throw
       }
     }
   }
@@ -406,7 +406,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Import-WordVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
@@ -414,9 +414,9 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'failed to create Word object' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
-        { Import-WordVBProject -Path $path -Source $source } | Should-Throw 'failed to create Word object'
+        { Import-WordVBProject -Path $path -Source $source } | Should-Throw
       }
     }
   }

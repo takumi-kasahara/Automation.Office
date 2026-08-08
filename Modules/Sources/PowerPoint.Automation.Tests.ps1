@@ -202,7 +202,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointSpeakerNote -Path $path } | Should-Throw
       }

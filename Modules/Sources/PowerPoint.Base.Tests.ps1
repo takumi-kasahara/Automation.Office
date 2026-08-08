@@ -188,7 +188,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { New-PowerPointFile -Path $path -Force -WhatIf } | Should -Not -Throw
         Should-NotInvoke -CommandName New-PowerPointObject
@@ -283,7 +283,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Open-PowerPointFile -Path $path } | Should-Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 1 -Exactly
@@ -297,7 +297,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Get-PowerPointAppProperty.Unit' {
     It 'throws when New-PowerPointObject fails' {
-      Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+      Mock -CommandName New-PowerPointObject -MockWith { throw }
 
       { Get-PowerPointAppProperty } | Should-Throw
       Should-Invoke -CommandName New-PowerPointObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
@@ -323,7 +323,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Set-PowerPointAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
@@ -331,7 +331,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Set-PowerPointAppProperty -Properties $properties } | Should-Throw
       }
@@ -402,7 +402,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw 'new powerpoint object failed' }
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointFileProperty -Path $path } | Should-Throw
       }

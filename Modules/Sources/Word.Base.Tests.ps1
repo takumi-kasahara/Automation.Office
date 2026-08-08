@@ -378,7 +378,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Open-WordFile -Path $path } | Should-Throw
         Should-Invoke -CommandName New-WordObject -Times 1 -Exactly
@@ -392,7 +392,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Get-WordAppProperty.Unit' {
     It 'throws when New-WordObject fails' {
-      Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+      Mock -CommandName New-WordObject -MockWith { throw }
 
       { Get-WordAppProperty } | Should-Throw
       Should-Invoke -CommandName New-WordObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
@@ -418,7 +418,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Set-WordAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
@@ -426,7 +426,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Set-WordAppProperty -Properties $properties } | Should-Throw
       }
@@ -493,7 +493,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw 'new word object failed' }
+        Mock -CommandName New-WordObject -MockWith { throw }
 
         { Get-WordFileProperty -Path $path } | Should-Throw
       }

@@ -122,7 +122,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Get-ExcelDocumentProperty -Path $path } | Should-Throw
       }
@@ -354,7 +354,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-ExcelFile
       }
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -512,7 +512,7 @@ InModuleScope 'Automation.Office' {
         Should-NotInvoke -CommandName Open-ExcelFile
       }
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw 'new excel object failed' }
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
       }

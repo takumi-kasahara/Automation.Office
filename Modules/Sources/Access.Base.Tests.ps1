@@ -216,7 +216,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { New-AccessFile -Path $path -Force -WhatIf } | Should -Not -Throw
         Should-NotInvoke -CommandName New-AccessObject
@@ -242,7 +242,7 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Get-AccessAppProperty.Unit' {
     It 'throws when New-AccessObject fails' {
-      Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
+      Mock -CommandName New-AccessObject
 
       { Get-AccessAppProperty } | Should-Throw
       Should-Invoke -CommandName New-AccessObject -Times 1 -Exactly
@@ -268,7 +268,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'must not be called' }
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { Set-AccessAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
         Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
@@ -276,7 +276,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { Set-AccessAppProperty -Properties $properties } | Should-Throw
       }
@@ -348,7 +348,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw 'new access object failed' }
+        Mock -CommandName New-AccessObject -MockWith { throw }
 
         { Get-AccessFileProperty -Path $path } | Should-Throw
       }
