@@ -203,11 +203,11 @@ function Export-VBProjectComponent {
     }
     $exported = [VBComponentInfo[]]@()
     if ($Application) {
-      $tableDefinition = $resolved | Join-Path -ChildPath 'TableDefs.accdb'
-      New-AccessFile -Path $tableDefinition -RemovePersonalInformation -Force | Out-Null
+      $tableDefs = $resolved | Join-Path -ChildPath 'TableDefs.accdb'
+      New-AccessFile -Path $tableDefs -RemovePersonalInformation -Force | Out-Null
       $exported += [VBComponentInfo]@{
         Name = 'TableDefs'
-        Path = [PathCompatibility]::GetRelativePath($resolved, $tableDefinition)
+        Path = [PathCompatibility]::GetRelativePath($resolved, $tableDefs)
         type = [AcObjectType]::acTable
       }
       Get-AccessObject -Application $Application |
@@ -235,7 +235,7 @@ function Export-VBProjectComponent {
             $Application.DoCmd.TransferDatabase(
               [AcDataTransferType]::acExport  # TransferType
               , 'Microsoft Access'            # DatabaseType
-              , $tableDefinition              # DatabaseName
+              , $tableDefs                    # DatabaseName
               , [AcObjectType]$_.Type         # ObjectType
               , $_.Name                       # Source
               , $_.Name                       # Destination
@@ -270,7 +270,7 @@ function Export-VBProjectComponent {
           Path = [PathCompatibility]::GetRelativePath($resolved, $path)
           Type = [AcObjectType]$_.Type
         }
-        "Exported:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
+        "Exported:`t$($_.Name) as $([AcObjectType]$_.Type) to $($path)" | Out-Host
       }
     }
     $VBProject.VBComponents |
@@ -312,7 +312,7 @@ function Export-VBProjectComponent {
         Path = [PathCompatibility]::GetRelativePath($resolved, $path)
         Type = [vbext_ComponentType]$_.Type
       }
-      "Exported:`t$($_.Name)`t$([vbext_ComponentType]$_.Type)" | Out-Host
+      "Exported:`t$($_.Name) as $([vbext_ComponentType]$_.Type) to $($path)" | Out-Host
     }
     return $exported
   } finally {
@@ -348,7 +348,7 @@ function Import-VBProjectComponent {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemNotFound' -TargetObject $root))
     }
     if ($Application) {
-      $tableDefinition = $Components |
+      $tableDefs = $Components |
       Where-Object -Property Type -EQ ([AcObjectType]::acTable) |
       Where-Object { [Path]::GetFileName($_.Path) -eq 'TableDefs.accdb' } |
       Where-Object { Test-Path -LiteralPath ([Path]::GetFullPath(($root | Join-Path -ChildPath $_.Path))) -PathType Leaf } |
@@ -387,21 +387,27 @@ function Import-VBProjectComponent {
         }
         try {
           Write-Progress -Activity $activity -Status "Importing: $($_.Name) from $componentPath as $([AcObjectType]$_.Type)"
+          try {
+            # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
+            $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
+            "Removed:`t$($_.Name) as $([AcObjectType]$_.Type)" | Out-Host
+          } catch [COMException] {
+            Write-Warning -Message $_.Exception.Message
+          }
           if ([AcObjectType]$_.Type -eq [AcObjectType]::acTable) {
             try {
-              if ($null -ne $tableDefinition -and (Test-Path -LiteralPath $tableDefinition -PathType Leaf)) {
-                # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
-                $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
+              if ($null -ne $tableDefs -and (Test-Path -LiteralPath $tableDefs -PathType Leaf)) {
                 # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transferdatabase
                 $Application.DoCmd.TransferDatabase(
                   [AcDataTransferType]::acImport  # TransferType
                   , 'Microsoft Access'            # DatabaseType
-                  , $tableDefinition              # DatabaseName
+                  , $tableDefs                    # DatabaseName
                   , [AcObjectType]$_.Type         # ObjectType
                   , $_.Name                       # Source
                   , $_.Name                       # Destination
                   , $true                         # StructureOnly
                 )
+                "Imported:`t$($_.Name) as $([AcObjectType]$_.Type) from $($tableDefs)" | Out-Host
               }
               # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
               $Application.DoCmd.TransferText(
@@ -417,13 +423,6 @@ function Import-VBProjectComponent {
               Write-Warning -Message $_.Exception.Message
             }
           } else {
-            try {
-              # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
-              $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
-              "Removed:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
-            } catch [COMException] {
-              Write-Warning -Message $_.Exception.Message
-            }
             # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/application-load-from-text
             # NOTE stringified FileName to ensure correct type for COM interop.
             $Application.LoadFromText(
@@ -432,7 +431,7 @@ function Import-VBProjectComponent {
               , "$importPath"       # FileName
             )
           }
-          "Imported:`t$($_.Name)`t$([AcObjectType]$_.Type)" | Out-Host
+          "Imported:`t$($_.Name) as $([AcObjectType]$_.Type) from $($importPath)" | Out-Host
         } finally {
           if ($null -ne $tempDir -and (Test-Path -LiteralPath $tempDir -PathType Container)) {
             Remove-Item -LiteralPath $tempDir -Recurse -Force -WhatIf:$false -Confirm:$false
@@ -445,7 +444,7 @@ function Import-VBProjectComponent {
     ForEach-Object {
       Write-Progress -Activity $activity -Status "Removing: $($_.Name)"
       $VBProject.VBComponents.Remove($_)
-      "Removed:`t$($_.Name)`t$([vbext_ComponentType]$_.Type)" | Out-Host
+      "Removed:`t$($_.Name) as $([vbext_ComponentType]$_.Type)" | Out-Host
     }
     $component = $null
     $components |
@@ -507,7 +506,7 @@ function Import-VBProjectComponent {
       }
     }
     if ($component) {
-      "Imported:`t$($component.Name)`t$([vbext_ComponentType]$component.Type)" | Out-Host
+      "Imported:`t$($component.Name) as $([vbext_ComponentType]$component.Type) from $($importPath)" | Out-Host
     }
   } finally {
     Get-Variable |
