@@ -115,7 +115,7 @@ InModuleScope 'Automation.Office' {
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
       }
-      It 'opens a file with PasswordToOpen' {
+      It 'creates a file with PasswordToOpen' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -PasswordToOpen $password
         Test-Path -LiteralPath $path | Should-BeTrue
@@ -127,7 +127,7 @@ InModuleScope 'Automation.Office' {
           $Presentation.Password | Should-NotBeEmptyString
         }
       }
-      It 'opens a file with PasswordToModify' {
+      It 'creates a file with PasswordToModify' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -PasswordToModify $password
         Test-Path -LiteralPath $path | Should-BeTrue
@@ -139,7 +139,7 @@ InModuleScope 'Automation.Office' {
           $Presentation.WritePassword | Should-NotBeEmptyString
         }
       }
-      It 'opens a file with ReadOnlyRecommended' {
+      It 'creates a file with ReadOnlyRecommended' {
         $path = Get-TempFile
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         Test-Path -LiteralPath $path | Should-BeTrue
@@ -203,8 +203,8 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Open-PowerPointFile' {
     BeforeEach {
-      $password = Get-Password
       $path = Get-TempFile
+      $password = Get-Password
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -212,7 +212,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'opens a presentation and returns the presentation object' {
+      It 'opens a presentation by Path and returns the presentation object' {
         New-PowerPointFile -Path $path
         { Open-PowerPointFile -Path $path } | Should -Not -Throw
       }
@@ -223,20 +223,6 @@ InModuleScope 'Automation.Office' {
       It 'opens a presentation by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
         { [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile } | Should -Not -Throw
-      }
-      It 'opens a presentation using an existing Application object' {
-        New-PowerPointFile -Path $path
-        $app = New-PowerPointObject
-        try {
-          { Open-PowerPointFile -Path $path -Application $app } | Should -Not -Throw
-        } finally {
-          $app.Quit()
-          Get-Variable |
-          Where-Object -Property Value -Is [__ComObject] |
-          Clear-Variable -Force -WhatIf:$false -Confirm:$false
-          [GC]::Collect()
-          [GC]::WaitForPendingFinalizers()
-        }
       }
     }
     Context 'Other parameters' {
@@ -263,6 +249,20 @@ InModuleScope 'Automation.Office' {
           return $Presentation.Slides.Count
         }
         $result | Should-Be 1
+      }
+      It 'opens a presentation using an existing Application object' {
+        New-PowerPointFile -Path $path
+        $app = New-PowerPointObject
+        try {
+          { Open-PowerPointFile -Path $path -Application $app } | Should -Not -Throw
+        } finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
       }
     }
   }

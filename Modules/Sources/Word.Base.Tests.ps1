@@ -305,7 +305,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'opens a document and returns the document object' {
+      It 'opens a document by Path and returns the document object' {
         New-WordFile -Path $path
         { Open-WordFile -Path $path } | Should -Not -Throw
       }
@@ -316,20 +316,6 @@ InModuleScope 'Automation.Office' {
       It 'opens a document by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
         { [PSCustomObject]@{ FullName = $path } | Open-WordFile } | Should -Not -Throw
-      }
-      It 'opens a document using an existing Application object' {
-        New-WordFile -Path $path
-        $app = New-WordObject
-        try {
-          { Open-WordFile -Path $path -Application $app } | Should -Not -Throw
-        } finally {
-          $app.Quit()
-          Get-Variable |
-          Where-Object -Property Value -Is [__ComObject] |
-          Clear-Variable -Force -WhatIf:$false -Confirm:$false
-          [GC]::Collect()
-          [GC]::WaitForPendingFinalizers()
-        }
       }
     }
     Context 'Other parameters' {
@@ -356,6 +342,20 @@ InModuleScope 'Automation.Office' {
           return $Document.Range().Text
         }
         $result | Should-Be 'TestContent'
+      }
+      It 'opens a document using an existing Application object' {
+        New-WordFile -Path $path
+        $app = New-WordObject
+        try {
+          { Open-WordFile -Path $path -Application $app } | Should -Not -Throw
+        } finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
       }
     }
   }

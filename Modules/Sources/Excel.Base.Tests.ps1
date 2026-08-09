@@ -234,7 +234,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'opens a workbook and returns the workbook object' {
+      It 'opens a workbook by Path and returns the workbook object' {
         New-ExcelFile -Path $path
         { Open-ExcelFile -Path $path } | Should -Not -Throw
       }
@@ -245,20 +245,6 @@ InModuleScope 'Automation.Office' {
       It 'opens a workbook by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         { [PSCustomObject]@{ FullName = $path } | Open-ExcelFile } | Should -Not -Throw
-      }
-      It 'opens a workbook using an existing Application object' {
-        New-ExcelFile -Path $path
-        $app = New-ExcelObject
-        try {
-          { Open-ExcelFile -Application $app -Path $path } | Should -Not -Throw
-        } finally {
-          $app.Quit()
-          Get-Variable |
-          Where-Object -Property Value -Is [__ComObject] |
-          Clear-Variable -Force -WhatIf:$false -Confirm:$false
-          [GC]::Collect()
-          [GC]::WaitForPendingFinalizers()
-        }
       }
     }
     Context 'Other parameters' {
@@ -289,6 +275,20 @@ InModuleScope 'Automation.Office' {
           return $Workbook.Worksheets.Item(1).Name
         }
         $result | Should-Be 'Sheet1'
+      }
+      It 'opens a workbook using an existing Application object' {
+        New-ExcelFile -Path $path
+        $app = New-ExcelObject
+        try {
+          { Open-ExcelFile -Application $app -Path $path } | Should -Not -Throw
+        } finally {
+          $app.Quit()
+          Get-Variable |
+          Where-Object -Property Value -Is [__ComObject] |
+          Clear-Variable -Force -WhatIf:$false -Confirm:$false
+          [GC]::Collect()
+          [GC]::WaitForPendingFinalizers()
+        }
       }
     }
   }
