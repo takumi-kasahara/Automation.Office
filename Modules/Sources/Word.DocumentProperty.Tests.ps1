@@ -268,13 +268,13 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToOpen (Get-Password) } | Should-Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-Be $value
       }
       It 'updates a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value ([guid]::NewGuid().ToString('N')) -PasswordToModify (Get-Password) } | Should-Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-Be $value
       }
@@ -312,7 +312,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws an error when read-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
-        { Set-WordDocumentProperty -LiteralPath $path -Name 'Title' -Value ([guid]::NewGuid().ToString('N')) } | Should-Throw
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
