@@ -127,6 +127,11 @@ function New-AccessFile {
 
     Returns the connection string of the new database project.
 
+  .NOTES
+    The `-Password` and `-RemovePersonalInformation` parameters cannot be specified together.
+    Setting `RemovePersonalInformation` triggers a save operation that displays a password
+    confirmation dialog in password-protected databases, causing the cmdlet to hang.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created database.
@@ -154,6 +159,9 @@ function New-AccessFile {
     $InitializeProject
   )
   process {
+    if ($null -ne $Password -and $RemovePersonalInformation.IsPresent) {
+      throw '-Password and -RemovePersonalInformation parameters cannot be specified together.'
+    }
     $passwordString = if ($null -eq $Password) {
       $null
     } else {
@@ -224,6 +232,7 @@ function New-AccessFile {
     } finally {
       try {
         if ($app) {
+          $app.CloseCurrentDatabase()
           $app.Quit()
         }
         if ($dialogSuppressor) {
@@ -380,6 +389,7 @@ function Open-AccessFile {
     } finally {
       if ($shouldDisposeApp -and $app) {
         try {
+          $app.CloseCurrentDatabase()
           $app.Quit()
         } finally {
           Get-Variable |

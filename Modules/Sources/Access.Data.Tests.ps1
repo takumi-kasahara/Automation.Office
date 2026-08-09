@@ -36,7 +36,7 @@ InModuleScope 'Automation.Office' {
         [SecureString]
         $Password = $null
       )
-      New-AccessFile -Path $Path -Password $Password -RemovePersonalInformation -Force -InitializeDb {
+      New-AccessFile -Path $Path -Password $Password -Force -InitializeDb {
         param(
           [Microsoft.Office.Interop.Access.Dao.Database]
           $Database
