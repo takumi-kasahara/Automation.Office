@@ -330,11 +330,6 @@ function Open-AccessFile {
     $ActionProject
   )
   process {
-    # Validate that only one of ActionDb or ActionProject is specified
-    if ($ActionDb -and $ActionProject) {
-      $PSCmdlet.ThrowTerminatingError((New-Object System.ArgumentException 'ActionDb and ActionProject are mutually exclusive; only one can be specified.'))
-    }
-
     $app = if ($Application) {
       $Application
     } else {

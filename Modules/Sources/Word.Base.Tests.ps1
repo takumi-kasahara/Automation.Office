@@ -307,29 +307,29 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'opens a document by Path and returns the document object' {
         New-WordFile -Path $path
-        { Open-WordFile -Path $path } | Should -Not -Throw
+        Open-WordFile -Path $path | Should-NotBeNull
       }
       It 'opens a document by Path with ValueFromPipeline' {
         New-WordFile -Path $path
-        { $path | Open-WordFile } | Should -Not -Throw
+        $path | Open-WordFile | Should-NotBeNull
       }
       It 'opens a document by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
-        { [PSCustomObject]@{ FullName = $path } | Open-WordFile } | Should -Not -Throw
+        [PSCustomObject]@{ FullName = $path } | Open-WordFile | Should-NotBeNull
       }
     }
     Context 'Other parameters' {
       It 'opens a document with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
-        { Open-WordFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+        Open-WordFile -Path $path -PasswordToOpen $password | Should-NotBeNull
       }
       It 'opens a document with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
-        { Open-WordFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+        Open-WordFile -Path $path -PasswordToModify $password | Should-NotBeNull
       }
       It 'opens a document with ReadOnly' {
         New-WordFile -Path $path
-        { Open-WordFile -Path $path -ReadOnly } | Should -Not -Throw
+        Open-WordFile -Path $path -ReadOnly | Should-NotBeNull
       }
       It 'opens a document with Action script block' {
         New-WordFile -Path $path
@@ -347,7 +347,7 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         $app = New-WordObject
         try {
-          { Open-WordFile -Path $path -Application $app } | Should -Not -Throw
+          Open-WordFile -Path $path -Application $app | Should-NotBeNull
         } finally {
           $app.Quit()
           Get-Variable |

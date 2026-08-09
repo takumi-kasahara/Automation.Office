@@ -236,33 +236,33 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'opens a workbook by Path and returns the workbook object' {
         New-ExcelFile -Path $path
-        { Open-ExcelFile -Path $path } | Should -Not -Throw
+        Open-ExcelFile -Path $path | Should-NotBeNull
       }
       It 'opens a workbook by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
-        { $path | Open-ExcelFile } | Should -Not -Throw
+        $path | Open-ExcelFile | Should-NotBeNull
       }
       It 'opens a workbook by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
-        { [PSCustomObject]@{ FullName = $path } | Open-ExcelFile } | Should -Not -Throw
+        [PSCustomObject]@{ FullName = $path } | Open-ExcelFile | Should-NotBeNull
       }
     }
     Context 'Other parameters' {
       It 'opens a workbook with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Open-ExcelFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+        Open-ExcelFile -Path $path -PasswordToOpen $password | Should-NotBeNull
       }
       It 'opens a workbook with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
-        { Open-ExcelFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+        Open-ExcelFile -Path $path -PasswordToModify $password | Should-NotBeNull
       }
       It 'opens a workbook with ReadOnly' {
         New-ExcelFile -Path $path
-        { Open-ExcelFile -Path $path -ReadOnly } | Should -Not -Throw
+        Open-ExcelFile -Path $path -ReadOnly | Should-NotBeNull
       }
       It 'opens a workbook with Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
-        { Open-ExcelFile -Path $path -Force } | Should -Not -Throw
+        Open-ExcelFile -Path $path -Force | Should-NotBeNull
       }
       It 'opens a workbook with Action script block' {
         New-ExcelFile -Path $path
@@ -280,7 +280,7 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         $app = New-ExcelObject
         try {
-          { Open-ExcelFile -Application $app -Path $path } | Should -Not -Throw
+          Open-ExcelFile -Application $app -Path $path | Should-NotBeNull
         } finally {
           $app.Quit()
           Get-Variable |

@@ -214,29 +214,29 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'opens a presentation by Path and returns the presentation object' {
         New-PowerPointFile -Path $path
-        { Open-PowerPointFile -Path $path } | Should -Not -Throw
+        Open-PowerPointFile -Path $path | Should-NotBeNull
       }
       It 'opens a presentation by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
-        { $path | Open-PowerPointFile } | Should -Not -Throw
+        $path | Open-PowerPointFile | Should-NotBeNull
       }
       It 'opens a presentation by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
-        { [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile } | Should -Not -Throw
+        [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile | Should-NotBeNull
       }
     }
     Context 'Other parameters' {
       It 'opens a presentation with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-        { Open-PowerPointFile -Path $path -PasswordToOpen $password } | Should -Not -Throw
+        Open-PowerPointFile -Path $path -PasswordToOpen $password | Should-NotBeNull
       }
       It 'opens a presentation with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
-        { Open-PowerPointFile -Path $path -PasswordToModify $password } | Should -Not -Throw
+        Open-PowerPointFile -Path $path -PasswordToModify $password | Should-NotBeNull
       }
       It 'opens a presentation with ReadOnly' {
         New-PowerPointFile -Path $path
-        { Open-PowerPointFile -Path $path -ReadOnly } | Should -Not -Throw
+        Open-PowerPointFile -Path $path -ReadOnly | Should-NotBeNull
       }
       It 'opens a presentation with Action script block' {
         New-PowerPointFile -Path $path
@@ -254,7 +254,7 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path
         $app = New-PowerPointObject
         try {
-          { Open-PowerPointFile -Path $path -Application $app } | Should -Not -Throw
+          Open-PowerPointFile -Path $path -Application $app | Should-NotBeNull
         } finally {
           $app.Quit()
           Get-Variable |
