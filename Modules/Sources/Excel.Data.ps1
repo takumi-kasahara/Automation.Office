@@ -28,6 +28,36 @@ function Get-ExcelTable {
 
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
 
+  .EXAMPLE
+    Get-ExcelTable -Path 'C:\Workbooks\Workbook.xlsx'
+
+    Gets all tables (worksheets) in the specified Excel workbook file.
+
+  .EXAMPLE
+    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xlsx'
+
+    Gets all tables using a literal path (wildcards not interpreted).
+
+  .EXAMPLE
+    'C:\Workbooks\Workbook.xlsx' | Get-ExcelTable
+
+    Gets all tables by piping the file path to the cmdlet.
+
+  .EXAMPLE
+    Get-ExcelTable -Path 'C:\Workbooks\*.xlsx'
+
+    Gets all tables from all .xlsx files in the specified directory using wildcards.
+
+  .EXAMPLE
+    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xls'
+
+    Gets all tables from an .xls format workbook file.
+
+  .EXAMPLE
+    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xlsm' -ReadOnly
+
+    Gets all tables from a macro-enabled workbook in read-only mode.
+
   .OUTPUTS
     System.Management.Automation.PSCustomObject
   #>
@@ -102,6 +132,36 @@ function Get-ExcelTableColumn {
     Opens the connection in read-only mode.
 
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
+
+  .EXAMPLE
+    Get-ExcelTableColumn -Path 'C:\Workbooks\Workbook.xlsx' -Table Employees$
+
+    Gets column metadata for the Employees$ table in the specified Excel workbook file.
+
+  .EXAMPLE
+    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table Employees$
+
+    Gets column metadata using a literal path (wildcards not interpreted).
+
+  .EXAMPLE
+    'C:\Workbooks\Workbook.xlsx' | Get-ExcelTableColumn -Table Employees$
+
+    Gets column metadata by piping the file path to the cmdlet.
+
+  .EXAMPLE
+    Get-ExcelTableColumn -Path 'C:\Workbooks\*.xlsx' -Table Employees$
+
+    Gets column metadata from all .xlsx files in the specified directory using wildcards.
+
+  .EXAMPLE
+    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xls' -Table Employees$
+
+    Gets column metadata from an .xls format workbook file.
+
+  .EXAMPLE
+    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xlsm' -Table Employees$ -ReadOnly
+
+    Gets column metadata from a macro-enabled workbook in read-only mode.
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
@@ -245,6 +305,51 @@ function Invoke-ExcelQuery {
 
     For connection string details, see:
     https://www.connectionstrings.com/excel/
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$'
+
+    Gets all rows from the Employees$ table in the specified Excel workbook.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -Columns Id, Name
+
+    Gets only the Id and Name columns from the Employees$ table.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
+
+    Executes a custom SQL query against the workbook.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query "INSERT INTO [Employees$] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
+
+    Inserts a new row and returns the number of affected rows.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
+
+    Updates existing rows and returns the number of affected rows.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -Address 'A1:C2'
+
+    Queries a specific cell range (A1:C2) within the Employees$ table.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -NoHeader
+
+    Queries the table treating the first row as data (no header row), resulting in column names F1, F2, F3.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -ReadOnly
+
+    Queries the table in read-only mode to prevent any write operations.
+
+  .EXAMPLE
+    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsm' -Table 'Employees$'
+
+    Queries a macro-enabled workbook (.xlsm format).
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
