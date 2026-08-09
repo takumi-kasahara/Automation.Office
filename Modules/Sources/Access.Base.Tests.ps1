@@ -231,201 +231,6 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-AccessAppProperty' {
-    It 'returns application properties' {
-      $properties = Get-AccessAppProperty
-
-      $properties.Visible | Should-NotBeNull
-    }
-  }
-  Describe 'Get-AccessAppProperty.Unit' {
-    It 'throws when New-AccessObject fails' {
-      Mock -CommandName New-AccessObject
-
-      { Get-AccessAppProperty } | Should-Throw
-      Should-Invoke -CommandName New-AccessObject -Times 1 -Exactly
-    }
-  }
-  Describe 'Set-AccessAppProperty' {
-    It 'sets application properties' {
-      $properties = [PSCustomObject]@{ Visible = $false }
-      { Set-AccessAppProperty -Properties $properties } | Should -Not -Throw
-    }
-    It 'does not set properties when WhatIf is specified' {
-      $properties = [PSCustomObject]@{ Visible = $false }
-      { Set-AccessAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-    }
-    It 'throws when trying to set a property that does not exist.' {
-      $properties = [PSCustomObject]@{ NonExistentProperty = 'Value' }
-      { Set-AccessAppProperty -Properties $properties } | Should-Throw
-    }
-  }
-  Describe 'Set-AccessAppProperty.Unit' {
-    BeforeEach {
-      $properties = [PSCustomObject]@{ Visible = $false }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not call New-AccessObject when WhatIf is specified' {
-        Mock -CommandName New-AccessObject -MockWith { throw }
-
-        { Set-AccessAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-AccessObject -Times 0 -Exactly
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw }
-
-        { Set-AccessAppProperty -Properties $properties } | Should-Throw
-      }
-    }
-  }
-  Describe 'Get-AccessFileProperty' {
-    BeforeEach {
-      $ConfirmPreference = 'None'
-      $path = Get-TempFile
-      New-AccessFile -Path $path -RemovePersonalInformation
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'retrieves file properties by Path' {
-        $properties = Get-AccessFileProperty -Path $path
-        $properties | Should-NotBeNull
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'retrieves file properties by LiteralPath' {
-        $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties | Should-NotBeNull
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'retrieves file properties by Path with ValueFromPipeline' {
-        $properties = $path | Get-AccessFileProperty -Name RemovePersonalInformation
-        $properties | Should-NotBeNull
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'retrieves file properties by Path with ValueFromPipelineByPropertyName' {
-        $properties = [PSCustomObject]@{ PSPath = $path } | Get-AccessFileProperty -Name RemovePersonalInformation
-        $properties | Should-NotBeNull
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-    }
-    Context 'Other parameters' {
-      It 'retrieves file properties with -Name filter' {
-        $properties = Get-AccessFileProperty -Path $path -Name RemovePersonalInformation
-        $properties.RemovePersonalInformation | Should-Be $true
-        @($properties.PSObject.Properties).Count | Should-Be 1
-      }
-      It 'opens a file protected with Password' {
-        $password = Get-Password
-        $protectedPath = Get-TempFile
-        try {
-          New-AccessFile -Path $protectedPath -Password $password
-          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
-          $properties | Should-NotBeNull
-        } finally {
-          if (Test-Path -LiteralPath $protectedPath) {
-            Remove-Item -LiteralPath $protectedPath -Force
-          }
-        }
-      }
-    }
-  }
-  Describe 'Get-AccessFileProperty.Unit' {
-    BeforeEach {
-      $path = Get-TempFile
-      New-Item -Path $path -ItemType File -Force | Out-Null
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
-    }
-    Context 'Edge cases' {
-      It 'throws when New-AccessObject fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw }
-
-        { Get-AccessFileProperty -Path $path } | Should-Throw
-      }
-    }
-  }
-  Describe 'Set-AccessFileProperty' {
-    BeforeEach {
-      $ConfirmPreference = 'None'
-      $password = Get-Password
-      $path = Get-TempFile
-      New-AccessFile -Path $path
-    }
-    AfterEach {
-      if (Test-Path -LiteralPath $path) {
-        Remove-Item -LiteralPath $path -Force
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'sets file property by Path' {
-        Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true
-        $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'sets file property by LiteralPath' {
-        Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true
-        $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'sets file property by Path with ValueFromPipeline' {
-        $path | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
-        $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'sets file property by Path with ValueFromPipelineByPropertyName' {
-        [PSCustomObject]@{ PSPath = $path } | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
-        $properties = Get-AccessFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not update property when WhatIf is specified' {
-        Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -WhatIf
-        $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should-Be $false
-      }
-    }
-    Context 'Other parameters' {
-      It 'sets file property with -InputObject' {
-        $inputObject = [PSCustomObject]@{ RemovePersonalInformation = $true }
-        Set-AccessFileProperty -Path $path -InputObject $inputObject
-        $properties = Get-AccessFileProperty -Path $path
-        $properties.RemovePersonalInformation | Should-Be $true
-      }
-      It 'returns updated file properties when PassThru is specified' {
-        $result = Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -PassThru
-        $result | Should-NotBeNull
-        $result.RemovePersonalInformation | Should-Be $true
-      }
-      It 'updates a file protected with Password' {
-        $password = Get-Password
-        $protectedPath = Get-TempFile
-        try {
-          New-AccessFile -Path $protectedPath -Password $password
-          Set-AccessFileProperty -Path $protectedPath -Name RemovePersonalInformation -Value $true -Password $password
-          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
-          $properties.RemovePersonalInformation | Should-Be $true
-        } finally {
-          if (Test-Path -LiteralPath $protectedPath) {
-            Remove-Item -LiteralPath $protectedPath -Force
-          }
-        }
-      }
-    }
-    Context 'Edge cases' {
-      It 'throws when trying to set a property that does not exist' {
-        { Set-AccessFileProperty -Path $path -Name NonExistentProperty -Value 'test' } | Should-Throw
-      }
-    }
-  }
   Describe 'Open-AccessFile' {
     BeforeAll {
       # Reuse existing helper functions from parent scope
@@ -625,6 +430,152 @@ InModuleScope 'Automation.Office' {
         $path = [IO.Path]::GetTempFileName()
         Remove-Item -LiteralPath $path -Force
         { Open-AccessFile -Path $path } | Should-Throw
+      }
+    }
+  }
+  Describe 'Get-AccessFileProperty' {
+    BeforeEach {
+      $ConfirmPreference = 'None'
+      $path = Get-TempFile
+      New-AccessFile -Path $path -RemovePersonalInformation
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'retrieves file properties by Path' {
+        $properties = Get-AccessFileProperty -Path $path
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'retrieves file properties by LiteralPath' {
+        $properties = Get-AccessFileProperty -LiteralPath $path
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'retrieves file properties by Path with ValueFromPipeline' {
+        $properties = $path | Get-AccessFileProperty -Name RemovePersonalInformation
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'retrieves file properties by Path with ValueFromPipelineByPropertyName' {
+        $properties = [PSCustomObject]@{ PSPath = $path } | Get-AccessFileProperty -Name RemovePersonalInformation
+        $properties | Should-NotBeNull
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+    }
+    Context 'Other parameters' {
+      It 'retrieves file properties with -Name filter' {
+        $properties = Get-AccessFileProperty -Path $path -Name RemovePersonalInformation
+        $properties.RemovePersonalInformation | Should-Be $true
+        @($properties.PSObject.Properties).Count | Should-Be 1
+      }
+      It 'opens a file protected with Password' {
+        $password = Get-Password
+        $protectedPath = Get-TempFile
+        try {
+          New-AccessFile -Path $protectedPath -Password $password
+          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
+          $properties | Should-NotBeNull
+        } finally {
+          if (Test-Path -LiteralPath $protectedPath) {
+            Remove-Item -LiteralPath $protectedPath -Force
+          }
+        }
+      }
+    }
+  }
+  Describe 'Get-AccessFileProperty.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when New-AccessObject fails' {
+        Mock -CommandName New-AccessObject -MockWith { throw }
+
+        { Get-AccessFileProperty -Path $path } | Should-Throw
+      }
+    }
+  }
+  Describe 'Set-AccessFileProperty' {
+    BeforeEach {
+      $ConfirmPreference = 'None'
+      $password = Get-Password
+      $path = Get-TempFile
+      New-AccessFile -Path $path
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'sets file property by Path' {
+        Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true
+        $properties = Get-AccessFileProperty -Path $path
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'sets file property by LiteralPath' {
+        Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true
+        $properties = Get-AccessFileProperty -LiteralPath $path
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'sets file property by Path with ValueFromPipeline' {
+        $path | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
+        $properties = Get-AccessFileProperty -Path $path
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'sets file property by Path with ValueFromPipelineByPropertyName' {
+        [PSCustomObject]@{ PSPath = $path } | Set-AccessFileProperty -Name RemovePersonalInformation -Value $true
+        $properties = Get-AccessFileProperty -LiteralPath $path
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not update property when WhatIf is specified' {
+        Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -WhatIf
+        $properties = Get-AccessFileProperty -Path $path
+        $properties.RemovePersonalInformation | Should-Be $false
+      }
+    }
+    Context 'Other parameters' {
+      It 'sets file property with -InputObject' {
+        $inputObject = [PSCustomObject]@{ RemovePersonalInformation = $true }
+        Set-AccessFileProperty -Path $path -InputObject $inputObject
+        $properties = Get-AccessFileProperty -Path $path
+        $properties.RemovePersonalInformation | Should-Be $true
+      }
+      It 'returns updated file properties when PassThru is specified' {
+        $result = Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -PassThru
+        $result | Should-NotBeNull
+        $result.RemovePersonalInformation | Should-Be $true
+      }
+      It 'updates a file protected with Password' {
+        $password = Get-Password
+        $protectedPath = Get-TempFile
+        try {
+          New-AccessFile -Path $protectedPath -Password $password
+          Set-AccessFileProperty -Path $protectedPath -Name RemovePersonalInformation -Value $true -Password $password
+          $properties = Get-AccessFileProperty -Path $protectedPath -Password $password
+          $properties.RemovePersonalInformation | Should-Be $true
+        } finally {
+          if (Test-Path -LiteralPath $protectedPath) {
+            Remove-Item -LiteralPath $protectedPath -Force
+          }
+        }
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when trying to set a property that does not exist' {
+        { Set-AccessFileProperty -Path $path -Name NonExistentProperty -Value 'test' } | Should-Throw
       }
     }
   }

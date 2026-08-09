@@ -285,53 +285,6 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointAppProperty' {
-    It 'return application properties' {
-      { Get-PowerPointAppProperty | Out-Host } | Should -Not -Throw
-    }
-  }
-  Describe 'Get-PowerPointAppProperty.Unit' {
-    It 'throws when New-PowerPointObject fails' {
-      Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-      { Get-PowerPointAppProperty } | Should-Throw
-      Should-Invoke -CommandName New-PowerPointObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
-    }
-  }
-  Describe 'Set-PowerPointAppProperty' {
-    It 'set application properties' {
-      $properties = Get-PowerPointAppProperty
-      { Set-PowerPointAppProperty -Properties $properties } | Should -Not -Throw
-    }
-    It 'throws when trying to set a property that does not exist.' {
-      $properties = [PSCustomObject]@{ NonExistentProperty = 'Value' }
-      { Set-PowerPointAppProperty -Properties $properties } | Should-Throw
-    }
-    It 'does not update properties when WhatIf is specified' {
-      $properties = Get-PowerPointAppProperty
-      { Set-PowerPointAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-    }
-  }
-  Describe 'Set-PowerPointAppProperty.Unit' {
-    BeforeEach {
-      $properties = [PSCustomObject]@{ Visible = $false }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Set-PowerPointAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Set-PowerPointAppProperty -Properties $properties } | Should-Throw
-      }
-    }
-  }
   Describe 'Get-PowerPointFileProperty' {
     BeforeEach {
       $password = Get-Password

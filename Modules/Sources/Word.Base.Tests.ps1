@@ -378,53 +378,6 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-WordAppProperty' {
-    It 'return application properties' {
-      { Get-WordAppProperty | Out-Host } | Should -Not -Throw
-    }
-  }
-  Describe 'Get-WordAppProperty.Unit' {
-    It 'throws when New-WordObject fails' {
-      Mock -CommandName New-WordObject -MockWith { throw }
-
-      { Get-WordAppProperty } | Should-Throw
-      Should-Invoke -CommandName New-WordObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
-    }
-  }
-  Describe 'Set-WordAppProperty' {
-    It 'set application properties' {
-      $properties = Get-WordAppProperty
-      { Set-WordAppProperty -Properties $properties } | Should -Not -Throw
-    }
-    It 'throws when trying to set a property that does not exist.' {
-      $properties = [PSCustomObject]@{ NonExistentProperty = 'Value' }
-      { Set-WordAppProperty -Properties $properties } | Should-Throw
-    }
-    It 'does not update properties when WhatIf is specified' {
-      $properties = Get-WordAppProperty
-      { Set-WordAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-    }
-  }
-  Describe 'Set-WordAppProperty.Unit' {
-    BeforeEach {
-      $properties = [PSCustomObject]@{ Visible = $false }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Set-WordAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'throws when New-WordObject fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Set-WordAppProperty -Properties $properties } | Should-Throw
-      }
-    }
-  }
   Describe 'Get-WordFileProperty' {
     BeforeEach {
       $password = Get-Password

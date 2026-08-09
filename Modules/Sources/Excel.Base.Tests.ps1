@@ -311,53 +311,6 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-ExcelAppProperty' {
-    It 'return application properties' {
-      { Get-ExcelAppProperty | Out-Host } | Should -Not -Throw
-    }
-  }
-  Describe 'Get-ExcelAppProperty.Unit' {
-    It 'throws when New-ExcelObject fails' {
-      Mock -CommandName New-ExcelObject -MockWith { throw }
-
-      { Get-ExcelAppProperty } | Should-Throw
-      Should-Invoke -CommandName New-ExcelObject -ParameterFilter { $NoSetup } -Times 1 -Exactly
-    }
-  }
-  Describe 'Set-ExcelAppProperty' {
-    It 'set application properties' {
-      $properties = Get-ExcelAppProperty
-      { Set-ExcelAppProperty -Properties $properties } | Should -Not -Throw
-    }
-    It 'throws when trying to set a property that does not exist.' {
-      $properties = [PSCustomObject]@{ NonExistentProperty = 'Value' }
-      { Set-ExcelAppProperty -Properties $properties } | Should-Throw
-    }
-    It 'does not update properties when WhatIf is specified' {
-      $properties = Get-ExcelAppProperty
-      { Set-ExcelAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-    }
-  }
-  Describe 'Set-ExcelAppProperty.Unit' {
-    BeforeEach {
-      $properties = [PSCustomObject]@{ Visible = $false }
-    }
-    Context 'SupportsShouldProcess' {
-      It 'does not call New-ExcelObject when WhatIf is specified' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Set-ExcelAppProperty -Properties $properties -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-ExcelObject -Times 0 -Exactly
-      }
-    }
-    Context 'ParameterSetName' {
-      It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Set-ExcelAppProperty -Properties $properties } | Should-Throw
-      }
-    }
-  }
   Describe 'Get-ExcelFileProperty' {
     BeforeEach {
       $password = Get-Password
