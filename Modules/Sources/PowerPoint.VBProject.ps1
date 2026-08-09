@@ -37,6 +37,28 @@ function Export-PowerPointVBProject {
   .PARAMETER NoClobber
     Produces an error if -Destination already exists. If omitted, existing output is overwritten.
 
+  .EXAMPLE
+    Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project metadata and components from a PowerPoint presentation to VBProject.json and creates a companion component folder.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a presentation protected with an open password.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a presentation protected with a modify password.
+
+  .EXAMPLE
+    Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually exporting the VBA project.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created export file.
@@ -126,6 +148,33 @@ function Import-PowerPointVBProject {
 
   .PARAMETER Hidden
     Imports while keeping the presentation window hidden.
+
+  .EXAMPLE
+    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json"
+
+    Imports VBA project from JSON file to PowerPoint presentation.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
+
+    Imports into presentation protected with an open password.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
+
+    Imports into presentation protected with a modify password.
+
+  .EXAMPLE
+    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually importing the VBA project.
+
+  .EXAMPLE
+    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -Force -Confirm
+
+    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

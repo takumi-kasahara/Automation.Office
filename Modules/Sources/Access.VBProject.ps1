@@ -45,6 +45,36 @@ function Export-AccessVBProject {
     When specified, the specified object types are omitted from the export.
     Corresponds to the ExcludeAcObjectType parameter in the Access VBA object model.
 
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json"
+
+    Exports the VBA project from the Access database to VBProject.json and creates a companion component folder.
+
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ComponentRoot "$env:TEMP\Components"
+
+    Exports the VBA project to VBProject.json and places component files in the specified ComponentRoot directory.
+
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -IncludeAcObjectType acForm
+
+    Exports only form components from the VBA project.
+
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ExcludeAcObjectType acReport
+
+    Exports all components except reports from the VBA project.
+
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually exporting the VBA project.
+
+  .EXAMPLE
+    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -Force -Confirm
+
+    Forces overwrite of existing read-only files and prompts for confirmation before executing.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created export file.
@@ -127,6 +157,27 @@ function Import-AccessVBProject {
 
   .PARAMETER Source
     Specifies the source file path for `VBProject.json`.
+
+  .EXAMPLE
+    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json"
+
+    Imports VBA project from JSON file to Access database.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -Password $password
+
+    Imports protected database with password.
+
+  .EXAMPLE
+    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen without actual import.
+
+  .EXAMPLE
+    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -Force -Confirm
+
+    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

@@ -38,6 +38,27 @@ function Export-WordVBProject {
   .PARAMETER NoClobber
     Produces an error if -Destination already exists. If omitted, existing output is overwritten.
 
+  .EXAMPLE
+    Export-WordVBProject -Path "$env:TEMP\Document.docm" -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project metadata and components from a Word document to VBProject.json and creates a companion component folder.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-WordVBProject -Path "$env:TEMP\Document.docm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a document protected with an open password.
+
+  .EXAMPLE
+    Export-WordVBProject -Path "$env:TEMP\Document.docm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a document protected with a modify password.
+
+  .EXAMPLE
+    Export-WordVBProject -Path "$env:TEMP\Document.docm" -Destination "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually exporting the VBA project.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created export file.
@@ -121,6 +142,38 @@ function Import-WordVBProject {
 
   .PARAMETER Source
     Specifies the source file path for `VBProject.json`.
+
+  .EXAMPLE
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json"
+
+    Imports VBA project from JSON file to Word document.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString -Prompt 'Enter password'
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
+
+    Imports into document protected with an open password.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
+
+    Imports into document protected with a modify password.
+
+  .EXAMPLE
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually importing the VBA project.
+
+  .EXAMPLE
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -Hidden
+
+    Imports while keeping the Word window hidden.
+
+  .EXAMPLE
+    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -Force -Confirm
+
+    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

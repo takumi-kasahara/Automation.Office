@@ -37,6 +37,28 @@ function Export-ExcelVBProject {
   .PARAMETER NoClobber
     Produces an error if -Destination already exists. If omitted, existing output is overwritten.
 
+  .EXAMPLE
+    Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project metadata and components from an Excel workbook to VBProject.json and creates a companion component folder.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a workbook protected with an open password.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
+
+    Exports VBA project from a workbook protected with a modify password.
+
+  .EXAMPLE
+    Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually exporting the VBA project.
+
   .OUTPUTS
     System.IO.FileInfo
       Returns the created export file.
@@ -126,6 +148,33 @@ function Import-ExcelVBProject {
 
   .PARAMETER Hidden
     Imports while keeping the workbook window hidden.
+
+  .EXAMPLE
+    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json"
+
+    Imports VBA project from JSON file to Excel workbook.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
+
+    Imports into workbook protected with an open password.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
+
+    Imports into workbook protected with a modify password.
+
+  .EXAMPLE
+    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -WhatIf
+
+    Shows what would happen if the command were executed without actually importing the VBA project.
+
+  .EXAMPLE
+    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -Force -Confirm
+
+    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.
