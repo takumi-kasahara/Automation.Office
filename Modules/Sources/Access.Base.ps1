@@ -190,7 +190,8 @@ function New-AccessFile {
         $resolved     # FilePath
         , $FileFormat # FileFormat
       )
-      if ($passwordString) {
+      $dialogSuppressor = Start-DialogSuppressor -TargetExe 'MSACCESS.EXE'
+      if ($Password) {
         # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/dbengine-opendatabase-method-dao
         $database = $app.DBEngine.OpenDatabase(
           $resolved         # Name
@@ -219,11 +220,6 @@ function New-AccessFile {
         } finally {
           $database.Close()
         }
-      }
-      $dialogSuppressor = if ($InitializeProject) {
-        Start-DialogSuppressor -TargetExe 'MSACCESS.EXE'
-      } else {
-        $null
       }
       if ($InitializeProject) {
         & $InitializeProject $app.CurrentProject
@@ -309,6 +305,9 @@ function Open-AccessFile {
 
     Opens a database and returns the connection string.
 
+  .NOTES
+    If neither ActionDb nor ActionProject is specified, do not return anything.
+
   .OUTPUTS
     __ComObject
       Returns the opened CurrentProject object when no Action parameter is specified.
@@ -349,7 +348,7 @@ function Open-AccessFile {
       } else {
         [NetworkCredential]::new([string]::Empty, $Password).Password
       }
-      if ($Password) {
+      try {
         # Validate credentials through DAO first to avoid Access password UI prompts.
         # https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/dbengine-opendatabase-method-dao
         $app.DBEngine.OpenDatabase(
@@ -358,14 +357,12 @@ function Open-AccessFile {
           , $true                   # ReadOnly
           , ";PWD=$passwordString"  # Connect
         ).Close()
-      }
-      # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
-      $app.OpenCurrentDatabase(
-        $resolved         # filePath
-        , $true           # exclusive
-        , $passwordString # bstrPassword
-      )
-      try {
+        # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
+        $app.OpenCurrentDatabase(
+          $resolved         # filePath
+          , $true           # exclusive
+          , $passwordString # bstrPassword
+        )
         if ($ActionDb) {
           $db = $app.CurrentDb()
           try {
@@ -377,8 +374,6 @@ function Open-AccessFile {
         if ($ActionProject) {
           & $ActionProject $app.CurrentProject
         }
-        # If neither ActionDb nor ActionProject is specified, do not return anything
-        # (function will implicitly return $null, but we don't want to explicitly return $app.CurrentProject)
       } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
@@ -389,7 +384,6 @@ function Open-AccessFile {
     } finally {
       if ($shouldDisposeApp -and $app) {
         try {
-          $app.CloseCurrentDatabase()
           $app.Quit()
         } finally {
           Get-Variable |
