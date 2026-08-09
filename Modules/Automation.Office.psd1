@@ -15,6 +15,8 @@
     'Get-AccessView'
     'Get-AccessViewColumn'
     'Invoke-AccessQuery'
+    'Export-AccessDatabase'
+    'Import-AccessDatabase'
     'Export-AccessVBProject'
     'Import-AccessVBProject'
     #endregion

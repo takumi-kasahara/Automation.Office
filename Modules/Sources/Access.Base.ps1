@@ -695,4 +695,214 @@ function Set-AccessFileProperty {
     }
   }
 }
+function Export-AccessDatabase {
+  [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
+  [OutputType([System.IO.FileInfo])]
+  param (
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [SecureString]
+    $Password = $null,
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $TableName,
+    [Parameter(Mandatory)]
+    [ValidateScript({ (Test-Path -LiteralPath $_ -IsValid) -and -not (Test-Path -LiteralPath $_ -PathType Container) })]
+    [string]
+    $Destination,
+    [switch]
+    $Force,
+    [switch]
+    $NoClobber,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [Microsoft.Office.Interop.Access.AcTextTransferType]
+    $TransferType = [Microsoft.Office.Interop.Access.AcTextTransferType]::acExportDelim,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [string]
+    $SpecificationName,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [string]
+    $HTMLTableName,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [int]
+    $CodePage = 1200,
+    [switch]
+    $HasFieldNames,
+    [Parameter(ParameterSetName = 'SpreadsheetSet')]
+    [Microsoft.Office.Interop.Access.AcSpreadSheetType]
+    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml
+  )
+  process {
+    $resolvedPath = [Path]::GetFullPath($Path)
+    $resolvedDestination = [Path]::GetFullPath($Destination)
+    $exists = Test-Path -LiteralPath $resolvedDestination
+    if ($exists -and $NoClobber) {
+      $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolvedDestination))
+    }
+    if ($exists -and -not $Force) {
+      $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolvedDestination))
+    }
+    $isReadOnly = $false
+    if ($exists -and $Force) {
+      $destinationItem = Get-Item -LiteralPath $resolvedDestination -Force
+      $isReadOnly = $destinationItem.IsReadOnly
+      if ($isReadOnly) { $destinationItem.IsReadOnly = $false }
+    }
+    $action = if ($PSCmdlet.ParameterSetName -eq 'SpreadsheetSet') {
+      'Export Access data to spreadsheet'
+    } else {
+      'Export Access data to text'
+    }
+    if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolvedDestination, $action))) {
+      return
+    }
+    if ($exists) {
+      Remove-Item -LiteralPath $resolvedDestination -Force -WhatIf:$WhatIfPreference -Confirm:$false
+    }
+    $app = New-AccessObject
+    try {
+      Open-AccessFile -Application $app -Path $resolvedPath -Password $Password
+      try {
+        switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+          'TextSet' {
+            $app.DoCmd.TransferText(
+              $TransferType                                                                 # TransferType
+              , $(if ($SpecificationName) { $SpecificationName } else { [type]::Missing })  # SpecificationName
+              , $TableName                                                                  # TableName
+              , $resolvedDestination                                                        # FileName
+              , $(if ($HasFieldNames) { $true } else { [type]::Missing })                   # HasFieldNames
+              , $(if ($HTMLTableName) { $HTMLTableName } else { [type]::Missing })          # HTMLTableName
+              , $CodePage                                                                   # CodePage
+            )
+          }
+          'SpreadsheetSet' {
+            $app.DoCmd.TransferSpreadsheet(
+              [Microsoft.Office.Interop.Access.AcDataTransferType]::acExport  # TransferType
+              , $SpreadsheetType                                              # SpreadsheetType
+              , $TableName                                                    # TableName
+              , $resolvedDestination                                          # FileName
+              , $(if ($HasFieldNames) { $true } else { [type]::Missing })     # HasFieldNames
+              , [type]::Missing                                               # Range
+            )
+          }
+        }
+        return Get-Item -LiteralPath $resolvedDestination -Force
+      } finally {
+        $app.CloseCurrentDatabase()
+      }
+    } finally {
+      try { if ($app) { $app.Quit() } } finally {
+        if ($exists -and $Force -and $isReadOnly -and (Test-Path -LiteralPath $resolvedDestination)) {
+          (Get-Item -LiteralPath $resolvedDestination -Force).IsReadOnly = $true
+        }
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+function Import-AccessDatabase {
+  [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
+  [OutputType([void])]
+  param (
+    [Alias('FullName')]
+    [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Path,
+    [SecureString]
+    $Password = $null,
+    [Parameter(Mandatory)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]
+    $Source,
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $TableName,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [Microsoft.Office.Interop.Access.AcTextTransferType]
+    $TransferType = [Microsoft.Office.Interop.Access.AcTextTransferType]::acImportDelim,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [string]
+    $SpecificationName,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [string]
+    $HTMLTableName,
+    [Parameter(ParameterSetName = 'TextSet')]
+    [int]
+    $CodePage = 1200,
+    [switch]
+    $HasFieldNames,
+    [Parameter(ParameterSetName = 'SpreadsheetSet')]
+    [Microsoft.Office.Interop.Access.AcSpreadSheetType]
+    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml,
+    [Parameter(ParameterSetName = 'SpreadsheetSet')]
+    [string]
+    $Range
+  )
+  process {
+    $resolvedPath = [Path]::GetFullPath($Path)
+    $resolvedSource = [Path]::GetFullPath($Source)
+    $action = if ($PSCmdlet.ParameterSetName -eq 'SpreadsheetSet') {
+      'Import spreadsheet data into Access'
+    } else {
+      'Import text data into Access'
+    }
+    if (-not $PSCmdlet.ShouldProcess($resolvedPath, $action)) {
+      return
+    }
+    $item = Get-Item -LiteralPath $resolvedPath -Force
+    if ($item.IsReadOnly) {
+      $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
+    }
+    $app = New-AccessObject
+    try {
+      Open-AccessFile -Application $app -Path $resolvedPath -Password $Password
+      try {
+        switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+          'TextSet' {
+            $app.DoCmd.TransferText(
+              $TransferType                                                                 # TransferType
+              , $(if ($SpecificationName) { $SpecificationName } else { [type]::Missing })  # SpecificationName
+              , $TableName                                                                  # TableName
+              , $resolvedSource                                                             # FileName
+              , $(if ($HasFieldNames) { $true } else { [type]::Missing })                   # HasFieldNames
+              , $(if ($HTMLTableName) { $HTMLTableName } else { [type]::Missing })          # HTMLTableName
+              , $CodePage                                                                   # CodePage
+            )
+          }
+          'SpreadsheetSet' {
+            $app.DoCmd.TransferSpreadsheet(
+              [Microsoft.Office.Interop.Access.AcDataTransferType]::acImport  # TransferType
+              , $SpreadsheetType                                              # SpreadsheetType
+              , $TableName                                                    # TableName
+              , $resolvedSource                                               # FileName
+              , $(if ($HasFieldNames) { $true } else { [type]::Missing })     # HasFieldNames
+              , $(if ($Range) { $Range } else { [type]::Missing })            # Range
+            )
+          }
+        }
+      } finally {
+        $app.CloseCurrentDatabase()
+      }
+    } finally {
+      try { if ($app) { $app.Quit() } } finally {
+        Get-Variable |
+        Where-Object -Property Value -Is [__ComObject] |
+        Clear-Variable -Force -WhatIf:$false -Confirm:$false
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+      }
+    }
+  }
+}
+
 #endregion
