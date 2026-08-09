@@ -98,8 +98,7 @@ function Get-PowerPointSpeakerNote {
       Returns an object that contains the source path and a collection of `SpeakerNote` objects.
 
   .NOTES
-    The presentation is always opened in read-only mode and the PowerPoint COM object is released
-    after processing.
+    The presentation is always opened in read-only mode and the PowerPoint COM object is released after processing.
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([SpeakerNotes])]

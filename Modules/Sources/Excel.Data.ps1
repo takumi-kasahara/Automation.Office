@@ -294,18 +294,6 @@ function Invoke-ExcelQuery {
 
     This switch is ignored when executing DML statements.
 
-  .NOTES
-    SQL syntax is based on the Jet/ACE SQL dialect used by the Microsoft Access database engine. For a complete SQL reference, see:
-    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
-
-    Excel does not support `DELETE` statements. `UPDATE` requires an updateable connection (`IMEX=0`).
-
-    DDL statements (`CREATE TABLE`, `DROP TABLE`, `ALTER TABLE`) are not supported.
-    To create or delete tables, use the Excel COM object or the OpenXML SDK.
-
-    For connection string details, see:
-    https://www.connectionstrings.com/excel/
-
   .EXAMPLE
     Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$'
 
@@ -353,6 +341,18 @@ function Invoke-ExcelQuery {
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
+
+  .NOTES
+    SQL syntax is based on the Jet/ACE SQL dialect used by the Microsoft Access database engine. For a complete SQL reference, see:
+    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
+
+    Excel does not support `DELETE` statements. `UPDATE` requires an updateable connection (`IMEX=0`).
+
+    DDL statements (`CREATE TABLE`, `DROP TABLE`, `ALTER TABLE`) are not supported.
+    To create or delete tables, use the Excel COM object or the OpenXML SDK.
+
+    For connection string details, see:
+    https://www.connectionstrings.com/excel/
   #>
   [CmdletBinding(DefaultParameterSetName = 'TablePathSet')]
   [OutputType([PSCustomObject])]

@@ -128,13 +128,9 @@ function New-AccessFile {
     Returns the connection string of the new database project.
 
   .NOTES
-    The `-Password` and `-RemovePersonalInformation` parameters cannot be specified together.
-    Setting `RemovePersonalInformation` triggers a save operation that displays a password
-    confirmation dialog in password-protected databases, causing the cmdlet to hang.
-
-  .OUTPUTS
-    System.IO.FileInfo
-      Returns the created database.
+    The -Password and -RemovePersonalInformation parameters cannot be specified together.
+    Setting RemovePersonalInformation triggers a save operation that displays a password dialog,
+    which may cause the cmdlet to hang if a password is required for a password-protected databasetirmation dialog in password-protected databases, causing the cmdlet to hang.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([System.IO.FileInfo])]
@@ -305,12 +301,12 @@ function Open-AccessFile {
 
     Opens a database and returns the connection string.
 
-  .NOTES
-    If neither ActionDb nor ActionProject is specified, do not return anything.
-
   .OUTPUTS
     __ComObject
       Returns the opened CurrentProject object when no Action parameter is specified.
+
+  .NOTES
+    If neither ActionDb nor ActionProject is specified, do not return anything.
   #>
   [CmdletBinding()]
   [OutputType([__ComObject])]

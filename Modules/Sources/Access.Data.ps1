@@ -473,13 +473,6 @@ function Invoke-AccessQuery {
   .PARAMETER Password
     Specifies the password required to open a protected Access database.
 
-  .NOTES
-    SQL syntax is based on the Microsoft Access SQL dialect. For a complete SQL reference, see:
-    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
-
-    For connection string details, see:
-    https://www.connectionstrings.com/access/
-
   .EXAMPLE
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table Employees
 
@@ -523,6 +516,13 @@ function Invoke-AccessQuery {
 
   .OUTPUTS
     System.Management.Automation.PSCustomObject
+
+  .NOTES
+    SQL syntax is based on the Microsoft Access SQL dialect. For a complete SQL reference, see:
+    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
+
+    For connection string details, see:
+    https://www.connectionstrings.com/access/
   #>
   [CmdletBinding(DefaultParameterSetName = 'TablePathSet')]
   [OutputType([PSCustomObject])]
