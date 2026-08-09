@@ -4,7 +4,9 @@
 param (
   [ValidateScript({ Test-Path -LiteralPath $_ })]
   [string]
-  $Path = ($PSScriptRoot | Join-Path -ChildPath 'Modules\Sources'),
+  $Path,
+  [int]
+  $LineNumber = 0,
   [switch]
   $Parallel
 )
@@ -16,22 +18,19 @@ Set-Location -LiteralPath $PSScriptRoot
 
 $ext = [Path]::GetExtension($Path)
 if (Test-Path -LiteralPath $Path -PathType Container) {
-  $module = Get-ChildItem -LiteralPath $Path -File -Filter '*.ps1' | Where-Object { $_.BaseName -notlike '.*' -and $_.BaseName -notlike '*.Tests' }
+  $module = Get-ChildItem -Path "$([WildcardPattern]::Escape($Path))\*" -File -Include '*.ps1', '*.psm1' | Where-Object { $_.Name -notlike '*.Tests.ps1' }
   $test = Get-ChildItem -LiteralPath $Path -File -Filter '*.Tests.ps1'
-}
-elseif ($ext -eq '.ps1') {
+} elseif ($ext -eq '.ps1') {
   $parent = [WildcardPattern]::Escape($Path) | Split-Path -Parent
   $base = [Path]::GetFileNameWithoutExtension($Path) -replace '\.Tests$', [string]::Empty
   $module = $parent | Join-Path -ChildPath "$base.ps1"
   $test = $Path
-}
-elseif ($ext -eq '.psm1') {
+} elseif ($ext -eq '.psm1') {
   $parent = [WildcardPattern]::Escape($Path) | Split-Path -Parent
   $base = [Path]::GetFileNameWithoutExtension($Path)
   $module = $Path
   $test = $parent | Join-Path -ChildPath "$base.Tests.ps1"
-}
-else {
+} else {
   throw "Unsupported file type: $ext"
 }
 if (-not (Test-Path -LiteralPath $module)) {
@@ -41,6 +40,9 @@ if (-not (Test-Path -LiteralPath $test)) {
   throw "Test not found: $test"
 }
 $config = New-PesterConfiguration
+if ($LineNumber -gt 0 -and @($test).Count -eq 1) {
+  $config.Filter.Line = "$((Resolve-Path -LiteralPath $test).Path):$($LineNumber)"
+}
 $config.Run.Parallel = $Parallel.IsPresent
 $config.Run.Path = (Resolve-Path -LiteralPath $test).Path
 $config.TestResult.OutputFormat = 'NUnitXml'
