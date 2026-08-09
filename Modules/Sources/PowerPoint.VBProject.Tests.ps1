@@ -362,6 +362,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToOpen' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -PasswordToOpen $password
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToOpen (Get-Password) } | Should-Throw
         Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToOpen $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToOpen $password
@@ -370,6 +371,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToModify' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -PasswordToModify $password
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToModify (Get-Password) } | Should-Throw
         Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToModify $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToModify $password

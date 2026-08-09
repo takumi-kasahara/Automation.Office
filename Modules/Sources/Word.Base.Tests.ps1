@@ -417,13 +417,15 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
-        { Get-WordFileProperty -Path $path -PasswordToOpen (Get-Password) | Out-Null } | Should-Throw
-        { Get-WordFileProperty -Path $path -PasswordToOpen $password | Out-Null } | Should -Not -Throw
+        { Get-WordFileProperty -Path $path } | Should-Throw
+        { Get-WordFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-WordFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
-        { Get-WordFileProperty -Path $path -PasswordToModify (Get-Password) | Out-Null } | Should -Not -Throw
-        { Get-WordFileProperty -Path $path -PasswordToModify $password | Out-Null } | Should -Not -Throw
+        { Get-WordFileProperty -Path $path } | Should -Not -Throw
+        { Get-WordFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-WordFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
     }
   }
@@ -509,15 +511,13 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-WordFileProperty -Path $path -InputObject $properties
-        $actual = Get-WordFileProperty -Path $path
-        $actual.Final | Should-BeTrue
+        (Get-WordFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-WordFileProperty -LiteralPath $path -InputObject $properties
-        $actual = Get-WordFileProperty -LiteralPath $path
-        $actual.Final | Should-BeTrue
+        (Get-WordFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-WordFile -Path $path
@@ -534,22 +534,26 @@ InModuleScope 'Automation.Office' {
       It 'does not update properties when WhatIf is specified' {
         New-WordFile -Path $path
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
+        (Get-WordFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-WordFile -Path $path
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
         $exitCode | Should-Be 0
+        (Get-WordFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
+        { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
         (Get-WordFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
+        { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         (Get-WordFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue

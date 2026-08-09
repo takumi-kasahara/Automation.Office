@@ -273,12 +273,14 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
         Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-Be $value
       }
       It 'updates a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-Be $value
@@ -456,6 +458,7 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
+        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToOpen $password
         Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-BeNull
@@ -463,6 +466,7 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
+        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should-Throw
         Remove-ExcelDocumentProperty -LiteralPath $path -PasswordToModify $password
         Get-ExcelPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-BeNull

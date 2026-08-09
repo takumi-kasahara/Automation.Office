@@ -328,13 +328,15 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-        { Get-PowerPointFileProperty -Path $path -PasswordToOpen (Get-Password) | Out-Null } | Should-Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToOpen $password | Out-Null } | Should -Not -Throw
+        { Get-PowerPointFileProperty -Path $path } | Should-Throw
+        { Get-PowerPointFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-PowerPointFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
-        { Get-PowerPointFileProperty -Path $path -PasswordToModify (Get-Password) | Out-Null } | Should -Not -Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToModify $password | Out-Null } | Should -Not -Throw
+        { Get-PowerPointFileProperty -Path $path } | Should -Not -Throw
+        { Get-PowerPointFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-PowerPointFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
     }
   }
@@ -420,15 +422,13 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-PowerPointFileProperty -Path $path -InputObject $properties
-        $actual = Get-PowerPointFileProperty -Path $path
-        $actual.Final | Should-BeTrue
+        (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-PowerPointFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-PowerPointFileProperty -LiteralPath $path -InputObject $properties
-        $actual = Get-PowerPointFileProperty -LiteralPath $path
-        $actual.Final | Should-BeTrue
+        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
@@ -457,12 +457,14 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
+        { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
         (Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
+        { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         (Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue

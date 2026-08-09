@@ -369,6 +369,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToOpen' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled -PasswordToOpen $password
+        { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
         { Import-ExcelVBProject -Path $path -Source $source -PasswordToOpen (Get-Password) } | Should-Throw
         Import-ExcelVBProject -Path $path -Source $source -PasswordToOpen $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToOpen $password
@@ -377,6 +378,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToModify' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled -PasswordToModify $password
+        { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
         { Import-ExcelVBProject -Path $path -Source $source -PasswordToModify (Get-Password) } | Should-Throw
         Import-ExcelVBProject -Path $path -Source $source -PasswordToModify $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToModify $password

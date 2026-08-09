@@ -27,7 +27,7 @@ public static class NUIDialogSuppressor
         }
         var classBuilder = new StringBuilder(64);
         NativeMethods.GetClassName(hWnd, classBuilder, classBuilder.Capacity);
-        if (!string.Equals(classBuilder.ToString(), "NUIDialog", StringComparison.OrdinalIgnoreCase)) { return true; }
+        if (!IsTargetDialogClass(classBuilder.ToString())) { return true; }
         TrySuppressDialog(hWnd);
         handled = true;
         return false;
@@ -35,6 +35,13 @@ public static class NUIDialogSuppressor
 
       Thread.Sleep(100);
     }
+  }
+  private static bool IsTargetDialogClass(string className)
+  {
+    if (string.IsNullOrEmpty(className)) { return false; }
+    if (string.Equals(className, "NUIDialog", StringComparison.OrdinalIgnoreCase)) { return true; }
+    if (className.StartsWith("bosa_sdm_", StringComparison.OrdinalIgnoreCase)) { return true; }
+    return false;
   }
   private static bool IsProcessMatch(uint processId, string targetExe)
   {

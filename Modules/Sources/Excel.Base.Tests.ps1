@@ -304,7 +304,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'Edge cases' {
       It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject
+        Mock -CommandName New-ExcelObject -MockWith { throw }
 
         { Open-ExcelFile -Path $path } | Should-Throw
         Should-Invoke -CommandName New-ExcelObject -Times 1 -Exactly
@@ -350,13 +350,15 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelFileProperty -Path $path -PasswordToOpen (Get-Password) | Out-Null } | Should-Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToOpen $password | Out-Null } | Should -Not -Throw
+        { Get-ExcelFileProperty -Path $path } | Should-Throw
+        { Get-ExcelFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-ExcelFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
-        { Get-ExcelFileProperty -Path $path -PasswordToModify (Get-Password) | Out-Null } | Should -Not -Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToModify $password | Out-Null } | Should -Not -Throw
+        { Get-ExcelFileProperty -Path $path } | Should -Not -Throw
+        { Get-ExcelFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-ExcelFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
     }
   }
@@ -442,15 +444,13 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-ExcelFileProperty -Path $path -InputObject $properties
-        $actual = Get-ExcelFileProperty -Path $path
-        $actual.Final | Should-BeTrue
+        (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-ExcelFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
         Set-ExcelFileProperty -LiteralPath $path -InputObject $properties
-        $actual = Get-ExcelFileProperty -LiteralPath $path
-        $actual.Final | Should-BeTrue
+        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
@@ -460,14 +460,14 @@ InModuleScope 'Automation.Office' {
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
         [PSCustomObject]@{ PSPath = $path } | Set-ExcelFileProperty -Name $name -Value $value
-        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
+        (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update properties when WhatIf is specified' {
         New-ExcelFile -Path $path
-        Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -Force -WhatIf
-        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeFalse
+        Set-ExcelFileProperty -Path $path -Name $name -Value $value -Force -WhatIf
+        (Get-ExcelFileProperty -Path $path).Final | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-ExcelFile -Path $path
@@ -484,19 +484,21 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
-        Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-        (Get-ExcelFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
+        { Set-ExcelFileProperty -Path $path -Name $name -Value $value } | Should-Throw
+        { Set-ExcelFileProperty -Path $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
+        Set-ExcelFileProperty -Path $path -Name $name -Value $value -PasswordToOpen $password
+        (Get-ExcelFileProperty -Path $path -PasswordToOpen $password).Final | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
+        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         (Get-ExcelFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified' {
         New-ExcelFile -Path $path
-        $property = Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
+        $property = Set-ExcelFileProperty -Path $path -Name $name -Value $value -PassThru
         $property | Should-HaveType ([PSCustomObject])
         $property.Final | Should-BeTrue
       }

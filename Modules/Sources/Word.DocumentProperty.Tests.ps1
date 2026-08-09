@@ -268,12 +268,14 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-Be $value
       }
       It 'updates a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
+        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-Be $value
@@ -445,6 +447,7 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
+        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-WordDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         Remove-WordDocumentProperty -LiteralPath $path -PasswordToOpen $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToOpen $password | Should-BeNull
@@ -452,6 +455,7 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
+        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should-Throw
         Remove-WordDocumentProperty -LiteralPath $path -PasswordToModify $password
         Get-WordPropertyValue -LiteralPath $path -Name $name -PasswordToModify $password | Should-BeNull

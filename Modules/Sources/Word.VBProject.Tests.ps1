@@ -362,6 +362,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToOpen' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToOpen $password
+        { Import-WordVBProject -Path $path -Source $source } | Should-Throw
         { Import-WordVBProject -Path $path -Source $source -PasswordToOpen (Get-Password) } | Should-Throw
         Import-WordVBProject -Path $path -Source $source -PasswordToOpen $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToOpen $password
@@ -370,6 +371,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a file protected with PasswordToModify' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToModify $password
+        { Import-WordVBProject -Path $path -Source $source } | Should-Throw
         { Import-WordVBProject -Path $path -Source $source -PasswordToModify (Get-Password) } | Should-Throw
         Import-WordVBProject -Path $path -Source $source -PasswordToModify $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToModify $password
