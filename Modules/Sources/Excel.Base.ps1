@@ -341,11 +341,7 @@ function Open-ExcelFile {
       } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
       }
-      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-        Start-NUIDialogSuppressor -TargetExe 'EXCEL.EXE'
-      } else {
-        $null
-      }
+      $dialogSuppressor = Start-DialogSuppressor -TargetExe 'EXCEL.EXE'
       try {
         # https://learn.microsoft.com/en-us/office/vba/api/excel.workbooks.open
         $file = $app.Workbooks.Open(
@@ -367,7 +363,7 @@ function Open-ExcelFile {
       } finally {
         try {
           if ($dialogSuppressor) {
-            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+            Stop-DialogSuppressor -Job $dialogSuppressor
           }
         } finally {
           Get-Variable |

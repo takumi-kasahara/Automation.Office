@@ -660,7 +660,7 @@ function Import-VBProject {
     [string]
     $TargetExe
   )
-  $dialogSuppressor = Start-VBProjectDialogSuppressor -TargetExe $TargetExe
+  $dialogSuppressor = Start-DialogSuppressor -TargetExe $TargetExe
   $activity = 'Importing VBProject'
   try {
     $resolvedSource = [Path]::GetFullPath($Source)
@@ -695,7 +695,7 @@ function Import-VBProject {
     }
   } finally {
     if ($dialogSuppressor) {
-      Stop-VBProjectDialogSuppressor -Job $dialogSuppressor
+      Stop-DialogSuppressor -Job $dialogSuppressor
     }
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |

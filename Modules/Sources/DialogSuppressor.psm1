@@ -1,6 +1,6 @@
 ﻿using namespace System.Diagnostics.CodeAnalysis
 
-function Start-NUIDialogSuppressor {
+function Start-DialogSuppressor {
   [CmdletBinding()]
   [OutputType([System.Management.Automation.Job])]
   [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function starts a background job to suppress dialogs and does not require user confirmation')]
@@ -16,53 +16,15 @@ function Start-NUIDialogSuppressor {
     param()
     Add-Type -LiteralPath $using:csPath
     [NUIDialogSuppressor]::Run($using:stopFilePath, $using:TargetExe)
-  }
-  $job | Add-Member -MemberType NoteProperty -Name StopFilePath -Value $stopFilePath
-  return $job
-}
-function Stop-NUIDialogSuppressor {
-  [CmdletBinding()]
-  [OutputType([void])]
-  [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function stops a background job and performs cleanup, which is an internal state change')]
-  param (
-    [Parameter(Mandatory)]
-    [System.Management.Automation.Job]
-    $Job
-  )
-  $stopFilePath = $Job.StopFilePath
-  try {
-    New-Item -Path $stopFilePath -ItemType File -Force -WhatIf:$false -Confirm:$false | Out-Null
-    Receive-Job -Job $Job -Wait -AutoRemoveJob
-  } finally {
-    if (Test-Path -LiteralPath $stopFilePath) {
-      Remove-Item -LiteralPath $stopFilePath -Force -WhatIf:$false -Confirm:$false
-    }
-  }
-}
-function Start-VBProjectDialogSuppressor {
-  [CmdletBinding()]
-  [OutputType([System.Management.Automation.Job])]
-  [SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
-  param (
-    [Parameter(Mandatory)]
-    [ValidateNotNullOrEmpty()]
-    [string]
-    $TargetExe
-  )
-  $csPath = $PSScriptRoot | Join-Path -ChildPath 'DialogSuppressor.cs'
-  $stopFilePath = $env:TEMP | Join-Path -ChildPath ("VBProjectDialogSuppressor.$([guid]::NewGuid().ToString('N')).stop")
-  $job = Start-Job -ScriptBlock {
-    param()
-    Add-Type -LiteralPath $using:csPath
     [VBProjectDialogSuppressor]::Run($using:stopFilePath, $using:TargetExe)
   }
   $job | Add-Member -MemberType NoteProperty -Name StopFilePath -Value $stopFilePath
   return $job
 }
-function Stop-VBProjectDialogSuppressor {
+function Stop-DialogSuppressor {
   [CmdletBinding()]
   [OutputType([void])]
-  [SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '')]
+  [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function stops a background job and performs cleanup, which is an internal state change')]
   param (
     [Parameter(Mandatory)]
     [System.Management.Automation.Job]

@@ -336,11 +336,7 @@ function Open-PowerPointFile {
       } else {
         [MsoTriState]::msoFalse
       }
-      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-        Start-NUIDialogSuppressor -TargetExe 'POWERPNT.EXE'
-      } else {
-        $null
-      }
+      $dialogSuppressor = Start-DialogSuppressor -TargetExe 'POWERPNT.EXE'
       try {
         # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentations.open
         $file = $app.Presentations.Open(
@@ -359,7 +355,7 @@ function Open-PowerPointFile {
       } finally {
         try {
           if ($dialogSuppressor) {
-            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+            Stop-DialogSuppressor -Job $dialogSuppressor
           }
         } finally {
           Get-Variable |

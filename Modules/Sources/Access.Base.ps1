@@ -221,7 +221,7 @@ function New-AccessFile {
         }
       }
       $dialogSuppressor = if ($InitializeProject) {
-        Start-VBProjectDialogSuppressor -TargetExe 'MSACCESS.EXE'
+        Start-DialogSuppressor -TargetExe 'MSACCESS.EXE'
       } else {
         $null
       }
@@ -236,7 +236,7 @@ function New-AccessFile {
           $app.Quit()
         }
         if ($dialogSuppressor) {
-          Stop-VBProjectDialogSuppressor -Job $dialogSuppressor
+          Stop-DialogSuppressor -Job $dialogSuppressor
         }
       } finally {
         Get-Variable |

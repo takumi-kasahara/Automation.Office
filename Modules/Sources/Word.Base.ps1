@@ -329,11 +329,7 @@ function Open-WordFile {
       } else {
         [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
       }
-      $dialogSuppressor = if ($PasswordToOpen -or $PasswordToModify) {
-        Start-NUIDialogSuppressor -TargetExe 'WINWORD.EXE'
-      } else {
-        $null
-      }
+      $dialogSuppressor = Start-DialogSuppressor -TargetExe 'WINWORD.EXE'
       try {
         # https://learn.microsoft.com/en-us/office/vba/api/word.documents.open
         $file = $app.Documents.Open(
@@ -361,7 +357,7 @@ function Open-WordFile {
       } finally {
         try {
           if ($dialogSuppressor) {
-            Stop-NUIDialogSuppressor -Job $dialogSuppressor
+            Stop-DialogSuppressor -Job $dialogSuppressor
           }
         } finally {
           Get-Variable |
