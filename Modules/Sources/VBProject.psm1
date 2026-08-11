@@ -274,12 +274,11 @@ function Export-VBProjectComponent {
               , $true                         # StructureOnly
             )
             # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
-            # NOTE stringified FileName to ensure correct type for COM interop.
             $Application.DoCmd.TransferText(
               [AcTextTransferType]::acExportDelim # TransferType
               , [type]::Missing                   # SpecificationName
               , $_.Name                           # TableName
-              , "$path"                           # FileName
+              , $path                             # FileName
               , $true                             # HasFieldNames
               , [type]::Missing                   # HTMLTableName
               , 1200                              # CodePage
@@ -446,7 +445,7 @@ function Import-VBProjectComponent {
                 [AcTextTransferType]::acImportDelim # TransferType
                 , [type]::Missing                   # SpecificationName
                 , $_.Name                           # TableName
-                , "$importPath"                     # FileName
+                , $importPath                       # FileName
                 , $true                             # HasFieldNames
                 , [type]::Missing                   # HTMLTableName
                 , 1200                              # CodePage
