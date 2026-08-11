@@ -41,13 +41,12 @@ using namespace System.IO
 
 [CmdletBinding()]
 param (
+  [Parameter(Mandatory, Position = 0)]
   [ValidateScript({ Test-Path -LiteralPath $_ })]
   [string]
   $Path,
   [int]
-  $LineNumber = 0,
-  [switch]
-  $Parallel
+  $LineNumber = 0
 )
 if ($PSEdition -ne 'Desktop') {
   return
@@ -63,7 +62,7 @@ if (Test-Path -LiteralPath $Path -PathType Container) {
   $parent = [WildcardPattern]::Escape($Path) | Split-Path -Parent
   $base = [Path]::GetFileNameWithoutExtension($Path) -replace '\.Tests$', [string]::Empty
   $module = $parent | Join-Path -ChildPath "$base.ps1"
-  $test = $Path
+  $test = $parent | Join-Path -ChildPath "$base.Tests.ps1"
 } elseif ($ext -eq '.psm1') {
   $parent = [WildcardPattern]::Escape($Path) | Split-Path -Parent
   $base = [Path]::GetFileNameWithoutExtension($Path)
@@ -82,11 +81,8 @@ $config = New-PesterConfiguration
 if ($LineNumber -gt 0 -and @($test).Count -eq 1) {
   $config.Filter.Line = "$((Resolve-Path -LiteralPath $test).Path):$($LineNumber)"
 }
-$config.Run.Parallel = $Parallel.IsPresent
 $config.Run.Path = (Resolve-Path -LiteralPath $test).Path
 $config.TestResult.OutputFormat = 'NUnitXml'
-if (-not $Parallel.IsPresent) {
-  $config.CodeCoverage.OutputFormat = 'JaCoCo'
-  $config.CodeCoverage.Path = (Resolve-Path -LiteralPath $module).Path
-}
+$config.CodeCoverage.OutputFormat = 'JaCoCo'
+$config.CodeCoverage.Path = (Resolve-Path -LiteralPath $module).Path
 Invoke-Pester -Configuration $config
