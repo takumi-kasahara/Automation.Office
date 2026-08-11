@@ -1,7 +1,9 @@
 ﻿using assembly Microsoft.Office.Interop.Access
+using assembly Microsoft.Office.Interop.Excel
 using module .\..\Automation.Office.psd1
 using namespace Microsoft.Office.Interop.Access
 using namespace Microsoft.Office.Interop.Access.Dao
+using namespace Microsoft.Office.Interop.Excel
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 
@@ -14,6 +16,13 @@ Set-StrictMode -Version Latest
 InModuleScope 'Automation.Office' {
   BeforeAll {
     function Get-Password {
+      [CmdletBinding()]
+      [OutputType([System.Security.SecureString])]
+      [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
+      param ()
+      return ConvertTo-SecureString -String ([System.Web.Security.Membership]::GeneratePassword(15, 0)) -AsPlainText -Force
+    }
+    function Get-AccessPassword {
       [CmdletBinding()]
       [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
@@ -58,7 +67,7 @@ InModuleScope 'Automation.Office' {
     }
     BeforeEach {
       $path = Get-TempFile
-      $password = Get-Password
+      $password = Get-AccessPassword
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -206,7 +215,7 @@ InModuleScope 'Automation.Office' {
   Describe 'Open-AccessFile' {
     BeforeEach {
       $path = Get-TempFile
-      $password = Get-Password
+      $password = Get-AccessPassword
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -260,6 +269,7 @@ InModuleScope 'Automation.Office' {
         try {
           Open-AccessFile -Application $app -Path $path | Should-BeNull
         } finally {
+          $app.CloseCurrentDataBase()
           $app.Quit()
           Get-Variable |
           Where-Object -Property Value -Is [__ComObject] |
@@ -273,7 +283,7 @@ InModuleScope 'Automation.Office' {
   Describe 'Get-AccessFileProperty' {
     BeforeEach {
       $path = Get-TempFile
-      $password = Get-Password
+      $password = Get-AccessPassword
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -310,7 +320,7 @@ InModuleScope 'Automation.Office' {
       It 'returns file properties from a file protected with Password' {
         New-AccessFile -Path $path -Password $password
         { Get-AccessFileProperty -Path $path } | Should-Throw
-        { Get-AccessFileProperty -Path $path -Password (Get-Password) } | Should-Throw
+        { Get-AccessFileProperty -Path $path -Password (Get-AccessPassword) } | Should-Throw
         { Get-AccessFileProperty -Path $path -Password $password } | Should -Not -Throw
       }
     }
@@ -336,7 +346,7 @@ InModuleScope 'Automation.Office' {
   Describe 'Set-AccessFileProperty' {
     BeforeEach {
       $path = Get-TempFile
-      $password = Get-Password
+      $password = Get-AccessPassword
       $name = 'RemovePersonalInformation'
       $value = $true
     }
@@ -390,7 +400,7 @@ InModuleScope 'Automation.Office' {
       It 'updates a file protected with Password' {
         New-AccessFile -Path $path -Password $password
         { Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true } | Should-Throw
-        { Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -Password (Get-Password) } | Should-Throw
+        { Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -Password (Get-AccessPassword) } | Should-Throw
         Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -Password $password
         (Get-AccessFileProperty -Path $path -Password $password).RemovePersonalInformation | Should-BeTrue
       }
@@ -405,6 +415,476 @@ InModuleScope 'Automation.Office' {
       It 'throws when trying to set a property that does not exist.' {
         New-AccessFile -Path $path
         { Set-AccessFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
+      }
+    }
+  }
+  Describe 'Set-AccessFileProperty.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+
+      $app = [PSCustomObject]@{}
+      $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
+      $app | Add-Member -MemberType ScriptMethod -Name CloseCurrentDatabase -Value { }
+
+      $database = [PSCustomObject]@{}
+      $database | Add-Member -MemberType ScriptMethod -Name Close -Value { }
+
+      Mock -CommandName New-AccessObject -MockWith { $app }
+      Mock -CommandName Open-AccessFile -MockWith { $null }
+      Mock -CommandName Set-ObjectProperty
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not call Open-AccessFile when WhatIf is specified' {
+        Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true -WhatIf
+        Should-NotInvoke -CommandName Open-AccessFile
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when target item is read-only' {
+        (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
+        { Set-AccessFileProperty -Path $path -Name RemovePersonalInformation -Value $true } | Should-Throw
+      }
+    }
+  }
+  Describe 'Export-AccessDatabase' {
+    BeforeAll {
+      function Invoke-Confirm {
+        [CmdletBinding()]
+        [OutputType([int])]
+        param (
+          [Parameter(ValueFromPipeline)]
+          [string]
+          $Response,
+          [Parameter(Mandatory)]
+          [string]
+          $Path,
+          [string]
+          $Destination
+        )
+        process {
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
+          $escapedDestination = $Destination.Replace("'", "''")
+          $command = @(
+            "Import-Module -Name '$escapedModulePath' -Force"
+            "Export-AccessDatabase -Path '$escapedPath' -TableName 'Employees' -Destination '$escapedDestination' -Confirm"
+          ) -join '; '
+          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
+          return $LASTEXITCODE
+        }
+      }
+      function Initialize-AccessFixture {
+        param(
+          [string]
+          $Path,
+          [SecureString]
+          $Password = $null
+        )
+        New-AccessFile -Path $Path -Password $Password -Force -InitializeDb {
+          param(
+            [Microsoft.Office.Interop.Access.Dao.Database]
+            $Database
+          )
+          $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255), Department TEXT(255))')
+          $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (1, 'Alice', 'Sales')")
+          $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
+        }
+      }
+      function Get-Destination {
+        [CmdletBinding()]
+        [OutputType([string])]
+        param (
+          [string]
+          $Extension = '.txt'
+        )
+        return $env:TEMP | Join-Path -ChildPath "Export.$([guid]::NewGuid().ToString('N'))$Extension"
+      }
+    }
+    BeforeEach {
+      $path = Get-TempFile
+      $password = Get-AccessPassword
+      $destination = Get-Destination
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+      if (Test-Path -LiteralPath $destination) {
+        Remove-Item -LiteralPath $destination -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'exports data to text file with default TextSet' {
+        Initialize-AccessFixture -Path $path
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'exports data by Path with ValueFromPipeline' {
+        Initialize-AccessFixture -Path $path
+        $item = $path | Export-AccessDatabase -TableName 'Employees' -Destination $destination
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'exports data by Path with ValueFromPipelineByPropertyName' {
+        Initialize-AccessFixture -Path $path
+        $item = [PSCustomObject]@{ FullName = $path } | Export-AccessDatabase -TableName 'Employees' -Destination $destination
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not export when WhatIf is specified' {
+        Initialize-AccessFixture -Path $path
+        Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -WhatIf
+        Test-Path -LiteralPath $destination | Should-BeFalse
+      }
+      It 'asks for confirmation when Confirm is specified' {
+        Initialize-AccessFixture -Path $path
+        $exitCode = 'N' | Invoke-Confirm -Path $path -Destination $destination
+        $exitCode | Should-Be 0
+        Test-Path -LiteralPath $destination | Should-BeFalse
+      }
+      It 'overwrites an existing read-only destination when Force is specified' {
+        Initialize-AccessFixture -Path $path
+        New-Item -Path $destination -ItemType File -Force | Out-Null
+        $readOnlyItem = Get-Item -LiteralPath $destination -Force
+        $readOnlyItem.IsReadOnly = $true
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination } | Should-Throw
+        Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -Force | Out-Null
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
+        Initialize-AccessFixture -Path $path
+        New-Item -Path $destination -ItemType File | Out-Null
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -NoClobber } | Should-Throw
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -Force -NoClobber } | Should-Throw
+        (Get-Item -LiteralPath $destination).Length | Should-Be 0
+      }
+    }
+    Context 'Other parameters' {
+      It 'exports data from a database protected with Password' {
+        Initialize-AccessFixture -Path $path -Password $password
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -Password $password
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'export data with TransferType' {
+        Initialize-AccessFixture -Path $path
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -TransferType acExportHTML
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'exports data with CodePage' {
+        Initialize-AccessFixture -Path $path
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -CodePage 65001
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'exports data as SpreadsheetType' {
+        Initialize-AccessFixture -Path $path
+        $destination = Get-Destination -Extension '.xlsx'
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -SpreadsheetType acSpreadsheetTypeExcel12Xml
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+      It 'exports data as SpreadsheetType with Range' {
+        Initialize-AccessFixture -Path $path
+        $destination = Get-Destination -Extension '.xlsx'
+        $item = Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C3'
+        $item | Should-HaveType ([System.IO.FileInfo])
+        Test-Path -LiteralPath $destination | Should-BeTrue
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when the destination is an existing directory' {
+        Initialize-AccessFixture -Path $path
+        New-Item -Path $destination -ItemType Directory | Out-Null
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination } | Should-Throw
+      }
+    }
+  }
+  Describe 'Export-AccessDatabase.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+
+      $destination = $env:TEMP | Join-Path -ChildPath "Export.$([guid]::NewGuid().ToString('N')).txt"
+
+      $app = [PSCustomObject]@{}
+      $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
+      $app | Add-Member -MemberType ScriptMethod -Name CloseCurrentDataBase -Value { }
+
+      Mock -CommandName New-AccessObject -MockWith { $app }
+      Mock -CommandName Open-AccessFile -MockWith { $null }
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+      if (Test-Path -LiteralPath $destination) {
+        Remove-Item -LiteralPath $destination -Force
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not call New-AccessObject when WhatIf is specified' {
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -WhatIf } | Should -Not -Throw
+        Should-NotInvoke -CommandName New-AccessObject
+        Test-Path -LiteralPath $destination | Should-BeFalse
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws and does not call New-AccessObject when destination exists and Force is not specified' {
+        New-Item -Path $destination -ItemType File -Force | Out-Null
+        Mock -CommandName New-AccessObject
+
+        { Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination } | Should-Throw
+        Should-NotInvoke -CommandName New-AccessObject
+      }
+    }
+  }
+  Describe 'Import-AccessDatabase' {
+    BeforeAll {
+      function Invoke-Confirm {
+        [CmdletBinding()]
+        [OutputType([int])]
+        param (
+          [Parameter(ValueFromPipeline)]
+          [string]
+          $Response,
+          [Parameter(Mandatory)]
+          [string]
+          $Path,
+          [string]
+          $Source
+        )
+        process {
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
+          $escapedSource = $Source.Replace("'", "''")
+          $command = @(
+            "Import-Module -Name '$escapedModulePath' -Force"
+            "Import-AccessDatabase -Path '$escapedPath' -Source '$escapedSource' -TableName 'Employees' -Confirm"
+          ) -join '; '
+          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
+          return $LASTEXITCODE
+        }
+      }
+      function Get-SourceFile {
+        [CmdletBinding()]
+        [OutputType([string])]
+        param (
+          [string]
+          $Extension = '.txt'
+        )
+        return $env:TEMP | Join-Path -ChildPath "Source.$([guid]::NewGuid().ToString('N'))$Extension"
+      }
+      function Initialize-TextFile {
+        [CmdletBinding()]
+        [OutputType([string])]
+        param (
+          [string]
+          $Path,
+          [string]
+          $Content = @(
+            '"Id","Name","Department"'
+            '1,"Alice","Sales"'
+            '2,"Bob","Engineering"'
+          ) -join [Environment]::NewLine,
+          [ValidateSet(1200, 65001)]
+          [int]
+          $CodePage = 1200
+        )
+        switch ($CodePage) {
+          1200 { $Content | Out-File -LiteralPath $Path -Encoding unicode }
+          65001 { $Content | Out-File -LiteralPath $Path -Encoding utf8 }
+        }
+        return $Path
+      }
+      function Initialize-ExcelFile {
+        [CmdletBinding()]
+        [OutputType([string])]
+        param (
+          [string]
+          $Path,
+          [SecureString]
+          $PasswordToOpen,
+          [SecureString]
+          $PasswordToModify
+        )
+        New-ExcelFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
+          param(
+            [Microsoft.Office.Interop.Excel.Workbook]
+            $Workbook
+          )
+          $sheet = $Workbook.Worksheets.Item(1)
+          $sheet.Name = 'Employees'
+          $sheet.Cells.Item(1, 1) = 'Id'
+          $sheet.Cells.Item(1, 2) = 'Name'
+          $sheet.Cells.Item(1, 3) = 'Department'
+          $sheet.Cells.Item(2, 1) = 1
+          $sheet.Cells.Item(2, 2) = 'Alice'
+          $sheet.Cells.Item(2, 3) = 'Sales'
+          $sheet.Cells.Item(3, 1) = 2
+          $sheet.Cells.Item(3, 2) = 'Bob'
+          $sheet.Cells.Item(3, 3) = 'Engineering'
+        }
+      }
+    }
+    BeforeEach {
+      $path = Get-TempFile
+      $password = Get-AccessPassword
+      $source = Get-SourceFile
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+      if (Test-Path -LiteralPath $source) {
+        Remove-Item -LiteralPath $source -Force
+      }
+    }
+    Context 'ParameterSetName' {
+      It 'imports data from text file with default TextSet' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees'
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+      It 'imports data by Path with ValueFromPipeline' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        $path | Import-AccessDatabase -Source $source -TableName 'Employees'
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+      It 'imports data by Path with ValueFromPipelineByPropertyName' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        [PSCustomObject]@{ FullName = $path } | Import-AccessDatabase -Source $source -TableName 'Employees'
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not import when WhatIf is specified' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -WhatIf
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-BeNull
+      }
+      It 'asks for confirmation when Confirm is specified' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
+        $exitCode | Should-Be 0
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-BeNull
+      }
+    }
+    Context 'Other parameters' {
+      It 'imports data from a database protected with Password' {
+        New-AccessFile -Path $path -Password $password
+        Initialize-TextFile -Path $source
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -Password $password
+        $tables = Get-AccessTable -Path $path -Password $password
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+      It 'imports data with TransferType' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -TransferType acImportDelim
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+      It 'imports data with CodePage' {
+        New-AccessFile -Path $path
+        Initialize-TextFile -Path $source -CodePage 65001
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -CodePage 65001
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+      It 'imports data as SpreadsheetType' {
+        New-AccessFile -Path $path
+        $source = Get-SourceFile -Extension '.xlsx'
+        Initialize-ExcelFile -Path $source -PasswordToModify (Get-Password)
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws when the source file does not exist' {
+        New-AccessFile -Path $path
+        $invalidSource = Get-TempFile -Extension '.txt'
+        { Import-AccessDatabase -Path $path -Source $invalidSource -TableName 'Employees' } | Should-Throw
+      }
+      It 'throws when the database is read-only' {
+        New-AccessFile -Path $path
+        $readOnlyItem = Get-Item -LiteralPath $path -Force
+        $readOnlyItem.IsReadOnly = $true
+        { Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' } | Should-Throw
+      }
+      It 'throws when TableName does not exist in source file' {
+        New-AccessFile -Path $path
+        { Import-AccessDatabase -Path $path -Source $source -TableName 'NonExistentTable' } | Should-Throw
+      }
+      It 'does not import data when workbook is protected with PasswordToOpen' {
+        New-AccessFile -Path $path
+        $source = Get-SourceFile -Extension '.xlsx'
+        Initialize-ExcelFile -Path $source -PasswordToOpen (Get-Password)
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-BeNull
+      }
+    }
+  }
+  Describe 'Import-AccessDatabase.Unit' {
+    BeforeEach {
+      $path = Get-TempFile
+      New-Item -Path $path -ItemType File -Force | Out-Null
+
+      $source = $env:TEMP | Join-Path -ChildPath "Source.$([guid]::NewGuid().ToString('N')).txt"
+      New-Item -Path $source -ItemType File -Force | Out-Null
+
+      $app = [PSCustomObject]@{}
+      $app | Add-Member -MemberType ScriptMethod -Name Quit -Value { }
+      $app | Add-Member -MemberType ScriptMethod -Name CloseCurrentDataBase -Value { }
+
+      Mock -CommandName New-AccessObject -MockWith { $app }
+      Mock -CommandName Open-AccessFile -MockWith { $null }
+    }
+    AfterEach {
+      if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Force
+      }
+      if (Test-Path -LiteralPath $source) {
+        Remove-Item -LiteralPath $source -Force
+      }
+    }
+    Context 'SupportsShouldProcess' {
+      It 'does not call New-AccessObject when WhatIf is specified' {
+        { Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -WhatIf } | Should -Not -Throw
+        Should-NotInvoke -CommandName New-AccessObject
+      }
+    }
+    Context 'Edge cases' {
+      It 'throws and does not call New-AccessObject when target item is read-only' {
+        (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
+        Mock -CommandName New-AccessObject
+
+        { Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' } | Should-Throw
+        Should-NotInvoke -CommandName New-AccessObject
       }
     }
   }

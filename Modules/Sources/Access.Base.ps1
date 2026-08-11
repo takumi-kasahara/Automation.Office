@@ -375,7 +375,7 @@ function Open-AccessFile {
         [GC]::WaitForPendingFinalizers()
       }
     } finally {
-      if ($shouldDisposeApp -and $app) {
+      if ($app) {
         try {
           $app.Quit()
         } finally {
@@ -698,6 +698,108 @@ function Set-AccessFileProperty {
   }
 }
 function Export-AccessDatabase {
+  <#
+  .SYNOPSIS
+    Exports data from an Access database table to a text file or spreadsheet.
+
+  .DESCRIPTION
+    Exports the contents of a table from an Access database to a text file (CSV, delimited, HTML) or spreadsheet (Excel) by automating Access through COM.
+
+    The cmdlet supports two parameter sets:
+    - **TextSet** (default): Exports to text formats using `DoCmd.TransferText`. Supports delimited, fixed-width, and HTML export types.
+    - **SpreadsheetSet**: Exports to Excel formats using `DoCmd.TransferSpreadsheet`.
+
+    If the destination file already exists, the cmdlet stops unless `-Force` is specified. With `-Force`, the existing file is overwritten. If `-NoClobber` is specified, the cmdlet throws an error when the destination exists.
+
+    Because this cmdlet supports `ShouldProcess`, you can use `-WhatIf` and `-Confirm` to preview or confirm the export operation.
+
+  .PARAMETER Path
+    Specifies the path to the Access database file to export from.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Password
+    Specifies the password required to open the database.
+
+    Pass a `SecureString` value. If omitted, no password is used.
+
+  .PARAMETER TableName
+    Specifies the name of the table to export.
+
+  .PARAMETER Destination
+    Specifies the destination file path for the exported data.
+
+    This parameter does not support wildcards because it represents a new file path.
+
+  .PARAMETER Force
+    Overwrites an existing file at `-Destination`.
+
+    Without this switch, the cmdlet stops when the destination file already exists.
+
+  .PARAMETER NoClobber
+    Prevents overwriting an existing file at `-Destination`.
+
+    If the destination file exists, the cmdlet throws an error. This switch takes precedence over `-Force`.
+
+  .PARAMETER TransferType
+    Specifies the text transfer type for the export.
+
+    This parameter is only valid with the **TextSet** parameter set. The default value is `acExportDelim`.
+
+  .PARAMETER CodePage
+    Specifies the code page to use for the exported text file.
+
+    This parameter is only valid with the **TextSet** parameter set. The default value is `1200` (Unicode).
+
+  .PARAMETER SpreadsheetType
+    Specifies the spreadsheet type for the export.
+
+    This parameter is only valid with the **SpreadsheetSet** parameter set. The default value is `acSpreadsheetTypeExcel12Xml`.
+
+  .PARAMETER Range
+    Specifies the range of cells to export in the spreadsheet.
+
+    This parameter is only valid with the **SpreadsheetSet** parameter set.
+
+  .EXAMPLE
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt"
+
+    Exports the Employees table to a delimited text file.
+
+  .EXAMPLE
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -HasFieldNames
+
+    Exports the Employees table to a text file with field names as the first row.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -Password $password
+
+    Exports data from a password-protected database.
+
+  .EXAMPLE
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.html" -TransferType acExportHTML
+
+    Exports the Employees table to an HTML file.
+
+  .EXAMPLE
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml
+
+    Exports the Employees table to an Excel spreadsheet.
+
+  .EXAMPLE
+    Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
+
+    Exports the Employees table to an Excel spreadsheet with a specific range.
+
+  .OUTPUTS
+    System.IO.FileInfo
+      Returns a FileInfo object representing the exported file.
+
+  .NOTES
+    The `-Password` and `-RemovePersonalInformation` parameters cannot be specified together in the underlying `New-AccessFile` cmdlet, but this cmdlet only reads from an existing database.
+    The cmdlet creates a temporary file during text export to work around a `TransferText` limitation with file names containing multiple periods.
+  #>
   [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
   [OutputType([System.IO.FileInfo])]
   param (
@@ -724,19 +826,14 @@ function Export-AccessDatabase {
     [Microsoft.Office.Interop.Access.AcTextTransferType]
     $TransferType = [Microsoft.Office.Interop.Access.AcTextTransferType]::acExportDelim,
     [Parameter(ParameterSetName = 'TextSet')]
-    [string]
-    $SpecificationName,
-    [Parameter(ParameterSetName = 'TextSet')]
-    [string]
-    $HTMLTableName,
-    [Parameter(ParameterSetName = 'TextSet')]
     [int]
     $CodePage = 1200,
-    [switch]
-    $HasFieldNames,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [Microsoft.Office.Interop.Access.AcSpreadSheetType]
-    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml
+    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml,
+    [Parameter(ParameterSetName = 'SpreadsheetSet')]
+    [string]
+    $Range
   )
   process {
     $resolvedPath = [Path]::GetFullPath($Path)
@@ -752,7 +849,9 @@ function Export-AccessDatabase {
     if ($exists -and $Force) {
       $destinationItem = Get-Item -LiteralPath $resolvedDestination -Force
       $isReadOnly = $destinationItem.IsReadOnly
-      if ($isReadOnly) { $destinationItem.IsReadOnly = $false }
+      if ($isReadOnly) {
+        $destinationItem.IsReadOnly = $false
+      }
     }
     $action = if ($PSCmdlet.ParameterSetName -eq 'SpreadsheetSet') {
       'Export Access data to spreadsheet'
@@ -771,15 +870,31 @@ function Export-AccessDatabase {
       try {
         switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
           'TextSet' {
-            $app.DoCmd.TransferText(
-              $TransferType                                                                 # TransferType
-              , $(if ($SpecificationName) { $SpecificationName } else { [type]::Missing })  # SpecificationName
-              , $TableName                                                                  # TableName
-              , $resolvedDestination                                                        # FileName
-              , $(if ($HasFieldNames) { $true } else { [type]::Missing })                   # HasFieldNames
-              , $(if ($HTMLTableName) { $HTMLTableName } else { [type]::Missing })          # HTMLTableName
-              , $CodePage                                                                   # CodePage
-            )
+            # Create a temporary file with a single period for TransferText
+            $tempDestination = [Path]::GetTempFileName()
+            try {
+              $app.DoCmd.TransferText(
+                $TransferType       # TransferType
+                , [type]::Missing   # SpecificationName
+                , $TableName        # TableName
+                , $tempDestination  # FileName
+                , $true             # HasFieldNames
+                , [type]::Missing   # HTMLTableName
+                , $CodePage         # CodePage
+              )
+              # Rename temp file to actual destination
+              if (Test-Path -LiteralPath $tempDestination) {
+                if (Test-Path -LiteralPath $resolvedDestination) {
+                  Remove-Item -LiteralPath $resolvedDestination -Force -WhatIf:$WhatIfPreference -Confirm:$false
+                }
+                Rename-Item -LiteralPath $tempDestination -NewName $resolvedDestination -Force
+                return Get-Item -LiteralPath $resolvedDestination -Force
+              }
+            } finally {
+              if (Test-Path -LiteralPath $tempDestination) {
+                Remove-Item -LiteralPath $tempDestination -Force -WhatIf:$false -Confirm:$false
+              }
+            }
           }
           'SpreadsheetSet' {
             $app.DoCmd.TransferSpreadsheet(
@@ -787,17 +902,21 @@ function Export-AccessDatabase {
               , $SpreadsheetType                                              # SpreadsheetType
               , $TableName                                                    # TableName
               , $resolvedDestination                                          # FileName
-              , $(if ($HasFieldNames) { $true } else { [type]::Missing })     # HasFieldNames
-              , [type]::Missing                                               # Range
+              , $true                                                         # HasFieldNames
+              , $(if ($Range) { $Range } else { [type]::Missing })            # Range
             )
+            return Get-Item -LiteralPath $resolvedDestination -Force
           }
         }
-        return Get-Item -LiteralPath $resolvedDestination -Force
       } finally {
         $app.CloseCurrentDatabase()
       }
     } finally {
-      try { if ($app) { $app.Quit() } } finally {
+      try {
+        if ($app) {
+          $app.Quit()
+        }
+      } finally {
         if ($exists -and $Force -and $isReadOnly -and (Test-Path -LiteralPath $resolvedDestination)) {
           (Get-Item -LiteralPath $resolvedDestination -Force).IsReadOnly = $true
         }
@@ -811,6 +930,97 @@ function Export-AccessDatabase {
   }
 }
 function Import-AccessDatabase {
+  <#
+  .SYNOPSIS
+    Imports data from a text file or spreadsheet into an Access database table.
+
+  .DESCRIPTION
+    Imports data from a text file (CSV, delimited, HTML) or spreadsheet (Excel) into an Access database table by automating Access through COM.
+
+    The cmdlet supports two parameter sets:
+    - **TextSet** (default): Imports from text formats using `DoCmd.TransferText`. Supports delimited, fixed-width, and HTML import types.
+    - **SpreadsheetSet**: Imports from Excel formats using `DoCmd.TransferSpreadsheet`.
+
+    If the destination database is read-only, the cmdlet throws an error.
+
+    Because this cmdlet supports `ShouldProcess`, you can use `-WhatIf` and `-Confirm` to preview or confirm the import operation.
+
+  .PARAMETER Path
+    Specifies the path to the Access database file to import into.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER Password
+    Specifies the password required to open the database.
+
+    Pass a `SecureString` value. If omitted, no password is used.
+
+  .PARAMETER Source
+    Specifies the path to the source file to import from.
+
+    This parameter does not support wildcards because it represents an existing file path.
+
+  .PARAMETER TableName
+    Specifies the name of the Access table to import data into.
+
+  .PARAMETER TransferType
+    Specifies the text transfer type for the import.
+
+    This parameter is only valid with the **TextSet** parameter set. The default value is `acImportDelim`.
+
+  .PARAMETER CodePage
+    Specifies the code page to use for the imported text file.
+
+    This parameter is only valid with the **TextSet** parameter set. The default value is `1200` (Unicode).
+
+  .PARAMETER HasFieldNames
+    Indicates that the first row of the source file contains field names that should be used as column headers.
+
+    This parameter is only valid with the **TextSet** parameter set.
+
+  .PARAMETER SpreadsheetType
+    Specifies the spreadsheet type for the import.
+
+    This parameter is only valid with the **SpreadsheetSet** parameter set. The default value is `acSpreadsheetTypeExcel12Xml`.
+
+  .PARAMETER Range
+    Specifies the range of cells to import from the spreadsheet.
+
+    This parameter is only valid with the **SpreadsheetSet** parameter set.
+
+  .EXAMPLE
+    Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees'
+
+    Imports data from a CSV file into the Employees table.
+
+  .EXAMPLE
+    Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -HasFieldNames
+
+    Imports data from a CSV file with field names in the first row.
+
+  .EXAMPLE
+    $password = Read-Host -AsSecureString
+    Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -Password $password
+
+    Imports data into a password-protected database.
+
+  .EXAMPLE
+    Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml
+
+    Imports data from an Excel spreadsheet into the Employees table.
+
+  .EXAMPLE
+    Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
+
+    Imports data from a specific range in an Excel spreadsheet.
+
+  .OUTPUTS
+    None.
+
+  .NOTES
+    The cmdlet creates a temporary file during text import to work around a `TransferText` limitation with file names containing multiple periods.
+    If the destination database is read-only, the cmdlet throws an error.
+  #>
   [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
   [OutputType([void])]
   param (
@@ -833,16 +1043,8 @@ function Import-AccessDatabase {
     [Microsoft.Office.Interop.Access.AcTextTransferType]
     $TransferType = [Microsoft.Office.Interop.Access.AcTextTransferType]::acImportDelim,
     [Parameter(ParameterSetName = 'TextSet')]
-    [string]
-    $SpecificationName,
-    [Parameter(ParameterSetName = 'TextSet')]
-    [string]
-    $HTMLTableName,
-    [Parameter(ParameterSetName = 'TextSet')]
     [int]
     $CodePage = 1200,
-    [switch]
-    $HasFieldNames,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [Microsoft.Office.Interop.Access.AcSpreadSheetType]
     $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml,
@@ -871,15 +1073,24 @@ function Import-AccessDatabase {
       try {
         switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
           'TextSet' {
-            $app.DoCmd.TransferText(
-              $TransferType                                                                 # TransferType
-              , $(if ($SpecificationName) { $SpecificationName } else { [type]::Missing })  # SpecificationName
-              , $TableName                                                                  # TableName
-              , $resolvedSource                                                             # FileName
-              , $(if ($HasFieldNames) { $true } else { [type]::Missing })                   # HasFieldNames
-              , $(if ($HTMLTableName) { $HTMLTableName } else { [type]::Missing })          # HTMLTableName
-              , $CodePage                                                                   # CodePage
-            )
+            # Create a temporary file with a single period for TransferText
+            $tempSource = [Path]::GetTempFileName()
+            try {
+              Copy-Item -LiteralPath $resolvedSource -Destination $tempSource -Force
+              $app.DoCmd.TransferText(
+                $TransferType                                               # TransferType
+                , [type]::Missing                                           # SpecificationName
+                , $TableName                                                # TableName
+                , $tempSource                                               # FileName
+                , $true                                                     # HasFieldNames
+                , [type]::Missing                                           # HTMLTableName
+                , $CodePage                                                 # CodePage
+              )
+            } finally {
+              if (Test-Path -LiteralPath $tempSource) {
+                Remove-Item -LiteralPath $tempSource -Force -WhatIf:$false -Confirm:$false
+              }
+            }
           }
           'SpreadsheetSet' {
             $app.DoCmd.TransferSpreadsheet(
@@ -887,7 +1098,7 @@ function Import-AccessDatabase {
               , $SpreadsheetType                                              # SpreadsheetType
               , $TableName                                                    # TableName
               , $resolvedSource                                               # FileName
-              , $(if ($HasFieldNames) { $true } else { [type]::Missing })     # HasFieldNames
+              , $true                                                         # HasFieldNames
               , $(if ($Range) { $Range } else { [type]::Missing })            # Range
             )
           }
@@ -896,7 +1107,11 @@ function Import-AccessDatabase {
         $app.CloseCurrentDatabase()
       }
     } finally {
-      try { if ($app) { $app.Quit() } } finally {
+      try {
+        if ($app) {
+          $app.Quit()
+        }
+      } finally {
         Get-Variable |
         Where-Object -Property Value -Is [__ComObject] |
         Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -906,5 +1121,4 @@ function Import-AccessDatabase {
     }
   }
 }
-
 #endregion
