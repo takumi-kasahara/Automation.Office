@@ -823,6 +823,14 @@ InModuleScope 'Automation.Office' {
         $tables = Get-AccessTable -Path $path
         ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
       }
+      It 'imports data as SpreadsheetType with Range' {
+        New-AccessFile -Path $path
+        $source = Get-SourceFile -Extension '.xlsx'
+        Initialize-ExcelFile -Path $source -PasswordToModify (Get-Password)
+        Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C3'
+        $tables = Get-AccessTable -Path $path
+        ($tables | Where-Object -Property Name -EQ 'Employees') | Should-NotBeNull
+      }
     }
     Context 'Edge cases' {
       It 'throws when the source file does not exist' {

@@ -56,8 +56,6 @@ function New-AccessFile {
     Creates a database at the specified path by automating Access through COM.
 
     If the destination file already exists, the command stops unless `-Force` is specified.
-    Because this cmdlet supports `ShouldProcess`, you can use `-WhatIf` and `-Confirm`
-    to preview or confirm the file creation or overwrite operation.
 
   .PARAMETER Path
     Specifies the destination path of the database file to create.
@@ -711,8 +709,6 @@ function Export-AccessDatabase {
 
     If the destination file already exists, the cmdlet stops unless `-Force` is specified. With `-Force`, the existing file is overwritten. If `-NoClobber` is specified, the cmdlet throws an error when the destination exists.
 
-    Because this cmdlet supports `ShouldProcess`, you can use `-WhatIf` and `-Confirm` to preview or confirm the export operation.
-
   .PARAMETER Path
     Specifies the path to the Access database file to export from.
 
@@ -745,16 +741,19 @@ function Export-AccessDatabase {
     Specifies the text transfer type for the export.
 
     This parameter is only valid with the **TextSet** parameter set. The default value is `acExportDelim`.
+    See https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype for valid values.
 
   .PARAMETER CodePage
     Specifies the code page to use for the exported text file.
 
     This parameter is only valid with the **TextSet** parameter set. The default value is `1200` (Unicode).
+    See https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers for valid code page values.
 
   .PARAMETER SpreadsheetType
     Specifies the spreadsheet type for the export.
 
-    This parameter is only valid with the **SpreadsheetSet** parameter set. The default value is `acSpreadsheetTypeExcel12Xml`.
+    This parameter is only valid with the **SpreadsheetSet** parameter set.
+    See https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype for valid values.
 
   .PARAMETER Range
     Specifies the range of cells to export in the spreadsheet.
@@ -795,10 +794,6 @@ function Export-AccessDatabase {
   .OUTPUTS
     System.IO.FileInfo
       Returns a FileInfo object representing the exported file.
-
-  .NOTES
-    The `-Password` and `-RemovePersonalInformation` parameters cannot be specified together in the underlying `New-AccessFile` cmdlet, but this cmdlet only reads from an existing database.
-    The cmdlet creates a temporary file during text export to work around a `TransferText` limitation with file names containing multiple periods.
   #>
   [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
   [OutputType([System.IO.FileInfo])]
@@ -830,7 +825,7 @@ function Export-AccessDatabase {
     $CodePage = 1200,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [Microsoft.Office.Interop.Access.AcSpreadSheetType]
-    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml,
+    $SpreadsheetType,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [string]
     $Range
@@ -873,6 +868,7 @@ function Export-AccessDatabase {
             # Create a temporary file with a single period for TransferText
             $tempDestination = [Path]::GetTempFileName()
             try {
+              # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
               $app.DoCmd.TransferText(
                 $TransferType       # TransferType
                 , [type]::Missing   # SpecificationName
@@ -897,6 +893,7 @@ function Export-AccessDatabase {
             }
           }
           'SpreadsheetSet' {
+            # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transferspreadsheet
             $app.DoCmd.TransferSpreadsheet(
               [Microsoft.Office.Interop.Access.AcDataTransferType]::acExport  # TransferType
               , $SpreadsheetType                                              # SpreadsheetType
@@ -943,8 +940,6 @@ function Import-AccessDatabase {
 
     If the destination database is read-only, the cmdlet throws an error.
 
-    Because this cmdlet supports `ShouldProcess`, you can use `-WhatIf` and `-Confirm` to preview or confirm the import operation.
-
   .PARAMETER Path
     Specifies the path to the Access database file to import into.
 
@@ -967,6 +962,7 @@ function Import-AccessDatabase {
     Specifies the text transfer type for the import.
 
     This parameter is only valid with the **TextSet** parameter set. The default value is `acImportDelim`.
+    See https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype for valid values.
 
   .PARAMETER CodePage
     Specifies the code page to use for the imported text file.
@@ -977,11 +973,13 @@ function Import-AccessDatabase {
     Indicates that the first row of the source file contains field names that should be used as column headers.
 
     This parameter is only valid with the **TextSet** parameter set.
+    See https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers for valid code page values.
 
   .PARAMETER SpreadsheetType
     Specifies the spreadsheet type for the import.
 
-    This parameter is only valid with the **SpreadsheetSet** parameter set. The default value is `acSpreadsheetTypeExcel12Xml`.
+    This parameter is only valid with the **SpreadsheetSet** parameter set.
+    See https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype for valid values.
 
   .PARAMETER Range
     Specifies the range of cells to import from the spreadsheet.
@@ -1016,10 +1014,6 @@ function Import-AccessDatabase {
 
   .OUTPUTS
     None.
-
-  .NOTES
-    The cmdlet creates a temporary file during text import to work around a `TransferText` limitation with file names containing multiple periods.
-    If the destination database is read-only, the cmdlet throws an error.
   #>
   [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
   [OutputType([void])]
@@ -1047,7 +1041,7 @@ function Import-AccessDatabase {
     $CodePage = 1200,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [Microsoft.Office.Interop.Access.AcSpreadSheetType]
-    $SpreadsheetType = [Microsoft.Office.Interop.Access.AcSpreadSheetType]::acSpreadsheetTypeExcel12Xml,
+    $SpreadsheetType,
     [Parameter(ParameterSetName = 'SpreadsheetSet')]
     [string]
     $Range
@@ -1077,6 +1071,7 @@ function Import-AccessDatabase {
             $tempSource = [Path]::GetTempFileName()
             try {
               Copy-Item -LiteralPath $resolvedSource -Destination $tempSource -Force
+              # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
               $app.DoCmd.TransferText(
                 $TransferType                                               # TransferType
                 , [type]::Missing                                           # SpecificationName
@@ -1093,6 +1088,7 @@ function Import-AccessDatabase {
             }
           }
           'SpreadsheetSet' {
+            # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transferspreadsheet
             $app.DoCmd.TransferSpreadsheet(
               [Microsoft.Office.Interop.Access.AcDataTransferType]::acImport  # TransferType
               , $SpreadsheetType                                              # SpreadsheetType
