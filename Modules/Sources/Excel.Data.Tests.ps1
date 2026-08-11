@@ -41,7 +41,10 @@ InModuleScope 'Automation.Office' {
         '.xlsm' { [Microsoft.Office.Interop.Excel.XlFileFormat]::xlOpenXMLWorkbookMacroEnabled }
       }
       New-ExcelFile -Path $Path -FileFormat $fileFormat -PasswordToOpen $PasswordToOpen -Initialize {
-        param($Workbook)
+        param(
+          [Microsoft.Office.Interop.Excel.Workbook]
+          $Workbook
+        )
         $sheet = $Workbook.Worksheets.Item(1)
         $sheet.Name = 'Employees'
         $sheet.Cells.Item(1, 1) = 'Id'
@@ -53,7 +56,7 @@ InModuleScope 'Automation.Office' {
         $sheet.Cells.Item(3, 1) = 2
         $sheet.Cells.Item(3, 2) = 'Bob'
         $sheet.Cells.Item(3, 3) = 'Engineering'
-      } | Out-Null
+      }
     }
   }
   Describe 'Get-ExcelTable' {

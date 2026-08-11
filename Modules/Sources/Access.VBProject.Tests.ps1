@@ -13,7 +13,7 @@ Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
   BeforeAll {
-    function Get-Password {
+    function Get-AccessPassword {
       [CmdletBinding()]
       [OutputType([System.Security.SecureString])]
       [SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '', Justification = 'Used in tests to generate random passwords for verification purposes')]
@@ -135,7 +135,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     BeforeEach {
-      $password = Get-Password
+      $password = Get-AccessPassword
       $path = Get-TempFile
       $destination = Get-Destination
       $componentRoot = [Path]::ChangeExtension($destination, $null)
@@ -243,7 +243,7 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'exports VBProject from a database protected with Password' {
         New-AccessFile -Path $path -Password $password
-        { Export-AccessVBProject -Path $path -Destination $destination -Password (Get-Password) } | Should-Throw
+        { Export-AccessVBProject -Path $path -Destination $destination -Password (Get-AccessPassword) } | Should-Throw
         Export-AccessVBProject -Path $path -Destination $destination -Password $password
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
@@ -343,7 +343,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     BeforeEach {
-      $password = Get-Password
+      $password = Get-AccessPassword
       $path = Get-TempFile
     }
     AfterEach {
@@ -395,7 +395,7 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a database protected with Password' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -Password $password
-        { Import-AccessVBProject -Path $path -Source $source -Password (Get-Password) } | Should-Throw
+        { Import-AccessVBProject -Path $path -Source $source -Password (Get-AccessPassword) } | Should-Throw
         Import-AccessVBProject -Path $path -Source $source -Password $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -Password $password
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
