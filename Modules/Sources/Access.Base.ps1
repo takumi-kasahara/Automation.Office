@@ -331,7 +331,6 @@ function Open-AccessFile {
     } else {
       New-AccessObject
     }
-    $shouldDisposeApp = -not $Application
     try {
       $resolved = (Resolve-Path -LiteralPath $Path).Path
       $passwordString = if ($null -eq $Password) {
@@ -364,6 +363,9 @@ function Open-AccessFile {
         }
         if ($ActionProject) {
           & $ActionProject $app.CurrentProject
+        }
+        if (-not $Application) {
+          $app.CloseCurrentDatabase()
         }
       } finally {
         Get-Variable |
