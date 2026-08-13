@@ -78,7 +78,7 @@ InModuleScope 'Automation.Office' {
     }
   }
   AfterAll {
-    $componentRoot = [Path]::ChangeExtension($source, $null)
+    $componentRoot = [Path]::ChangeExtension($source, $null).TrimEnd('.')
     if (-not (Test-Path -LiteralPath $componentRoot)) {
       New-Item -Path $componentRoot -ItemType Directory | Out-Null
     }
@@ -118,7 +118,7 @@ InModuleScope 'Automation.Office' {
       $password = Get-Password
       $path = Get-TempFile
       $destination = Get-Destination
-      $componentRoot = [Path]::ChangeExtension($destination, $null)
+      $componentRoot = [Path]::ChangeExtension($destination, $null).TrimEnd('.')
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
