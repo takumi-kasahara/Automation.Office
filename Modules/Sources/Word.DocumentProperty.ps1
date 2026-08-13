@@ -145,7 +145,7 @@ function Get-WordDocumentProperty {
     }
   }
 }
-function Get-WordPropertyValue {
+function Get-WordDocumentPropertyValue {
   <#
   .SYNOPSIS
     Gets a single document property value from documents.
@@ -173,7 +173,7 @@ function Get-WordPropertyValue {
 
   .EXAMPLE
     ``` powershell
-    Get-WordPropertyValue -Path "$env:TEMP\Document.docx" -Name Title
+    Get-WordDocumentPropertyValue -Path "$env:TEMP\Document.docx" -Name Title
     ```
 
   .OUTPUTS

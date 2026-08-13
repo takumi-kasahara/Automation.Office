@@ -145,7 +145,7 @@ function Get-ExcelDocumentProperty {
     }
   }
 }
-function Get-ExcelPropertyValue {
+function Get-ExcelDocumentPropertyValue {
   <#
   .SYNOPSIS
     Gets a single document property value from workbooks.
@@ -173,7 +173,7 @@ function Get-ExcelPropertyValue {
 
   .EXAMPLE
     ``` powershell
-    Get-ExcelPropertyValue -Path "$env:TEMP\Workbook.xlsx" -Name Title
+    Get-ExcelDocumentPropertyValue -Path "$env:TEMP\Workbook.xlsx" -Name Title
     ```
 
   .OUTPUTS

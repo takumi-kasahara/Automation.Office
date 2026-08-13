@@ -145,7 +145,7 @@ function Get-PowerPointDocumentProperty {
     }
   }
 }
-function Get-PowerPointPropertyValue {
+function Get-PowerPointDocumentPropertyValue {
   <#
   .SYNOPSIS
     Gets a single document property value from presentations.
@@ -173,7 +173,7 @@ function Get-PowerPointPropertyValue {
 
   .EXAMPLE
     ``` powershell
-    Get-PowerPointPropertyValue -Path "$env:TEMP\Presentation.pptx" -Name Title
+    Get-PowerPointDocumentPropertyValue -Path "$env:TEMP\Presentation.pptx" -Name Title
     ```
 
   .OUTPUTS
