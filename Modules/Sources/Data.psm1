@@ -32,8 +32,7 @@ function Get-OdbcConnectionString {
     [switch]
     $ReadOnly
   )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
-
+  $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
   $extension = [Path]::GetExtension($resolved)
   $drivers = Get-OdbcDriver | Where-Object -Property Name -Like "*[*]$extension*" | Select-Object -ExpandProperty Name
   return $drivers |
@@ -71,7 +70,7 @@ function Get-OleDbConnectionString {
     [switch]
     $NoIMEX
   )
-  $resolved = (Resolve-Path -LiteralPath $Path).Path
+  $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
   $extension = [Path]::GetExtension($resolved)
   if ($extension -notin '.accdb', '.mdb', '.xlsx', '.xls', '.xlsm', '.xlsb') {
     throw [ArgumentException]::new("Unsupported extension: $extension. Supported extensions are .accdb, .mdb, .xlsx, .xls, .xlsm, .xlsb.", 'Path')

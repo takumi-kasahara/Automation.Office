@@ -140,7 +140,7 @@ function New-OneNoteSection {
   try {
     switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
       'PathSet' {
-        $resolved = [Path]::GetFullPath($Path)
+        $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
         $relativeToObjectId = [string]::Empty
       }
       'ParentIdSet' {
@@ -231,7 +231,7 @@ function New-OneNoteSectionGroup {
   try {
     switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
       'PathSet' {
-        $resolved = [Path]::GetFullPath($Path)
+        $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
         $relativeToObjectId = [string]::Empty
       }
       'ParentIdSet' {
@@ -536,7 +536,7 @@ function Export-OneNoteHierarchy {
   } else {
     $Id
   }
-  $resolved = [Path]::GetFullPath($Destination) | Join-Path -ChildPath "$name.hierarchy.xml"
+  $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination)) | Join-Path -ChildPath "$name.hierarchy.xml"
   if ((Test-Path -LiteralPath $Destination -PathType Leaf) -or (Test-Path -LiteralPath $resolved -PathType Container)) {
     $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $Destination))
   }
@@ -651,7 +651,7 @@ function Export-OneNotePageContent {
   } else {
     $Id
   }
-  $resolved = [Path]::GetFullPath($Destination) | Join-Path -ChildPath "$name.content.xml"
+  $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination)) | Join-Path -ChildPath "$name.content.xml"
   if ((Test-Path -LiteralPath $Destination -PathType Leaf) -or (Test-Path -LiteralPath $resolved -PathType Container)) {
     $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $Destination))
   }
@@ -771,7 +771,7 @@ function Export-OneNotePageAsDocument {
     $Id
   }
   $ext = Get-ExtensionByPublishFormat -PublishFormat $PublishFormat
-  $resolved = [Path]::GetFullPath($Destination) | Join-Path -ChildPath "$name$ext"
+  $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination)) | Join-Path -ChildPath "$name$ext"
   if ((Test-Path -LiteralPath $Destination -PathType Leaf) -or (Test-Path -LiteralPath $resolved -PathType Container)) {
     $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $Destination))
   }

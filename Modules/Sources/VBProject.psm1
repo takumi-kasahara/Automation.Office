@@ -199,7 +199,7 @@ function Export-VBProjectComponent {
   )
   $activity = 'Getting Components'
   try {
-    $resolved = [Path]::GetFullPath($Destination)
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination))
     if ((Test-Path -LiteralPath $resolved) -and $NoClobber) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))
     }
@@ -326,7 +326,7 @@ function Export-VBProjectComponent {
       try {
         if ([vbext_ComponentType]$_.Type -eq [vbext_ComponentType]::vbext_ct_Document) {
           if ($_.CodeModule.CountOfLines -gt 0) {
-          $contents = $_.CodeModule.Lines(1, $_.CodeModule.CountOfLines) -join [Environment]::NewLine
+            $contents = $_.CodeModule.Lines(1, $_.CodeModule.CountOfLines) -join [Environment]::NewLine
           } else {
             $contents = [string]::Empty
           }
@@ -378,16 +378,16 @@ function Import-VBProjectComponent {
   )
   $activity = 'Importing Components'
   try {
-    $root = [Path]::GetFullPath($ComponentRoot)
-    if (-not (Test-Path -LiteralPath $root -PathType Container)) {
-      $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemNotFound' -TargetObject $root))
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $ComponentRoot))
+    if (-not (Test-Path -LiteralPath $resolved -PathType Container)) {
+      $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemNotFound' -TargetObject $resolved))
     }
     if ($Application) {
       $tableDefs = $Components |
       Where-Object -Property Type -EQ ([AcObjectType]::acTable) |
       Where-Object { [Path]::GetFileName($_.Path) -eq 'TableDefs.accdb' } |
-      Where-Object { Test-Path -LiteralPath ([Path]::GetFullPath(($root | Join-Path -ChildPath $_.Path))) -PathType Leaf } |
-      ForEach-Object { [Path]::GetFullPath(($root | Join-Path -ChildPath $_.Path)) } |
+      Where-Object { Test-Path -LiteralPath ($resolved | Join-Path -ChildPath $_.Path) -PathType Leaf } |
+      ForEach-Object { ($resolved | Join-Path -ChildPath $_.Path) } |
       Select-Object -First 1
       $Components |
       Where-Object -Property Type -NE ([AcObjectType]::acModule) |
@@ -395,9 +395,9 @@ function Import-VBProjectComponent {
       Where-Object { $_.Type -ne [AcObjectType]::acTable -or [Path]::GetFileName($_.Path) -ne 'TableDefs.accdb' } |
       ForEach-Object {
         $_.Path = [string]$_.Path
-        $path = Join-Path -Path $root -ChildPath $_.Path
+        $path = Join-Path -Path $resolved -ChildPath $_.Path
         if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-          $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($_.Path))
+          $fallbackPath = Join-Path -Path $resolved -ChildPath ([Path]::GetFileName($_.Path))
           if (Test-Path -LiteralPath $fallbackPath -PathType Leaf) {
             $path = $fallbackPath
           }
@@ -485,9 +485,9 @@ function Import-VBProjectComponent {
     $components |
     Where-Object -Property Type -In ([Enum]::GetValues([vbext_ComponentType])) |
     ForEach-Object {
-      $path = Join-Path -Path $root -ChildPath $_.Path
+      $path = Join-Path -Path $resolved -ChildPath $_.Path
       if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-        $fallbackPath = Join-Path -Path $root -ChildPath ([Path]::GetFileName($_.Path))
+        $fallbackPath = Join-Path -Path $resolved -ChildPath ([Path]::GetFileName($_.Path))
         if (Test-Path -LiteralPath $fallbackPath -PathType Leaf) {
           $path = $fallbackPath
         }
@@ -577,7 +577,7 @@ function Export-VBProject {
   $activity = 'Exporting VBProject'
   $resolvedDestination = $null
   try {
-    $resolvedDestination = [Path]::GetFullPath($Destination)
+    $resolvedDestination = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination))
     if (Test-Path -LiteralPath $resolvedDestination -PathType Container) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolvedDestination))
     }
@@ -592,7 +592,7 @@ function Export-VBProject {
       $destinationName = [Path]::GetFileNameWithoutExtension($resolvedDestination)
       $destinationDirectory | Join-Path -ChildPath $destinationName
     } else {
-      [Path]::GetFullPath($ComponentRoot)
+      [Path]::GetFullPath([Path]::Combine($PWD.Path, $ComponentRoot))
     }
 
     Write-Progress -Activity $activity -Status 'Exporting references'
@@ -620,10 +620,10 @@ function Export-VBProject {
     }
     $components = @($components) |
     ForEach-Object {
-      $absoluteComponentPath = [Path]::GetFullPath(($resolvedComponentRoot | Join-Path -ChildPath $_.Path))
+      $resolvedComponentPath = [Path]::GetFullPath(($resolvedComponentRoot | Join-Path -ChildPath $_.Path))
       [VBComponentInfo]@{
         Name = $_.Name
-        Path = [PathCompatibility]::GetRelativePath($destinationDirectory, $absoluteComponentPath)
+        Path = [PathCompatibility]::GetRelativePath($destinationDirectory, $resolvedComponentPath)
         Type = $_.Type
       }
     }
@@ -666,10 +666,10 @@ function Import-VBProject {
   $dialogSuppressor = Start-DialogSuppressor -TargetExe $TargetExe
   $activity = 'Importing VBProject'
   try {
-    $resolvedSource = [Path]::GetFullPath($Source)
-    $sourceDirectory = $resolvedSource | Split-Path -Parent
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Source))
+    $sourceDirectory = $resolved | Split-Path -Parent
 
-    $metadata = Get-Content -LiteralPath $resolvedSource -Encoding UTF8 -Raw | ConvertFrom-Json
+    $metadata = Get-Content -LiteralPath $resolved -Encoding UTF8 -Raw | ConvertFrom-Json
     $components = @($metadata.VBComponents) |
     ForEach-Object {
       [VBComponentInfo]@{

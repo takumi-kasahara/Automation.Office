@@ -177,7 +177,7 @@ function New-WordFile {
     } else {
       [NetworkCredential]::new([string]::Empty, $PasswordToModify).Password
     }
-    $resolved = [Path]::GetFullPath($Path)
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
     $exists = Test-Path -LiteralPath $resolved
     if ($exists -and -not $Force) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))
@@ -318,7 +318,7 @@ function Open-WordFile {
     }
     $shouldDisposeApp = -not $Application
     try {
-      $resolved = (Resolve-Path -LiteralPath $Path).Path
+      $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
       $passwordToOpenString = if ($null -eq $PasswordToOpen) {
         [type]::Missing
       } else {

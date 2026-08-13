@@ -161,7 +161,7 @@ function New-AccessFile {
     } else {
       [NetworkCredential]::new([string]::Empty, $Password).Password
     }
-    $resolved = [Path]::GetFullPath($Path)
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
     $exists = Test-Path -LiteralPath $resolved
     if ($exists -and -not $Force) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))
@@ -831,8 +831,8 @@ function Export-AccessDatabase {
     $Range
   )
   process {
-    $resolvedPath = [Path]::GetFullPath($Path)
-    $resolvedDestination = [Path]::GetFullPath($Destination)
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
+    $resolvedDestination = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination))
     $exists = Test-Path -LiteralPath $resolvedDestination
     if ($exists -and $NoClobber) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolvedDestination))
@@ -861,7 +861,7 @@ function Export-AccessDatabase {
     }
     $app = New-AccessObject
     try {
-      Open-AccessFile -Application $app -Path $resolvedPath -Password $Password
+      Open-AccessFile -Application $app -Path $resolved -Password $Password
       try {
         switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
           'TextSet' {
@@ -1047,23 +1047,23 @@ function Import-AccessDatabase {
     $Range
   )
   process {
-    $resolvedPath = [Path]::GetFullPath($Path)
-    $resolvedSource = [Path]::GetFullPath($Source)
+    $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Path))
+    $resolvedSource = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Source))
     $action = if ($PSCmdlet.ParameterSetName -eq 'SpreadsheetSet') {
       'Import spreadsheet data into Access'
     } else {
       'Import text data into Access'
     }
-    if (-not $PSCmdlet.ShouldProcess($resolvedPath, $action)) {
+    if (-not $PSCmdlet.ShouldProcess($resolved, $action)) {
       return
     }
-    $item = Get-Item -LiteralPath $resolvedPath -Force
+    $item = Get-Item -LiteralPath $resolved -Force
     if ($item.IsReadOnly) {
       $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
     }
     $app = New-AccessObject
     try {
-      Open-AccessFile -Application $app -Path $resolvedPath -Password $Password
+      Open-AccessFile -Application $app -Path $resolved -Password $Password
       try {
         switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
           'TextSet' {

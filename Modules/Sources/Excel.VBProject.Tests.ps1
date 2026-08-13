@@ -101,13 +101,13 @@ InModuleScope 'Automation.Office' {
           $Destination
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedDestination = $Destination.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Export-ExcelVBProject -Path '$escapedFilePath' -Destination '$escapedDestination' -Confirm"
+            "Export-ExcelVBProject -Path '$escapedPath' -Destination '$escapedDestination' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -221,6 +221,18 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'exports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeDestination = [Path]::GetFileName($destination)
+          $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
+          Export-ExcelVBProject -Path $fixture -Destination $relativeDestination -ComponentRoot $relativeComponentRoot
+          Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
+          Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        } finally {
+          Pop-Location
+        }
+      }
       It 'exports VBProject from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled -PasswordToOpen $password
         { Export-ExcelVBProject -Path $path -Destination $destination -PasswordToOpen (Get-Password) } | Should-Throw
@@ -310,13 +322,13 @@ InModuleScope 'Automation.Office' {
           $Source
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedSource = $Source.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Import-ExcelVBProject -Path '$escapedFilePath' -Source '$escapedSource' -Confirm"
+            "Import-ExcelVBProject -Path '$escapedPath' -Source '$escapedSource' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -380,6 +392,19 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'imports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeSource = [Path]::GetFileName($source)
+          New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled
+          Import-ExcelVBProject -Path $path -Source $relativeSource
+          $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
+          $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
+          ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
+        } finally {
+          Pop-Location
+        }
+      }
       It 'imports VBProject into a file protected with PasswordToOpen' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled -PasswordToOpen $password

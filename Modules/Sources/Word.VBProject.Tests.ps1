@@ -101,13 +101,13 @@ InModuleScope 'Automation.Office' {
           $Destination
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedDestination = $Destination.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Export-WordVBProject -Path '$escapedFilePath' -Destination '$escapedDestination' -Confirm"
+            "Export-WordVBProject -Path '$escapedPath' -Destination '$escapedDestination' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -221,6 +221,18 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'exports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeDestination = [Path]::GetFileName($destination)
+          $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
+          Export-WordVBProject -Path $fixture -Destination $relativeDestination -ComponentRoot $relativeComponentRoot
+          Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
+          Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        } finally {
+          Pop-Location
+        }
+      }
       It 'exports VBProject from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToOpen $password
         { Export-WordVBProject -Path $path -Destination $destination -PasswordToOpen (Get-Password) } | Should-Throw
@@ -310,13 +322,13 @@ InModuleScope 'Automation.Office' {
           $Source
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedSource = $Source.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Import-WordVBProject -Path '$escapedFilePath' -Source '$escapedSource' -Confirm"
+            "Import-WordVBProject -Path '$escapedPath' -Source '$escapedSource' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -373,6 +385,19 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'imports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeSource = [Path]::GetFileName($source)
+          New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+          Import-WordVBProject -Path $path -Source $relativeSource
+          $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
+          $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
+          ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
+        } finally {
+          Pop-Location
+        }
+      }
       It 'imports VBProject into a file protected with PasswordToOpen' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToOpen $password

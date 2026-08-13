@@ -264,7 +264,7 @@ function Export-PowerPointAsFixedFormat {
   )
   process {
     if ($PSCmdlet.ShouldProcess($Path, "Export as Fixed Format to $Destination")) {
-      $resolved = [Path]::GetFullPath($Destination)
+      $resolved = [Path]::GetFullPath([Path]::Combine($PWD.Path, $Destination))
       # By default, ExportAsFixedFormat overwrites.
       if ((Test-Path -LiteralPath $resolved) -and ($NoClobber -or -not $Force)) {
         $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))

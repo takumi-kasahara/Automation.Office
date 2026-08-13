@@ -121,13 +121,13 @@ InModuleScope 'Automation.Office' {
           $Destination
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedDestination = $Destination.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Export-AccessVBProject -Path '$escapedFilePath' -Destination '$escapedDestination' -Confirm"
+            "Export-AccessVBProject -Path '$escapedPath' -Destination '$escapedDestination' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -241,6 +241,18 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'exports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeDestination = [Path]::GetFileName($destination)
+          $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
+          Export-AccessVBProject -Path $relativePath -Destination $relativeDestination
+          Test-Path -LiteralPath $relativeDestination -PathType Leaf | Should-BeTrue
+          Test-Path -LiteralPath $relativeComponentRoot -PathType Container | Should-BeTrue
+        } finally {
+          Pop-Location
+        }
+      }
       It 'exports VBProject from a database protected with Password' {
         New-AccessFile -Path $path -Password $password
         { Export-AccessVBProject -Path $path -Destination $destination -Password (Get-AccessPassword) } | Should-Throw
@@ -329,13 +341,13 @@ InModuleScope 'Automation.Office' {
           $Source
         )
         process {
-          $resolvedModulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $resolvedModulePath.Replace("'", "''")
-          $escapedFilePath = $Path.Replace("'", "''")
+          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
+          $escapedModulePath = $modulePath.Replace("'", "''")
+          $escapedPath = $Path.Replace("'", "''")
           $escapedSource = $Source.Replace("'", "''")
           $command = @(
             "Import-Module -Name '$escapedModulePath' -Force"
-            "Import-AccessVBProject -Path '$escapedFilePath' -Source '$escapedSource' -Confirm"
+            "Import-AccessVBProject -Path '$escapedPath' -Source '$escapedSource' -Confirm"
           ) -join '; '
           @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
           return $LASTEXITCODE
@@ -392,6 +404,19 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
+      It 'imports VBProject by relative path' {
+        Push-Location -Path $env:TEMP
+        try {
+          $relativeSource = [Path]::GetFileName($source)
+          New-AccessFile -Path $path -RemovePersonalInformation
+          Import-AccessVBProject -Path $path -Source $relativeSource
+          $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
+          $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
+          ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
+        } finally {
+          Pop-Location
+        }
+      }
       It 'imports VBProject into a database protected with Password' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -Password $password
