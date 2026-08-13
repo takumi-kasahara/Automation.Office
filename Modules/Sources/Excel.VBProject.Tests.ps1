@@ -236,6 +236,20 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
+      It 'exports a workbook whose ThisWorkbook module has no code lines' {
+        New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled
+        Open-ExcelFile -Path $path -Action {
+          param (
+            [Microsoft.Office.Interop.Excel.Workbook]
+            $Workbook
+          )
+          $Workbook.VBProject.VBComponents.Item('ThisWorkbook').CodeModule.DeleteLines(1, $Workbook.VBProject.VBComponents.Item('ThisWorkbook').CodeModule.CountOfLines)
+          $Workbook.Save()
+        }
+        { Export-ExcelVBProject -Path $path -Destination $destination } | Should -Not -Throw
+        Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
+        Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'ThisWorkbook.vba') -PathType Leaf | Should-BeTrue
+      }
       It 'throws when the destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
         { Export-ExcelVBProject -Path $fixture -Destination $destination -Force } | Should-Throw

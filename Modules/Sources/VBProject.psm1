@@ -325,7 +325,11 @@ function Export-VBProjectComponent {
       Write-Progress -Activity $activity -Status "Exporting: $($_.Name) to $path as $([vbext_ComponentType]$_.Type)"
       try {
         if ([vbext_ComponentType]$_.Type -eq [vbext_ComponentType]::vbext_ct_Document) {
+          if ($_.CodeModule.CountOfLines -gt 0) {
           $contents = $_.CodeModule.Lines(1, $_.CodeModule.CountOfLines) -join [Environment]::NewLine
+          } else {
+            $contents = [string]::Empty
+          }
           if (-not $contents.EndsWith([Environment]::NewLine)) {
             $contents += [Environment]::NewLine
           }
