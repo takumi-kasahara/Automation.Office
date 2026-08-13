@@ -11,9 +11,7 @@ function Get-WordDocumentProperty {
 
   .DESCRIPTION
     Opens one or more documents and returns document properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected documents via `-PasswordToOpen` and `-PasswordToModify`.
-
     When `-Custom` is specified, the cmdlet reads custom document properties instead of built-in properties.
 
   .PARAMETER Path
@@ -35,29 +33,37 @@ function Get-WordDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title
+    ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-WordDocumentProperty -LiteralPath "$env:TEMP\Document.docx" -PasswordToOpen $password -Name Title
+    ```
 
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -PasswordToModify $password -Name Title
+    ```
 
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Custom -Name MyCustomProperty
+    ```
 
     Gets a custom document property.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -166,7 +172,9 @@ function Get-WordPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-WordPropertyValue -Path "$env:TEMP\Document.docx" -Name Title
+    ```
 
   .OUTPUTS
     System.Object
@@ -216,11 +224,8 @@ function Set-WordDocumentProperty {
 
   .DESCRIPTION
     Opens one or more documents and updates a built-in or custom document property.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     If a target is read-only, the cmdlet throws an exception.
 
   .PARAMETER Path
@@ -252,33 +257,43 @@ function Set-WordDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Monthly report'
+    ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
+    ``` powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Custom -Name MyProperty -Value 'Custom value'
+    ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
+    ``` powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
+    ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Protected document' -PasswordToOpen $password
+    ```
 
     Updates a protected document.
 
   .EXAMPLE
+    ``` powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Monthly report' -PassThru
+    ```
 
     Updates the `Title` built-in document property and returns the updated property object.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -418,10 +433,7 @@ function Remove-WordDocumentProperty {
 
   .DESCRIPTION
     Opens one or more documents and removes document information by calling `Document.RemoveDocumentInformation`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm removals.
-
     Read-only files and read-only documents throw an exception.
 
   .PARAMETER Path
@@ -442,18 +454,24 @@ function Remove-WordDocumentProperty {
     The default value is `wdRDIDocumentProperties`.
 
   .EXAMPLE
+    ``` powershell
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx"
+    ```
 
     Removes document properties from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx" -PasswordToOpen $password
+    ```
 
     Removes document properties from a protected document.
 
   .EXAMPLE
+    ``` powershell
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx" -RemoveDocInfoType wdRDIAll
+    ```
 
     Removes all supported document information categories.
 

@@ -11,9 +11,7 @@ function Export-ExcelVBProject {
 
   .DESCRIPTION
     Opens a file and exports references and components into a unified `VBProject.json` format.
-
-    The companion component folder is created next to the destination JSON unless -ComponentRoot is specified.
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
+    The companion component folder is created next to the destination JSON unless `-ComponentRoot` is specified.
 
   .PARAMETER Path
     Specifies the workbook path literally. Wildcards are not interpreted.
@@ -29,33 +27,42 @@ function Export-ExcelVBProject {
 
   .PARAMETER ComponentRoot
     Specifies the directory path where component files are exported.
-    When omitted, the directory is derived from -Destination by removing its extension.
+    When omitted, the directory is derived from `-Destination` by removing its extension.
 
   .PARAMETER Force
     Overrides read-only destination file attributes.
 
   .PARAMETER NoClobber
-    Produces an error if -Destination already exists. If omitted, existing output is overwritten.
+    Produces an error if -Destination already exists.
+    If omitted, existing output is overwritten.
 
   .EXAMPLE
+    ``` powershell
     Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project metadata and components from an Excel workbook to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project from a workbook protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project from a workbook protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json" -WhatIf
+    ```
 
     Shows what would happen if the command were executed without actually exporting the VBA project.
 
@@ -128,9 +135,6 @@ function Import-ExcelVBProject {
   .DESCRIPTION
     Opens a file and imports references and components from unified `VBProject.json` format.
 
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
-    You can import into protected workbooks with -PasswordToOpen or -PasswordToModify.
-
   .PARAMETER Path
     Specifies the workbook path literally. Wildcards are not interpreted.
 
@@ -150,31 +154,27 @@ function Import-ExcelVBProject {
     Imports while keeping the workbook window hidden.
 
   .EXAMPLE
+    ``` powershell
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json"
+    ```
 
     Imports VBA project from JSON file to Excel workbook.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
+    ```
 
     Imports into workbook protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
+    ```
 
     Imports into workbook protected with a modify password.
-
-  .EXAMPLE
-    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -WhatIf
-
-    Shows what would happen if the command were executed without actually importing the VBA project.
-
-  .EXAMPLE
-    Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -Force -Confirm
-
-    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

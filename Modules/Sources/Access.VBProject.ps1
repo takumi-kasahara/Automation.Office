@@ -12,9 +12,7 @@ function Export-AccessVBProject {
 
   .DESCRIPTION
     Opens a database and exports references and components into a unified `VBProject.json` format.
-
-    The companion component folder is created next to the destination JSON unless -ComponentRoot is specified.
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
+    The companion component folder is created next to the destination JSON unless `-ComponentRoot` is specified.
 
   .PARAMETER Path
     Specifies the database path literally. Wildcards are not interpreted.
@@ -27,13 +25,14 @@ function Export-AccessVBProject {
 
   .PARAMETER ComponentRoot
     Specifies the directory path where component files are exported.
-    When omitted, the directory is derived from -Destination by removing its extension.
+    When omitted, the directory is derived from `-Destination` by removing its extension.
 
   .PARAMETER Force
     Overrides read-only destination file attributes.
 
   .PARAMETER NoClobber
-    Produces an error if -Destination already exists. If omitted, existing output is overwritten.
+    Produces an error if -Destination already exists.
+    If omitted, existing output is overwritten.
 
   .PARAMETER IncludeAcObjectType
     Specifies an array of AcObjectType values to include when exporting the VBProject.
@@ -46,34 +45,32 @@ function Export-AccessVBProject {
     Corresponds to the ExcludeAcObjectType parameter in the Access VBA object model.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports the VBA project from the Access database to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ComponentRoot "$env:TEMP\Components"
+    ```
 
     Exports the VBA project to VBProject.json and places component files in the specified ComponentRoot directory.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -IncludeAcObjectType acForm
+    ```
 
     Exports only form components from the VBA project.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ExcludeAcObjectType acReport
+    ```
 
     Exports all components except reports from the VBA project.
-
-  .EXAMPLE
-    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -WhatIf
-
-    Shows what would happen if the command were executed without actually exporting the VBA project.
-
-  .EXAMPLE
-    Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -Force -Confirm
-
-    Forces overwrite of existing read-only files and prompts for confirmation before executing.
 
   .OUTPUTS
     System.IO.FileInfo
@@ -147,8 +144,6 @@ function Import-AccessVBProject {
   .DESCRIPTION
     Opens a database and imports references and components from unified `VBProject.json` format.
 
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
-
   .PARAMETER Path
     Specifies the database path literally. Wildcards are not interpreted.
 
@@ -159,25 +154,19 @@ function Import-AccessVBProject {
     Specifies the source file path for `VBProject.json`.
 
   .EXAMPLE
+    ``` powershell
     Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json"
+    ```
 
     Imports VBA project from JSON file to Access database.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -Password $password
+    ```
 
     Imports protected database with password.
-
-  .EXAMPLE
-    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -WhatIf
-
-    Shows what would happen without actual import.
-
-  .EXAMPLE
-    Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -Force -Confirm
-
-    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

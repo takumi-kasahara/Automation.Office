@@ -67,29 +67,21 @@ function New-PowerPointFile {
 
   .DESCRIPTION
     Creates a file at the specified path by automating PowerPoint through COM.
-
     If the destination file already exists, the command stops unless `-Force` is specified.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm the file creation or overwrite operation.
 
   .PARAMETER Path
     Specifies the destination path of the presentation file to create.
-
     This parameter does not support wildcards because it represents a new file path.
 
   .PARAMETER FileFormat
     Specifies the PowerPoint file format used when saving the presentation.
-
     The default value is `ppSaveAsOpenXMLPresentation`.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the presentation.
 
-  Pass a `SecureString` value. If omitted, no open password is set.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the presentation.
-
-    Pass a `SecureString` value. If omitted, no modify password is set.
 
   .PARAMETER ReadOnlyRecommended
     Saves the presentation with the read-only recommended flag set.
@@ -109,31 +101,41 @@ function New-PowerPointFile {
     The script block receives the presentation object as its first argument.
 
   .EXAMPLE
+    ``` powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
+    ```
 
     Creates a new presentation.
 
   .EXAMPLE
+    ``` powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptm" -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -Force
+    ```
 
     Creates or overwrites a macro-enabled presentation.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
+    ```
 
     Creates a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -ReadOnlyRecommended
+    ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
+    ``` powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Initialize {
       param($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
+    ```
 
     Creates a presentation and adds a title slide.
 
@@ -243,49 +245,42 @@ function Open-PowerPointFile {
   .DESCRIPTION
     Opens a presentation file by automating PowerPoint through COM.
 
-    If `-Application` is not specified, the cmdlet creates a new PowerPoint Application
-    object, opens the presentation, and releases the application after the action completes.
-
   .PARAMETER Path
     Specifies the path to the presentation file to open.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Application
     Specifies the PowerPoint Application COM object to use for opening the presentation.
-
     If not specified, a new PowerPoint Application object is created automatically.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the presentation.
 
-    Pass a `SecureString` value. If omitted, no open password is used.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the presentation.
-
-    Pass a `SecureString` value. If omitted, no modify password is used.
 
   .PARAMETER ReadOnly
     Opens the presentation in read-only mode.
 
   .PARAMETER Action
     Specifies a script block to execute with the opened presentation.
-
     The script block receives the presentation object as its first argument.
-    When this parameter is specified, the presentation is automatically closed after
-    the action completes.
+    When this parameter is specified, the presentation is automatically closed after the action completes.
 
   .EXAMPLE
+    ``` powershell
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
+    ```
 
     Opens a presentation and returns the presentation object.
 
   .EXAMPLE
+    ``` powershell
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Action {
       param($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
+    ```
 
     Opens a presentation, adds a title slide, and closes the presentation.
 
@@ -384,7 +379,6 @@ function Get-PowerPointFileProperty {
 
   .DESCRIPTION
     Opens one or more presentations and returns file properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected presentations via `-PasswordToOpen` and `-PasswordToModify`.
 
   .PARAMETER Path
@@ -403,24 +397,30 @@ function Get-PowerPointFileProperty {
     Specifies the password required to modify the presentation.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final
+    ```
 
     Gets the `Final` file property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointFileProperty -LiteralPath "$env:TEMP\Presentation.pptx" -PasswordToOpen $password -Name Final
+    ```
 
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToModify $password -Name Final
+    ```
 
     Gets file properties from a file protected with a modify password.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -520,11 +520,8 @@ function Set-PowerPointFileProperty {
 
   .DESCRIPTION
     Opens one or more presentations and updates a file property.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     If a target is read-only, the cmdlet throws an exception.
 
   .PARAMETER Path
@@ -553,28 +550,36 @@ function Set-PowerPointFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true
+    ```
 
     Sets a single file property.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -InputObject ([PSCustomObject]@{ Final = $true })
+    ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true -PasswordToOpen $password
+    ```
 
     Updates file properties on a protected presentation.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true -PassThru
+    ```
 
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
     None.
@@ -731,17 +736,23 @@ function Test-PowerPointExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
+    ``` powershell
     Test-PowerPointExtension -Path "$env:TEMP\Presentation.pptx"
+    ```
 
     Returns true when the specified file exists and has a supported PowerPoint extension.
 
   .EXAMPLE
+    ``` powershell
     Test-PowerPointExtension -LiteralPath "$env:TEMP\Presentation.ppsx"
+    ```
 
     Returns true when the exact file path exists and is recognized as a PowerPoint presentation.
 
   .EXAMPLE
+    ``` powershell
     Test-PowerPointExtension -Path "$env:TEMP\*.txt"
+    ```
 
     Returns false when matched files do not use a supported PowerPoint extension.
 

@@ -15,8 +15,6 @@ function Get-ExcelTable {
   .DESCRIPTION
     Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and returns table entries.
 
-    This cmdlet does not use COM objects.
-
   .PARAMETER Path
     Specifies Excel workbook file paths. Wildcards are supported.
 
@@ -25,41 +23,52 @@ function Get-ExcelTable {
 
   .PARAMETER ReadOnly
     Opens the connection in read-only mode.
-
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
 
   .EXAMPLE
-    Get-ExcelTable -Path 'C:\Workbooks\Workbook.xlsx'
+    ``` powershell
+    Get-ExcelTable -Path "$env:TEMP\Workbook.xlsx"
+    ```
 
     Gets all tables (worksheets) in the specified Excel workbook file.
 
   .EXAMPLE
-    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xlsx'
+    ``` powershell
+    Get-ExcelTable -LiteralPath "$env:TEMP\Workbook.xlsx"
+    ```
 
     Gets all tables using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    'C:\Workbooks\Workbook.xlsx' | Get-ExcelTable
+    ``` powershell
+    "$env:TEMP\Workbook.xlsx" | Get-ExcelTable
+    ```
 
     Gets all tables by piping the file path to the cmdlet.
 
   .EXAMPLE
-    Get-ExcelTable -Path 'C:\Workbooks\*.xlsx'
+    ``` powershell
+    Get-ExcelTable -Path "$env:TEMP\*.xlsx"
+    ```
 
     Gets all tables from all .xlsx files in the specified directory using wildcards.
 
   .EXAMPLE
-    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xls'
+    ``` powershell
+    Get-ExcelTable -LiteralPath "$env:TEMP\Workbook.xls"
+    ```
 
     Gets all tables from an .xls format workbook file.
 
   .EXAMPLE
-    Get-ExcelTable -LiteralPath 'C:\Workbooks\Workbook.xlsm' -ReadOnly
+    ``` powershell
+    Get-ExcelTable -LiteralPath '$env:TEMP\Workbook.xlsm' -ReadOnly
+    ```
 
     Gets all tables from a macro-enabled workbook in read-only mode.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -117,8 +126,6 @@ function Get-ExcelTableColumn {
   .DESCRIPTION
     Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and returns column metadata for specified tables.
 
-    This cmdlet does not use COM objects.
-
   .PARAMETER Path
     Specifies Excel workbook file paths. Wildcards are supported.
 
@@ -130,41 +137,52 @@ function Get-ExcelTableColumn {
 
   .PARAMETER ReadOnly
     Opens the connection in read-only mode.
-
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
 
   .EXAMPLE
-    Get-ExcelTableColumn -Path 'C:\Workbooks\Workbook.xlsx' -Table Employees$
+    ``` powershell
+    Get-ExcelTableColumn -Path "$env:TEMP\Workbook.xlsx" -Table Employees$
+    ```
 
     Gets column metadata for the Employees$ table in the specified Excel workbook file.
 
   .EXAMPLE
-    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table Employees$
+    ``` powershell
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsx" -Table Employees$
+    ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    'C:\Workbooks\Workbook.xlsx' | Get-ExcelTableColumn -Table Employees$
+    ``` powershell
+    "$env:TEMP\Workbook.xlsx" | Get-ExcelTableColumn -Table Employees$
+    ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
-    Get-ExcelTableColumn -Path 'C:\Workbooks\*.xlsx' -Table Employees$
+    ``` powershell
+    Get-ExcelTableColumn -Path "$env:TEMP\*.xlsx" -Table Employees$
+    ```
 
     Gets column metadata from all .xlsx files in the specified directory using wildcards.
 
   .EXAMPLE
-    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xls' -Table Employees$
+    ``` powershell
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xls" -Table Employees$
+    ```
 
     Gets column metadata from an .xls format workbook file.
 
   .EXAMPLE
-    Get-ExcelTableColumn -LiteralPath 'C:\Workbooks\Workbook.xlsm' -Table Employees$ -ReadOnly
+    ``` powershell
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsm" -Table Employees$ -ReadOnly
+    ```
 
     Gets column metadata from a macro-enabled workbook in read-only mode.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -233,14 +251,9 @@ function Invoke-ExcelQuery {
 
   .DESCRIPTION
     Opens one or more Excel workbook files (.xlsx, .xls, .xlsm, .xlsb) through OLE DB/ODBC and executes the specified SQL statement.
-
     For `SELECT` statements, rows are returned as PSCustomObject with Path, ObjectType, ObjectName, and column properties.
-
     For `INSERT` and `UPDATE` statements, a single PSCustomObject with Path, ObjectType, ObjectName, and RecordsAffected is returned.
-
     `DELETE` statements are not supported by the Excel OLE DB provider.
-
-    This cmdlet does not use COM objects.
 
   .PARAMETER Path
     Specifies Excel workbook file paths. Wildcards are supported.
@@ -253,98 +266,105 @@ function Invoke-ExcelQuery {
 
   .PARAMETER Address
     Specifies one or more cell ranges to query within the corresponding table.
-
     Use A1-style notation such as A1:B10. The range is appended to the table name in the form [Sheet1$A1:B10].
     This parameter must have the same number of elements as -Table.
-
     Reference: [Import from Excel or Export to Excel with SQL Server Integration Services (SSIS)](https://learn.microsoft.com/en-us/sql/integration-services/load-data-to-from-excel-with-ssis?view=sql-server-ver17)
 
   .PARAMETER Columns
     Specifies the columns to return when querying tables by name.
-
     When omitted, all columns are returned.
 
   .PARAMETER Query
     Specifies a SQL statement to execute against the database.
-
     `SELECT`, `INSERT`, and `UPDATE` are supported.
-
     `DELETE` is not supported by the Excel OLE DB provider.
 
   .PARAMETER NoHeader
     Specifies that the first row of the Excel range does not contain column names.
-
     When this switch is specified, the OLE DB connection uses `HDR=NO` instead of the default `HDR=YES`.
     Column names appear as F1, F2, F3, and so on.
-
     Reference: [Initializing the Microsoft Excel driver](https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/initializing-the-microsoft-excel-driver)
 
   .PARAMETER NoIMEX
     Disables IMEX mode for the OLE DB connection.
-
     When this switch is specified, the OLE DB connection uses `IMEX=0` instead of the default `IMEX=1`.
     With IMEX disabled, the driver may return null for cells whose data type does not match the guessed column type.
-
     DML statements automatically use `IMEX=0` because the Excel provider requires an updateable connection.
 
   .PARAMETER ReadOnly
     Opens the connection in read-only mode.
-
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
-
     This switch is ignored when executing DML statements.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$'
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$'
+    ```
 
     Gets all rows from the Employees$ table in the specified Excel workbook.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -Columns Id, Name
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -Columns Id, Name
+    ```
 
     Gets only the Id and Name columns from the Employees$ table.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
+    ```
 
     Executes a custom SQL query against the workbook.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query "INSERT INTO [Employees$] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query "INSERT INTO [Employees$] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
+    ```
 
     Inserts a new row and returns the number of affected rows.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
+    ```
 
     Updates existing rows and returns the number of affected rows.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -Address 'A1:C2'
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -Address 'A1:C2'
+    ```
 
     Queries a specific cell range (A1:C2) within the Employees$ table.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -NoHeader
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -NoHeader
+    ```
 
     Queries the table treating the first row as data (no header row), resulting in column names F1, F2, F3.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsx' -Table 'Employees$' -ReadOnly
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -ReadOnly
+    ```
 
     Queries the table in read-only mode to prevent any write operations.
 
   .EXAMPLE
-    Invoke-ExcelQuery -LiteralPath 'C:\Workbooks\Workbook.xlsm' -Table 'Employees$'
+    ``` powershell
+    Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsm" -Table 'Employees$'
+    ```
 
     Queries a macro-enabled workbook (.xlsm format).
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
 
   .NOTES
     SQL syntax is based on the Jet/ACE SQL dialect used by the Microsoft Access database engine. For a complete SQL reference, see:
-    https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference
+    <https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-access-sql-reference>
 
     Excel does not support `DELETE` statements. `UPDATE` requires an updateable connection (`IMEX=0`).
 
@@ -352,7 +372,7 @@ function Invoke-ExcelQuery {
     To create or delete tables, use the Excel COM object or the OpenXML SDK.
 
     For connection string details, see:
-    https://www.connectionstrings.com/excel/
+    <https://www.connectionstrings.com/excel/>
   #>
   [CmdletBinding(DefaultParameterSetName = 'TablePathSet')]
   [OutputType([PSCustomObject])]

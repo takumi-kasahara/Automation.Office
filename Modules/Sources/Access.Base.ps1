@@ -54,27 +54,21 @@ function New-AccessFile {
 
   .DESCRIPTION
     Creates a database at the specified path by automating Access through COM.
-
     If the destination file already exists, the command stops unless `-Force` is specified.
 
   .PARAMETER Path
     Specifies the destination path of the database file to create.
-
     This parameter does not support wildcards because it represents a new file path.
 
   .PARAMETER FileFormat
     Specifies the Access file format used when creating the database.
-
     The default value is `acNewDatabaseFormatUserDefault`.
 
   .PARAMETER Password
     Specifies the password required to open the database.
 
-    Pass a `SecureString` value. If omitted, no database password is set.
-
   .PARAMETER Force
     Overwrites an existing file at `-Path`.
-
     Without this switch, the cmdlet stops when the destination file already exists.
 
   .PARAMETER RemovePersonalInformation
@@ -89,46 +83,57 @@ function New-AccessFile {
     The script block receives the CurrentProject object as its first argument.
 
   .EXAMPLE
+    ``` powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb"
+    ```
 
     Creates a new database in the temporary directory.
 
   .EXAMPLE
+    ``` powershell
     New-AccessFile -Path "$env:TEMP\Database.mdb" -FileFormat acNewDatabaseFormatAccess2000 -Force
+    ```
 
     Creates or overwrites a legacy Access database.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     New-AccessFile -Path "$env:TEMP\Database.accdb" -Password $password
+    ```
 
     Creates a database protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -RemovePersonalInformation
+    ```
 
     Creates a new database and removes personal information from the file.
 
   .EXAMPLE
+    ``` powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeDb {
       param($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
+    ```
 
     Creates a database and creates a table using DAO.
 
   .EXAMPLE
+    ``` powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeProject {
       param($Project)
       return $Project.Connection
     }
+    ```
 
     Returns the connection string of the new database project.
 
   .NOTES
     The -Password and -RemovePersonalInformation parameters cannot be specified together.
-    Setting RemovePersonalInformation triggers a save operation that displays a password dialog,
-    which may cause the cmdlet to hang if a password is required for a password-protected databasetirmation dialog in password-protected databases, causing the cmdlet to hang.
+    Setting RemovePersonalInformation triggers a save operation that displays a password dialog.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([System.IO.FileInfo])]
@@ -246,56 +251,51 @@ function Open-AccessFile {
   .DESCRIPTION
     Opens a database file by automating Access through COM.
 
-    If `-Application` is not specified, the cmdlet creates a new Access Application
-    object, opens the database, and releases the application after the action completes.
-
   .PARAMETER Path
     Specifies the path to the database file to open.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Application
     Specifies the Access Application COM object to use for opening the database.
-
     If not specified, a new Access Application object is created automatically.
 
   .PARAMETER Password
     Specifies the password required to open the database.
 
-    Pass a `SecureString` value. If omitted, no password is used.
-
   .PARAMETER ActionDb
     Specifies a script block to execute with the DAO database object.
-
     The script block receives the database object as its first argument.
-    When this parameter is specified, the database is automatically closed after
-    the action completes.
+    When this parameter is specified, the database is automatically closed after the action completes.
 
   .PARAMETER ActionProject
     Specifies a script block to execute with the CurrentProject object.
-
     The script block receives the CurrentProject object as its first argument.
-    When this parameter is specified, the database is automatically closed after
-    the action completes.
+    When this parameter is specified, the database is automatically closed after the action completes.
 
   .EXAMPLE
+    ``` powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb"
+    ```
 
     Opens a database and returns the CurrentProject object.
 
   .EXAMPLE
+    ``` powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
       param($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
+    ```
 
     Opens a database, creates a table using DAO, and closes the database.
 
   .EXAMPLE
+    ``` powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionProject {
       param($Project)
       return $Project.Connection
     }
+    ```
 
     Opens a database and returns the connection string.
 
@@ -394,8 +394,7 @@ function Get-AccessFileProperty {
 
   .DESCRIPTION
     Opens one or more databases and returns database file properties as a `PSCustomObject`.
-
-    The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected databases via `-PasswordToOpen`.
+    The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected databases via `-Password`.
 
   .PARAMETER Path
     Specifies database paths. Wildcards are supported.
@@ -410,18 +409,22 @@ function Get-AccessFileProperty {
     Specifies the password required to open the database.
 
   .EXAMPLE
+    ``` powershell
     Get-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation
+    ```
 
     Gets the `RemovePersonalInformation` file property from a database.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-AccessFileProperty -LiteralPath "$env:TEMP\Database.accdb" -Password $password -Name RemovePersonalInformation
+    ```
 
     Gets file properties from a database protected with a password.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -518,11 +521,8 @@ function Set-AccessFileProperty {
 
   .DESCRIPTION
     Opens one or more databases and updates a file property.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     If a target is read-only, the cmdlet throws an exception.
 
   .PARAMETER Path
@@ -548,31 +548,37 @@ function Set-AccessFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true
+    ```
 
     Sets a single file property.
 
   .EXAMPLE
+    ``` powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -InputObject ([PSCustomObject]@{ RemovePersonalInformation = $true })
+    ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -Password $password
+    ```
 
     Updates file properties on a protected database.
 
   .EXAMPLE
+    ``` powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -PassThru
+    ```
 
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
-
-    None.
 
   .NOTES
     If a database cannot be updated (for example, read-only state, invalid property name, or file access issues), the cmdlet throws an exception and continues processing remaining items.
@@ -702,92 +708,96 @@ function Export-AccessDatabase {
 
   .DESCRIPTION
     Exports the contents of a table from an Access database to a text file (CSV, delimited, HTML) or spreadsheet (Excel) by automating Access through COM.
-
     The cmdlet supports two parameter sets:
-    - **TextSet** (default): Exports to text formats using `DoCmd.TransferText`. Supports delimited, fixed-width, and HTML export types.
+    - **TextSet** (default): Exports to text formats using `DoCmd.TransferText`.
     - **SpreadsheetSet**: Exports to Excel formats using `DoCmd.TransferSpreadsheet`.
-
-    If the destination file already exists, the cmdlet stops unless `-Force` is specified. With `-Force`, the existing file is overwritten. If `-NoClobber` is specified, the cmdlet throws an error when the destination exists.
+    If the destination file already exists, the cmdlet stops unless `-Force` is specified.
+    If `-NoClobber` is specified, the cmdlet throws an error when the destination exists.
 
   .PARAMETER Path
     Specifies the path to the Access database file to export from.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Password
     Specifies the password required to open the database.
-
-    Pass a `SecureString` value. If omitted, no password is used.
 
   .PARAMETER TableName
     Specifies the name of the table to export.
 
   .PARAMETER Destination
     Specifies the destination file path for the exported data.
-
     This parameter does not support wildcards because it represents a new file path.
 
   .PARAMETER Force
     Overwrites an existing file at `-Destination`.
-
     Without this switch, the cmdlet stops when the destination file already exists.
 
   .PARAMETER NoClobber
     Prevents overwriting an existing file at `-Destination`.
-
-    If the destination file exists, the cmdlet throws an error. This switch takes precedence over `-Force`.
+    If the destination file exists, the cmdlet throws an error.
+    This switch takes precedence over `-Force`.
 
   .PARAMETER TransferType
     Specifies the text transfer type for the export.
-
-    This parameter is only valid with the **TextSet** parameter set. The default value is `acExportDelim`.
-    See https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype for valid values.
+    This parameter is only valid with the **TextSet** parameter set.
+    The default value is `acExportDelim`.
+    See <https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype> for valid values.
 
   .PARAMETER CodePage
     Specifies the code page to use for the exported text file.
-
-    This parameter is only valid with the **TextSet** parameter set. The default value is `1200` (Unicode).
-    See https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers for valid code page values.
+    This parameter is only valid with the **TextSet** parameter set.
+    The default value is `1200` (Unicode).
+    See <https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers> for valid code page values.
 
   .PARAMETER SpreadsheetType
     Specifies the spreadsheet type for the export.
-
     This parameter is only valid with the **SpreadsheetSet** parameter set.
-    See https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype for valid values.
+    See <https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype> for valid values.
 
   .PARAMETER Range
     Specifies the range of cells to export in the spreadsheet.
-
     This parameter is only valid with the **SpreadsheetSet** parameter set.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt"
+    ```
 
     Exports the Employees table to a delimited text file.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -HasFieldNames
+    ```
 
     Exports the Employees table to a text file with field names as the first row.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -Password $password
+    ```
 
     Exports data from a password-protected database.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.html" -TransferType acExportHTML
+    ```
 
     Exports the Employees table to an HTML file.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml
+    ```
 
     Exports the Employees table to an Excel spreadsheet.
 
   .EXAMPLE
+    ``` powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
+    ```
 
     Exports the Employees table to an Excel spreadsheet with a specific range.
 
@@ -933,26 +943,20 @@ function Import-AccessDatabase {
 
   .DESCRIPTION
     Imports data from a text file (CSV, delimited, HTML) or spreadsheet (Excel) into an Access database table by automating Access through COM.
-
     The cmdlet supports two parameter sets:
-    - **TextSet** (default): Imports from text formats using `DoCmd.TransferText`. Supports delimited, fixed-width, and HTML import types.
+    - **TextSet** (default): Imports from text formats using `DoCmd.TransferText`.
     - **SpreadsheetSet**: Imports from Excel formats using `DoCmd.TransferSpreadsheet`.
-
     If the destination database is read-only, the cmdlet throws an error.
 
   .PARAMETER Path
     Specifies the path to the Access database file to import into.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Password
     Specifies the password required to open the database.
 
-    Pass a `SecureString` value. If omitted, no password is used.
-
   .PARAMETER Source
     Specifies the path to the source file to import from.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER TableName
@@ -960,55 +964,62 @@ function Import-AccessDatabase {
 
   .PARAMETER TransferType
     Specifies the text transfer type for the import.
-
-    This parameter is only valid with the **TextSet** parameter set. The default value is `acImportDelim`.
-    See https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype for valid values.
+    This parameter is only valid with the **TextSet** parameter set.
+    The default value is `acImportDelim`.
+    See <https://learn.microsoft.com/en-us/office/vba/api/access.actexttransfertype> for valid values.
 
   .PARAMETER CodePage
     Specifies the code page to use for the imported text file.
-
-    This parameter is only valid with the **TextSet** parameter set. The default value is `1200` (Unicode).
+    This parameter is only valid with the **TextSet** parameter set.
+    The default value is `1200` (Unicode).
 
   .PARAMETER HasFieldNames
     Indicates that the first row of the source file contains field names that should be used as column headers.
-
     This parameter is only valid with the **TextSet** parameter set.
-    See https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers for valid code page values.
+    See <https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers> for valid code page values.
 
   .PARAMETER SpreadsheetType
     Specifies the spreadsheet type for the import.
-
     This parameter is only valid with the **SpreadsheetSet** parameter set.
-    See https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype for valid values.
+    See <https://learn.microsoft.com/en-us/office/vba/api/access.acspreadsheettype> for valid values.
 
   .PARAMETER Range
     Specifies the range of cells to import from the spreadsheet.
-
     This parameter is only valid with the **SpreadsheetSet** parameter set.
 
   .EXAMPLE
+    ``` powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees'
+    ```
 
     Imports data from a CSV file into the Employees table.
 
   .EXAMPLE
+    ``` powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -HasFieldNames
+    ```
 
     Imports data from a CSV file with field names in the first row.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -Password $password
+    ```
 
     Imports data into a password-protected database.
 
   .EXAMPLE
+    ``` powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml
+    ```
 
     Imports data from an Excel spreadsheet into the Employees table.
 
   .EXAMPLE
+    ``` powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
+    ```
 
     Imports data from a specific range in an Excel spreadsheet.
 

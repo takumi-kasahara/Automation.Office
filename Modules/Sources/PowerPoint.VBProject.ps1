@@ -11,9 +11,7 @@ function Export-PowerPointVBProject {
 
   .DESCRIPTION
     Opens a file and exports references and components into a unified `VBProject.json` format.
-
-    The companion component folder is created next to the destination JSON unless -ComponentRoot is specified.
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
+    The companion component folder is created next to the destination JSON unless `-ComponentRoot` is specified.
 
   .PARAMETER Path
     Specifies the presentation path literally. Wildcards are not interpreted.
@@ -29,33 +27,42 @@ function Export-PowerPointVBProject {
 
   .PARAMETER ComponentRoot
     Specifies the directory path where component files are exported.
-    When omitted, the directory is derived from -Destination by removing its extension.
+    When omitted, the directory is derived from `-Destination` by removing its extension.
 
   .PARAMETER Force
     Overrides read-only destination file attributes.
 
   .PARAMETER NoClobber
-    Produces an error if -Destination already exists. If omitted, existing output is overwritten.
+    Produces an error if -Destination already exists.
+    If omitted, existing output is overwritten.
 
   .EXAMPLE
+    ``` powershell
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project metadata and components from a PowerPoint presentation to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project from a presentation protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
+    ```
 
     Exports VBA project from a presentation protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json" -WhatIf
+    ```
 
     Shows what would happen if the command were executed without actually exporting the VBA project.
 
@@ -128,9 +135,6 @@ function Import-PowerPointVBProject {
   .DESCRIPTION
     Opens a file and imports references and components from unified `VBProject.json` format.
 
-    This cmdlet supports ShouldProcess, so you can use -WhatIf and -Confirm.
-    You can import into protected presentations with -PasswordToOpen or -PasswordToModify.
-
   .PARAMETER Path
     Specifies the presentation path literally. Wildcards are not interpreted.
 
@@ -150,31 +154,34 @@ function Import-PowerPointVBProject {
     Imports while keeping the presentation window hidden.
 
   .EXAMPLE
+    ``` powershell
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json"
+    ```
 
     Imports VBA project from JSON file to PowerPoint presentation.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
+    ```
 
     Imports into presentation protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
+    ```
 
     Imports into presentation protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -WhatIf
+    ```
 
     Shows what would happen if the command were executed without actually importing the VBA project.
-
-  .EXAMPLE
-    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -Force -Confirm
-
-    Forces overwrite and confirms before execution.
 
   .OUTPUTS
     None.

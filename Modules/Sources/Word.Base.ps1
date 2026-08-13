@@ -68,29 +68,21 @@ function New-WordFile {
 
   .DESCRIPTION
     Creates a file at the specified path by automating Word through COM.
-
     If the destination file already exists, the command stops unless `-Force` is specified.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm the file creation or overwrite operation.
 
   .PARAMETER Path
     Specifies the destination path of the document file to create.
-
     This parameter does not support wildcards because it represents a new file path.
 
   .PARAMETER FileFormat
     Specifies the Word file format used when saving the document.
-
     The default value is `wdFormatXMLDocument`.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the document.
 
-    Pass a `SecureString` value. If omitted, no open password is set.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the document.
-
-    Pass a `SecureString` value. If omitted, no modify password is set.
 
   .PARAMETER ReadOnlyRecommended
     Saves the document with the read-only recommended flag set.
@@ -110,31 +102,41 @@ function New-WordFile {
     The script block receives the document object as its first argument.
 
   .EXAMPLE
+    ``` powershell
     New-WordFile -Path "$env:TEMP\Document.docx"
+    ```
 
     Creates a new document.
 
   .EXAMPLE
+    ``` powershell
     New-WordFile -Path "$env:TEMP\Document.docm" -FileFormat wdFormatXMLDocumentMacroEnabled -Force
+    ```
 
     Creates or overwrites a macro-enabled document.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     New-WordFile -Path "$env:TEMP\Document.docx" -PasswordToOpen $password
+    ```
 
     Creates a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     New-WordFile -Path "$env:TEMP\Document.docx" -ReadOnlyRecommended
+    ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
+    ``` powershell
     New-WordFile -Path "$env:TEMP\Document.docx" -Initialize {
       param($Document)
       $Document.Range().Text = 'Hello, World!'
     }
+    ```
 
     Creates a document and adds text to it.
 
@@ -241,49 +243,42 @@ function Open-WordFile {
   .DESCRIPTION
     Opens a document file by automating Word through COM.
 
-    If `-Application` is not specified, the cmdlet creates a new Word Application
-    object, opens the document, and releases the application after the action completes.
-
   .PARAMETER Path
     Specifies the path to the document file to open.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Application
     Specifies the Word Application COM object to use for opening the document.
-
     If not specified, a new Word Application object is created automatically.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the document.
 
-    Pass a `SecureString` value. If omitted, no open password is used.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the document.
-
-    Pass a `SecureString` value. If omitted, no modify password is used.
 
   .PARAMETER ReadOnly
     Opens the document in read-only mode.
 
   .PARAMETER Action
     Specifies a script block to execute with the opened document.
-
     The script block receives the document object as its first argument.
-    When this parameter is specified, the document is automatically closed after
-    the action completes.
+    When this parameter is specified, the document is automatically closed after the action completes.
 
   .EXAMPLE
+    ``` powershell
     Open-WordFile -Path "$env:TEMP\Document.docx"
+    ```
 
     Opens a document and returns the document object.
 
   .EXAMPLE
+    ``` powershell
     Open-WordFile -Path "$env:TEMP\Document.docx" -Action {
       param($Document)
       $Document.Range().Text = 'Hello, World!'
     }
+    ```
 
     Opens a document, adds text, and closes the document.
 
@@ -386,7 +381,6 @@ function Get-WordFileProperty {
 
   .DESCRIPTION
     Opens one or more documents and returns file properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected documents via `-PasswordToOpen` and `-PasswordToModify`.
 
   .PARAMETER Path
@@ -405,24 +399,30 @@ function Get-WordFileProperty {
     Specifies the password required to modify the document.
 
   .EXAMPLE
+    ``` powershell
     Get-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation
+    ```
 
     Gets the `RemovePersonalInformation` file property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-WordFileProperty -LiteralPath "$env:TEMP\Document.docx" -PasswordToOpen $password -Name RemovePersonalInformation
+    ```
 
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-WordFileProperty -Path "$env:TEMP\Document.docx" -PasswordToModify $password -Name RemovePersonalInformation
+    ```
 
     Gets file properties from a file protected with a modify password.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -525,7 +525,6 @@ function Set-WordFileProperty {
 
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
 
     If a target is read-only, the cmdlet throws an exception.
 
@@ -555,28 +554,36 @@ function Set-WordFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true
+    ```
 
     Sets a single file property.
 
   .EXAMPLE
+    ``` powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ RemovePersonalInformation = $true })
+    ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PasswordToOpen $password
+    ```
 
     Updates file properties on a protected document.
 
   .EXAMPLE
+    ``` powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PassThru
+    ```
 
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -726,17 +733,23 @@ function Test-WordExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
+    ``` powershell
     Test-WordExtension -Path "$env:TEMP\Document.docx"
+    ```
 
     Returns true when the specified document exists and has a supported Word extension.
 
   .EXAMPLE
+    ``` powershell
     Test-WordExtension -LiteralPath "$env:TEMP\Document.docm"
+    ```
 
     Returns true when the exact file path exists and is recognized as a Word document.
 
   .EXAMPLE
+    ``` powershell
     Test-WordExtension -Path "$env:TEMP\*.txt"
+    ```
 
     Returns false when matched files do not use a supported Word extension.
 

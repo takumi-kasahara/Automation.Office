@@ -11,9 +11,7 @@ function Get-ExcelDocumentProperty {
 
   .DESCRIPTION
     Opens one or more workbooks and returns document properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected workbooks via `-PasswordToOpen` and `-PasswordToModify`.
-
     When `-Custom` is specified, the cmdlet reads custom document properties instead of built-in properties.
 
   .PARAMETER Path
@@ -35,29 +33,37 @@ function Get-ExcelDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title
+    ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-ExcelDocumentProperty -LiteralPath "$env:TEMP\Workbook.xlsx" -PasswordToOpen $password -Name Title
+    ```
 
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -PasswordToModify $password -Name Title
+    ```
 
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Custom -Name MyCustomProperty
+    ```
 
     Gets a custom document property.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -166,7 +172,9 @@ function Get-ExcelPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-ExcelPropertyValue -Path "$env:TEMP\Workbook.xlsx" -Name Title
+    ```
 
   .OUTPUTS
     System.Object
@@ -216,11 +224,8 @@ function Set-ExcelDocumentProperty {
 
   .DESCRIPTION
     Opens one or more workbooks and updates a built-in or custom document property.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     By default, read-only items and read-only recommended workbooks throw an exception.
     Use `-Force` to ignore the read-only recommended flag when opening a file.
 
@@ -256,33 +261,43 @@ function Set-ExcelDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Monthly report'
+    ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Custom -Name MyProperty -Value 'Custom value'
+    ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
+    ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Protected book' -PasswordToOpen $password -Force
+    ```
 
     Updates a protected workbook.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Monthly report' -PassThru
+    ```
 
     Updates the `Title` built-in document property and returns the updated property object.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -424,11 +439,8 @@ function Remove-ExcelDocumentProperty {
     Removes document properties from workbooks.
 
   .DESCRIPTION
-    Opens one or more workbooks and removes document information by using `Workbook.RemoveDocumentInformation`.
-
+    Opens one or more workbooks and removes document information.
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm removals.
-
     By default, read-only items and read-only recommended workbooks throw an exception.
     Use `-Force` to ignore the read-only recommended flag when opening a file.
 
@@ -446,25 +458,30 @@ function Remove-ExcelDocumentProperty {
 
   .PARAMETER RemoveDocInfoType
     Specifies the document information type removed by Excel.
-
     The default value is `xlRDIDocumentProperties`.
 
   .PARAMETER Force
     Forces removal processing when a file is marked as read-only recommended.
 
   .EXAMPLE
+    ``` powershell
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx"
+    ```
 
     Removes document properties from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -PasswordToOpen $password -Force
+    ```
 
     Removes document properties from a protected workbook.
 
   .EXAMPLE
+    ``` powershell
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -RemoveDocInfoType xlRDIAll
+    ```
 
     Removes all supported document information categories.
 

@@ -70,7 +70,6 @@ function New-ExcelFile {
     Creates a file at the specified path by automating Excel through COM.
 
     If the destination file already exists, the command stops unless `-Force` is specified.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm the file creation or overwrite operation.
 
   .PARAMETER Path
     Specifies the destination path of the workbook file to create.
@@ -79,27 +78,20 @@ function New-ExcelFile {
 
   .PARAMETER FileFormat
     Specifies the Excel file format used when saving the workbook.
-
     The default value is `xlWorkbookDefault`.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the workbook.
 
-    Pass a `SecureString` value. If omitted, no open password is set.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the workbook.
 
-    Pass a `SecureString` value. If omitted, no modify password is set.
-
   .PARAMETER ReadOnlyRecommended
     Saves the workbook with the read-only recommended flag set.
-
     When this switch is specified, Excel recommends that users open the workbook as read-only.
 
   .PARAMETER Force
     Overwrites an existing file at `-Path`.
-
     Without this switch, the cmdlet stops when the destination file already exists.
 
   .PARAMETER RemovePersonalInformation
@@ -110,31 +102,41 @@ function New-ExcelFile {
     The script block receives the workbook object as its first argument.
 
   .EXAMPLE
+    ``` powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx"
+    ```
 
     Creates a new workbook.
 
   .EXAMPLE
+    ``` powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsm" -FileFormat xlOpenXMLWorkbookMacroEnabled -Force
+    ```
 
     Creates or overwrites a macro-enabled workbook.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -PasswordToOpen $password
+    ```
 
     Creates a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -ReadOnlyRecommended
+    ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
+    ``` powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -Initialize {
       param($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Data'
     }
+    ```
 
     Creates a workbook and renames the first worksheet.
 
@@ -239,28 +241,19 @@ function Open-ExcelFile {
   .DESCRIPTION
     Opens a workbook file by automating Excel through COM.
 
-    If `-Application` is not specified, the cmdlet creates a new Excel Application
-    object, opens the workbook, and releases the application after the action completes.
-
   .PARAMETER Path
     Specifies the path to the workbook file to open.
-
     This parameter does not support wildcards because it represents an existing file path.
 
   .PARAMETER Application
     Specifies the Excel Application COM object to use for opening the workbook.
-
     If not specified, a new Excel Application object is created automatically.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the workbook.
 
-    Pass a `SecureString` value. If omitted, no open password is used.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the workbook.
-
-    Pass a `SecureString` value. If omitted, no modify password is used.
 
   .PARAMETER ReadOnly
     Opens the workbook in read-only mode.
@@ -270,31 +263,35 @@ function Open-ExcelFile {
 
   .PARAMETER Action
     Specifies a script block to execute with the opened workbook.
-
     The script block receives the workbook object as its first argument.
-    When this parameter is specified, the workbook is automatically closed after
-    the action completes.
+    When this parameter is specified, the workbook is automatically closed after the action completes.
 
   .EXAMPLE
+    ``` powershell
     Open-ExcelFile -Path "$env:TEMP\Book.xlsx"
+    ```
 
     Opens a workbook and returns the workbook object.
 
   .EXAMPLE
+    ``` powershell
     Open-ExcelFile -Path "$env:TEMP\Book.xlsx" -Action {
       param($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Sheet1'
     }
+    ```
 
     Opens a workbook, renames the first worksheet, and closes the workbook.
 
   .EXAMPLE
+    ``` powershell
     $app = New-ExcelObject
     Open-ExcelFile -Application $app -Path "$env:TEMP\Book.xlsx" -Action {
       param($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Sheet1'
     }
     $app.Quit()
+    ```
 
     Opens a workbook using an existing Excel Application object.
 
@@ -392,7 +389,6 @@ function Get-ExcelFileProperty {
 
   .DESCRIPTION
     Opens one or more workbooks and returns file properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected workbooks via `-PasswordToOpen` and `-PasswordToModify`.
 
   .PARAMETER Path
@@ -411,24 +407,30 @@ function Get-ExcelFileProperty {
     Specifies the password required to modify the workbook.
 
   .EXAMPLE
+    ``` powershell
     Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues
+    ```
 
     Gets the `SaveLinkValues` workbook property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-ExcelFileProperty -LiteralPath "$env:TEMP\Book.xlsx" -PasswordToOpen $password -Name SaveLinkValues
+    ```
 
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -PasswordToModify $password -Name SaveLinkValues
+    ```
 
     Gets file properties from a file protected with a modify password.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -528,11 +530,8 @@ function Set-ExcelFileProperty {
 
   .DESCRIPTION
     Opens one or more workbooks and updates workbook file properties by using `Set-ObjectProperty`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     By default, read-only items and read-only recommended workbooks throw an exception.
     Use `-Force` to ignore the read-only recommended flag when opening a file.
 
@@ -565,28 +564,36 @@ function Set-ExcelFileProperty {
     Forces update processing when a file is marked as read-only recommended.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false
+    ```
 
     Sets a single workbook property.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -InputObject ([PSCustomObject]@{ SaveLinkValues = $false; CheckCompatibility = $false })
+    ```
 
     Updates multiple workbook properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PasswordToOpen $password -Force
+    ```
 
     Updates file properties on a protected workbook.
 
   .EXAMPLE
+    ``` powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PassThru
+    ```
 
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
     None.
@@ -740,17 +747,23 @@ function Test-ExcelExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
+    ``` powershell
     Test-ExcelExtension -Path "$env:TEMP\Book.xlsx"
+    ```
 
     Returns true when the specified file exists and has a supported Excel extension.
 
   .EXAMPLE
+    ``` powershell
     Test-ExcelExtension -LiteralPath "$env:TEMP\Book.xlsx"
+    ```
 
     Returns true when the exact file path exists and is recognized as a Excel presentation.
 
   .EXAMPLE
+    ``` powershell
     Test-ExcelExtension -Path "$env:TEMP\*.txt"
+    ```
 
     Returns false when matched files do not use a supported Excel extension.
 

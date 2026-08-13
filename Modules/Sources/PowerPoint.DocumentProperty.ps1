@@ -11,9 +11,7 @@ function Get-PowerPointDocumentProperty {
 
   .DESCRIPTION
     Opens one or more presentations and returns document properties as a `PSCustomObject`.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected presentations via `-PasswordToOpen` and `-PasswordToModify`.
-
     When `-Custom` is specified, the cmdlet reads custom document properties instead of built-in properties.
 
   .PARAMETER Path
@@ -35,29 +33,37 @@ function Get-PowerPointDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title
+    ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointDocumentProperty -LiteralPath "$env:TEMP\Presentation.pptx" -PasswordToOpen $password -Name Title
+    ```
 
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToModify $password -Name Title
+    ```
 
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Custom -Name MyCustomProperty
+    ```
 
     Gets a custom document property.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -166,7 +172,9 @@ function Get-PowerPointPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointPropertyValue -Path "$env:TEMP\Presentation.pptx" -Name Title
+    ```
 
   .OUTPUTS
     System.Object
@@ -216,11 +224,8 @@ function Set-PowerPointDocumentProperty {
 
   .DESCRIPTION
     Opens one or more presentations and updates a built-in or custom document property.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
     Use `-Name` and `-Value` to update a single property, or `-InputObject` to update multiple properties in one operation.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm updates.
-
     If a target is read-only, the cmdlet throws an exception.
 
   .PARAMETER Path
@@ -252,33 +257,43 @@ function Set-PowerPointDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Monthly report'
+    ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Custom -Name MyProperty -Value 'Custom value'
+    ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
+    ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Protected deck' -PasswordToOpen $password
+    ```
 
     Updates a protected presentation.
 
   .EXAMPLE
+    ``` powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Monthly report' -PassThru
+    ```
 
     Updates the `Title` built-in document property and returns the updated property object.
 
   .OUTPUTS
-    System.Management.Automation.PSCustomObject
+    PSCustomObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -418,11 +433,8 @@ function Remove-PowerPointDocumentProperty {
     Removes document properties from presentations.
 
   .DESCRIPTION
-    Opens one or more presentations and removes document information by using `Presentation.RemoveDocumentInformation`.
-
+    Opens one or more presentations and removes document information.
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets.
-    You can use `-WhatIf` and `-Confirm` to preview or confirm removals.
-
     Read-only files and read-only presentations throw an exception.
 
   .PARAMETER Path
@@ -439,22 +451,27 @@ function Remove-PowerPointDocumentProperty {
 
   .PARAMETER RemoveDocInfoType
     Specifies the document information type removed by PowerPoint.
-
     The default value is `ppRDIDocumentProperties`.
 
   .EXAMPLE
+    ``` powershell
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx"
+    ```
 
     Removes document properties from a file.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
+    ```
 
     Removes document properties from a protected presentation.
 
   .EXAMPLE
+    ``` powershell
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -RemoveDocInfoType ppRDIAll
+    ```
 
     Removes all supported document information categories.
 

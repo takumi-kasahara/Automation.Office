@@ -26,9 +26,7 @@ function Get-PowerPointSpeakerNote {
 
   .DESCRIPTION
     Opens one or more PowerPoint presentations in read-only mode and extracts speaker notes from each slide.
-
     The cmdlet supports both `-Path` and `-LiteralPath` parameter sets and can open protected presentations by using `-PasswordToOpen` and `-PasswordToModify`.
-
     Each output object contains the source file path and a collection of speaker notes, where each note includes the slide number and the corresponding text.
 
   .PARAMETER Path
@@ -40,16 +38,11 @@ function Get-PowerPointSpeakerNote {
   .PARAMETER PasswordToOpen
     Specifies the password required to open the presentation.
 
-    Pass a `SecureString` value. If omitted, the presentation is opened without an open password.
-
   .PARAMETER PasswordToModify
     Specifies the password required to modify the presentation.
 
-    Pass a `SecureString` value. If omitted, the presentation is opened without a modify password.
-
   .PARAMETER Force
     Includes speaker notes from hidden slides.
-
     If omitted, speaker notes from hidden slides are not included in the output.
 
   .PARAMETER Range
@@ -59,37 +52,49 @@ function Get-PowerPointSpeakerNote {
     For example, `1-3, 5, 7-10` includes slides 1, 2, 3, 5, 7, 8, 9, and 10.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx"
+    ```
 
     Gets speaker notes from the specified presentation.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointSpeakerNote -LiteralPath "$env:TEMP\Presentation.pptx"
+    ```
 
     Gets speaker notes from the specified presentation by using a literal path.
 
   .EXAMPLE
+    ``` powershell
     $note = Get-PowerPointSpeakerNote -LiteralPath "$env:TEMP\Presentation.pptx"
     $note.Items |
     ForEach-Object { $_.Text -split "`r" } |
     Where-Object { $_.Trim() -ne [string]::Empty } |
     Out-File -LiteralPath "$([IO.Path]::GetFileName($note.Path)).txt" -Append -Encoding utf8
+    ```
 
     Exports each speaker note to a separate text file named after the source presentation and slide number.
 
   .EXAMPLE
+    ``` powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
+    ```
 
     Gets speaker notes from a presentation protected with an open password.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -Force
+    ```
 
     Gets speaker notes including notes on hidden slides.
 
   .EXAMPLE
+    ``` powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -Range '2, 4-6'
+    ```
 
     Gets speaker notes only for slides 2, 4, 5, and 6.
 
