@@ -1,4 +1,14 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Exports OneNote pages as documents in various formats.
+
+.DESCRIPTION
+  This script exports OneNote pages as documents in multiple formats (OneNote, OneNote Package, MHT, PDF, XPS, DOCX, etc.).
+
+.NOTES
+  The script expects a Config.psd1 file with Output and StartNodeId properties.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.Xml
 
 [CmdletBinding()]

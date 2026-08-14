@@ -1,4 +1,15 @@
-﻿using namespace Microsoft.Office.Core
+﻿<#
+.SYNOPSIS
+  Registers CommandBar configurations from Excel VBA to the Excel ribbon.
+
+.DESCRIPTION
+  This script registers CommandBar configurations from Excel VBA to the Excel ribbon.
+  It resets the CommandBars and updates their captions and styles for proper display.
+
+.NOTES
+  The script creates an Excel.Application COM object to access the VBE CommandBars.
+#>
+using namespace Microsoft.Office.Core
 using namespace System.Runtime.InteropServices
 
 # https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.core.msobuttonstyle?view=office-pia

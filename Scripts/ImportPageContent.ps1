@@ -1,4 +1,14 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Imports OneNote page content from XML files.
+
+.DESCRIPTION
+  This script imports OneNote page content from XML files into the OneNote hierarchy.
+
+.NOTES
+  The script expects a Config.psd1 file with an Output property specifying the source directory.
+#>
+using module .\Modules\Automation.Office.psd1
 
 [CmdletBinding()]
 param ()

@@ -1,4 +1,14 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Exports OneNote page content to XML files.
+
+.DESCRIPTION
+  This script exports the content of OneNote pages to XML files.
+
+.NOTES
+  The script expects a Config.psd1 file with Output and StartNodeId properties.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.Xml
 
 [CmdletBinding()]

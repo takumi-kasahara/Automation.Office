@@ -1,4 +1,15 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Exports binary objects from OneNote pages to files.
+
+.DESCRIPTION
+  This script exports binary objects (attachments, images, etc.) from OneNote pages to a specified output directory.
+  It uses the Get-OneNoteHierarchy cmdlet to retrieve the page hierarchy and then exports binary objects from each page.
+
+.NOTES
+  The script expects a Config.psd1 file with Output and StartNodeId properties.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.Xml
 
 [CmdletBinding()]

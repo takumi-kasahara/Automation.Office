@@ -1,4 +1,15 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Exports OneNote hierarchy to CSV and XML files.
+
+.DESCRIPTION
+  This script exports the OneNote hierarchy structure to both CSV and XML formats.
+  It retrieves the hierarchy using Get-OneNoteHierarchy, filters out recycle bin items, and exports the data to a CSV file and individual XML files for each node.
+
+.NOTES
+  The script expects a Config.psd1 file with Output and StartNodeId properties.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.Xml
 
 [CmdletBinding()]

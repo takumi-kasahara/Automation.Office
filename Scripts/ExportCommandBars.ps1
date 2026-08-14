@@ -1,4 +1,16 @@
-﻿[CmdletBinding()]
+﻿<#
+.SYNOPSIS
+  Exports CommandBar configurations from Office applications to CSV files.
+
+.DESCRIPTION
+  This script exports CommandBar configurations from Access, Excel, PowerPoint, and Word applications to CSV files.
+  It creates COM objects for each application, retrieves the CommandBars and their controls, and exports the data to CSV files in the `./Out` directory.
+  For Access, it also exports VBA CommandBars if available.
+
+.NOTES
+  The script creates the `./Out` directory if it doesn't exist.
+#>
+[CmdletBinding()]
 param ()
 
 Set-StrictMode -Version Latest

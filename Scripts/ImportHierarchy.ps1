@@ -1,4 +1,14 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Imports OneNote hierarchy from XML files.
+
+.DESCRIPTION
+  This script imports OneNote hierarchy structures from XML files into the OneNote hierarchy.
+
+.NOTES
+  The script expects a Config.psd1 file with an Output property specifying the source directory.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.IO
 
 [CmdletBinding()]

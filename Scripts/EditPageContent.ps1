@@ -1,4 +1,15 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Edits page content in OneNote documents by removing language attributes.
+
+.DESCRIPTION
+  This script processes OneNote XML files to remove language attributes from Page elements and OE elements.
+  It extracts the XML files from a compressed archive, modifies them to remove language attributes, and then recreates the archive with the updated files.
+
+.NOTES
+  The script expects a Config.psd1 file in the same directory with an Output property specifying the base directory for processing.
+#>
+using module .\Modules\Automation.Office.psd1
 using namespace System.IO
 using namespace System.Xml
 

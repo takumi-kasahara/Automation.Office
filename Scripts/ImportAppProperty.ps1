@@ -1,4 +1,14 @@
-﻿using module .\Modules\Automation.Office.psd1
+﻿<#
+.SYNOPSIS
+  Imports Excel application properties from a JSON file.
+
+.DESCRIPTION
+  This script imports Excel application properties from a JSON file into the Excel Application object.
+
+.NOTES
+  The script expects a Config.psd1 file with an Output property containing the Config directory.
+#>
+using module .\Modules\Automation.Office.psd1
 
 [CmdletBinding()]
 param ()
