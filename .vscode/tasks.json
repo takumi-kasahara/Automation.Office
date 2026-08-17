@@ -3,7 +3,7 @@
   "options": {},
   "presentation": {
     "reveal": "silent",
-    "revealProblems": "onProblem",
+    "revealProblems": "onProblem"
   },
   "tasks": [
     {
@@ -16,13 +16,12 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Compile.ps1",
+        "Compile.ps1"
       ],
       "problemMatcher": [],
       "group": {
-        "kind": "build",
-        "isDefault": true,
-      },
+        "kind": "build"
+      }
     },
     {
       "label": "compile (release)",
@@ -35,13 +34,12 @@
         "RemoteSigned",
         "-File",
         "Compile.ps1",
-        "-Release",
+        "-Release"
       ],
       "problemMatcher": [],
       "group": {
-        "kind": "build",
-        "isDefault": true,
-      },
+        "kind": "build"
+      }
     },
     {
       "label": "decompile (debug)",
@@ -53,9 +51,9 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Decompile.ps1",
+        "Decompile.ps1"
       ],
-      "problemMatcher": [],
+      "problemMatcher": []
     },
     {
       "label": "decompile (release)",
@@ -68,15 +66,15 @@
         "RemoteSigned",
         "-File",
         "Decompile.ps1",
-        "-Release",
+        "-Release"
       ],
-      "problemMatcher": [],
+      "problemMatcher": []
     },
     {
       "label": "install",
       "type": "shell",
       "command": "${workspaceFolder}\\Install.bat",
-      "problemMatcher": [],
+      "problemMatcher": []
     },
     {
       "label": "pester current file",
@@ -88,15 +86,13 @@
         "-File",
         "Pester.ps1",
         "-Path",
-        "${file}",
+        "${file}"
       ],
-      "problemMatcher": [
-        "$pester",
-      ],
+      "problemMatcher": ["$pester"],
       "group": {
         "kind": "test",
-        "isDefault": true,
-      },
-    },
-  ],
+        "isDefault": true
+      }
+    }
+  ]
 }
