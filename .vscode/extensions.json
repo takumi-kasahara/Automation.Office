@@ -1,6 +1,3 @@
 {
-  "recommendations": [
-    "ms-vscode.powershell",
-    "serkonda7.vscode-vba",
-  ],
+  "recommendations": ["ms-vscode.powershell", "serkonda7.vscode-vba"]
 }

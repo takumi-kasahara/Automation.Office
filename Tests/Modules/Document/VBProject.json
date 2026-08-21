@@ -1,92 +1,92 @@
 ﻿{
-    "VBComponents":  [
-                         {
-                             "Name":  "ThisDocument",
-                             "Path":  ".\\VBProject\\ThisDocument.vba",
-                             "Type":  "vbext_ct_Document"
-                         },
-                         {
-                             "Name":  "Class1",
-                             "Path":  ".\\VBProject\\Class1.cls",
-                             "Type":  "vbext_ct_ClassModule"
-                         },
-                         {
-                             "Name":  "Module1",
-                             "Path":  ".\\VBProject\\Module1.bas",
-                             "Type":  "vbext_ct_StdModule"
-                         },
-                         {
-                             "Name":  "UserForm1",
-                             "Path":  ".\\VBProject\\UserForm1.frm",
-                             "Type":  "vbext_ct_MSForm"
-                         }
-                     ],
-    "References":  [
-                       {
-                           "BuiltIn":  true,
-                           "Description":  "Visual Basic For Applications",
-                           "FullPath":  "C:\\Program Files\\Common Files\\Microsoft Shared\\VBA\\VBA7.1\\VBE7.DLL",
-                           "Guid":  "{000204EF-0000-0000-C000-000000000046}",
-                           "IsBroken":  false,
-                           "Major":  4,
-                           "Minor":  2,
-                           "Name":  "VBA",
-                           "Type":  0
-                       },
-                       {
-                           "BuiltIn":  true,
-                           "Description":  "Microsoft Word 16.0 Object Library",
-                           "FullPath":  "C:\\Program Files\\Microsoft Office\\root\\Office16\\MSWORD.OLB",
-                           "Guid":  "{00020905-0000-0000-C000-000000000046}",
-                           "IsBroken":  false,
-                           "Major":  8,
-                           "Minor":  7,
-                           "Name":  "Word",
-                           "Type":  0
-                       },
-                       {
-                           "BuiltIn":  false,
-                           "Description":  "",
-                           "FullPath":  "C:\\WINDOWS\\system32\\Normal",
-                           "Guid":  "",
-                           "IsBroken":  false,
-                           "Major":  0,
-                           "Minor":  0,
-                           "Name":  "Normal",
-                           "Type":  1
-                       },
-                       {
-                           "BuiltIn":  false,
-                           "Description":  "Microsoft Office 16.0 Object Library",
-                           "FullPath":  "C:\\Program Files\\Common Files\\Microsoft Shared\\OFFICE16\\MSO.DLL",
-                           "Guid":  "{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}",
-                           "IsBroken":  false,
-                           "Major":  2,
-                           "Minor":  8,
-                           "Name":  "Office",
-                           "Type":  0
-                       },
-                       {
-                           "BuiltIn":  false,
-                           "Description":  "OLE Automation",
-                           "FullPath":  "C:\\Windows\\System32\\stdole2.tlb",
-                           "Guid":  "{00020430-0000-0000-C000-000000000046}",
-                           "IsBroken":  false,
-                           "Major":  2,
-                           "Minor":  0,
-                           "Name":  "stdole",
-                           "Type":  0
-                       },
-                       {
-                           "BuiltIn":  false,
-                           "Description":  "Microsoft Forms 2.0 Object Library",
-                           "FullPath":  "C:\\WINDOWS\\system32\\FM20.DLL",
-                           "Guid":  "{0D452EE1-E08F-101A-852E-02608C4D0BB4}",
-                           "IsBroken":  false,
-                           "Major":  2,
-                           "Minor":  0,
-                           "Name":  "MSForms",
-                           "Type":  0
-                       }
-                   ]
+  "VBComponents": [
+    {
+      "Name": "ThisDocument",
+      "Path": ".\\VBProject\\ThisDocument.vba",
+      "Type": "vbext_ct_Document"
+    },
+    {
+      "Name": "Class1",
+      "Path": ".\\VBProject\\Class1.cls",
+      "Type": "vbext_ct_ClassModule"
+    },
+    {
+      "Name": "Module1",
+      "Path": ".\\VBProject\\Module1.bas",
+      "Type": "vbext_ct_StdModule"
+    },
+    {
+      "Name": "UserForm1",
+      "Path": ".\\VBProject\\UserForm1.frm",
+      "Type": "vbext_ct_MSForm"
+    }
+  ],
+  "References": [
+    {
+      "BuiltIn": true,
+      "Description": "Visual Basic For Applications",
+      "FullPath": "C:\\Program Files\\Common Files\\Microsoft Shared\\VBA\\VBA7.1\\VBE7.DLL",
+      "Guid": "{000204EF-0000-0000-C000-000000000046}",
+      "IsBroken": false,
+      "Major": 4,
+      "Minor": 2,
+      "Name": "VBA",
+      "Type": 0
+    },
+    {
+      "BuiltIn": true,
+      "Description": "Microsoft Word 16.0 Object Library",
+      "FullPath": "C:\\Program Files\\Microsoft Office\\root\\Office16\\MSWORD.OLB",
+      "Guid": "{00020905-0000-0000-C000-000000000046}",
+      "IsBroken": false,
+      "Major": 8,
+      "Minor": 7,
+      "Name": "Word",
+      "Type": 0
+    },
+    {
+      "BuiltIn": false,
+      "Description": "",
+      "FullPath": "C:\\WINDOWS\\system32\\Normal",
+      "Guid": "",
+      "IsBroken": false,
+      "Major": 0,
+      "Minor": 0,
+      "Name": "Normal",
+      "Type": 1
+    },
+    {
+      "BuiltIn": false,
+      "Description": "Microsoft Office 16.0 Object Library",
+      "FullPath": "C:\\Program Files\\Common Files\\Microsoft Shared\\OFFICE16\\MSO.DLL",
+      "Guid": "{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}",
+      "IsBroken": false,
+      "Major": 2,
+      "Minor": 8,
+      "Name": "Office",
+      "Type": 0
+    },
+    {
+      "BuiltIn": false,
+      "Description": "OLE Automation",
+      "FullPath": "C:\\Windows\\System32\\stdole2.tlb",
+      "Guid": "{00020430-0000-0000-C000-000000000046}",
+      "IsBroken": false,
+      "Major": 2,
+      "Minor": 0,
+      "Name": "stdole",
+      "Type": 0
+    },
+    {
+      "BuiltIn": false,
+      "Description": "Microsoft Forms 2.0 Object Library",
+      "FullPath": "C:\\WINDOWS\\system32\\FM20.DLL",
+      "Guid": "{0D452EE1-E08F-101A-852E-02608C4D0BB4}",
+      "IsBroken": false,
+      "Major": 2,
+      "Minor": 0,
+      "Name": "MSForms",
+      "Type": 0
+    }
+  ]
 }

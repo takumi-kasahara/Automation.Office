@@ -6,7 +6,7 @@
       "type": "PowerShell",
       "request": "launch",
       "script": "${file}",
-      "cwd": "${cwd}",
-    },
-  ],
+      "cwd": "${cwd}"
+    }
+  ]
 }

@@ -1,18 +1,12 @@
 {
   "[powershell]": {
-    "files.encoding": "utf8bom",
+    "files.encoding": "utf8bom"
   },
   "json.schemas": [
     {
-      "fileMatch": [
-        "**/VBProject.json",
-        "**/VBProject.*.json",
-      ],
+      "fileMatch": ["**/VBProject.json", "**/VBProject.*.json"],
       "url": "./json/VBProject.json"
     }
   ],
-  "cSpell.userWords": [
-    "Finalizers",
-    "hWnd",
-  ],
+  "cSpell.userWords": ["Finalizers", "hWnd"]
 }
