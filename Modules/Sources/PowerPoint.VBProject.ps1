@@ -37,14 +37,14 @@ function Export-PowerPointVBProject {
     If omitted, existing output is overwritten.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json"
     ```
 
     Exports VBA project metadata and components from a PowerPoint presentation to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
     ```
@@ -52,7 +52,7 @@ function Export-PowerPointVBProject {
     Exports VBA project from a presentation protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
     ```
@@ -60,7 +60,7 @@ function Export-PowerPointVBProject {
     Exports VBA project from a presentation protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Destination "$env:TEMP\VBProject.json" -WhatIf
     ```
 
@@ -154,14 +154,14 @@ function Import-PowerPointVBProject {
     Imports while keeping the presentation window hidden.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json"
     ```
 
     Imports VBA project from JSON file to PowerPoint presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
     ```
@@ -169,7 +169,7 @@ function Import-PowerPointVBProject {
     Imports into presentation protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
     ```
@@ -177,7 +177,7 @@ function Import-PowerPointVBProject {
     Imports into presentation protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -WhatIf
     ```
 

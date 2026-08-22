@@ -52,21 +52,21 @@ function Get-PowerPointSpeakerNote {
     For example, `1-3, 5, 7-10` includes slides 1, 2, 3, 5, 7, 8, 9, and 10.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx"
     ```
 
     Gets speaker notes from the specified presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointSpeakerNote -LiteralPath "$env:TEMP\Presentation.pptx"
     ```
 
     Gets speaker notes from the specified presentation by using a literal path.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $note = Get-PowerPointSpeakerNote -LiteralPath "$env:TEMP\Presentation.pptx"
     $note.Items |
     ForEach-Object { $_.Text -split "`r" } |
@@ -77,7 +77,7 @@ function Get-PowerPointSpeakerNote {
     Exports each speaker note to a separate text file named after the source presentation and slide number.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
     ```
@@ -85,14 +85,14 @@ function Get-PowerPointSpeakerNote {
     Gets speaker notes from a presentation protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -Force
     ```
 
     Gets speaker notes including notes on hidden slides.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointSpeakerNote -Path "$env:TEMP\Presentation.pptx" -Range '2, 4-6'
     ```
 

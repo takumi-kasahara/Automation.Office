@@ -26,42 +26,42 @@ function Get-ExcelTable {
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTable -Path "$env:TEMP\Workbook.xlsx"
     ```
 
     Gets all tables (worksheets) in the specified Excel workbook file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTable -LiteralPath "$env:TEMP\Workbook.xlsx"
     ```
 
     Gets all tables using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     "$env:TEMP\Workbook.xlsx" | Get-ExcelTable
     ```
 
     Gets all tables by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTable -Path "$env:TEMP\*.xlsx"
     ```
 
     Gets all tables from all .xlsx files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTable -LiteralPath "$env:TEMP\Workbook.xls"
     ```
 
     Gets all tables from an .xls format workbook file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTable -LiteralPath '$env:TEMP\Workbook.xlsm' -ReadOnly
     ```
 
@@ -140,42 +140,42 @@ function Get-ExcelTableColumn {
     When this switch is specified, the OLE DB/ODBC connection uses read-only mode to prevent any write operations.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTableColumn -Path "$env:TEMP\Workbook.xlsx" -Table Employees$
     ```
 
     Gets column metadata for the Employees$ table in the specified Excel workbook file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsx" -Table Employees$
     ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     "$env:TEMP\Workbook.xlsx" | Get-ExcelTableColumn -Table Employees$
     ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTableColumn -Path "$env:TEMP\*.xlsx" -Table Employees$
     ```
 
     Gets column metadata from all .xlsx files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xls" -Table Employees$
     ```
 
     Gets column metadata from an .xls format workbook file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsm" -Table Employees$ -ReadOnly
     ```
 
@@ -297,63 +297,63 @@ function Invoke-ExcelQuery {
     This switch is ignored when executing DML statements.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$'
     ```
 
     Gets all rows from the Employees$ table in the specified Excel workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -Columns Id, Name
     ```
 
     Gets only the Id and Name columns from the Employees$ table.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query 'SELECT [Id], [Name] FROM [Employees$] WHERE [Id] = 1'
     ```
 
     Executes a custom SQL query against the workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query "INSERT INTO [Employees$] (Id, Name, Department) VALUES (3, 'Carol', 'Marketing')"
     ```
 
     Inserts a new row and returns the number of affected rows.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Query "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
     ```
 
     Updates existing rows and returns the number of affected rows.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -Address 'A1:C2'
     ```
 
     Queries a specific cell range (A1:C2) within the Employees$ table.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -NoHeader
     ```
 
     Queries the table treating the first row as data (no header row), resulting in column names F1, F2, F3.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$' -ReadOnly
     ```
 
     Queries the table in read-only mode to prevent any write operations.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-ExcelQuery -LiteralPath "$env:TEMP\Workbook.xlsm" -Table 'Employees$'
     ```
 

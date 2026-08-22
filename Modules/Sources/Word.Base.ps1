@@ -102,21 +102,21 @@ function New-WordFile {
     The script block receives the document object as its first argument.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-WordFile -Path "$env:TEMP\Document.docx"
     ```
 
     Creates a new document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-WordFile -Path "$env:TEMP\Document.docm" -FileFormat wdFormatXMLDocumentMacroEnabled -Force
     ```
 
     Creates or overwrites a macro-enabled document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     New-WordFile -Path "$env:TEMP\Document.docx" -PasswordToOpen $password
     ```
@@ -124,14 +124,14 @@ function New-WordFile {
     Creates a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-WordFile -Path "$env:TEMP\Document.docx" -ReadOnlyRecommended
     ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-WordFile -Path "$env:TEMP\Document.docx" -Initialize {
       param($Document)
       $Document.Range().Text = 'Hello, World!'
@@ -266,14 +266,14 @@ function Open-WordFile {
     When this parameter is specified, the document is automatically closed after the action completes.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-WordFile -Path "$env:TEMP\Document.docx"
     ```
 
     Opens a document and returns the document object.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-WordFile -Path "$env:TEMP\Document.docx" -Action {
       param($Document)
       $Document.Range().Text = 'Hello, World!'
@@ -399,14 +399,14 @@ function Get-WordFileProperty {
     Specifies the password required to modify the document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation
     ```
 
     Gets the `RemovePersonalInformation` file property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-WordFileProperty -LiteralPath "$env:TEMP\Document.docx" -PasswordToOpen $password -Name RemovePersonalInformation
     ```
@@ -414,7 +414,7 @@ function Get-WordFileProperty {
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-WordFileProperty -Path "$env:TEMP\Document.docx" -PasswordToModify $password -Name RemovePersonalInformation
     ```
@@ -554,21 +554,21 @@ function Set-WordFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true
     ```
 
     Sets a single file property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ RemovePersonalInformation = $true })
     ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PasswordToOpen $password
     ```
@@ -576,7 +576,7 @@ function Set-WordFileProperty {
     Updates file properties on a protected document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PassThru
     ```
 
@@ -733,21 +733,21 @@ function Test-WordExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-WordExtension -Path "$env:TEMP\Document.docx"
     ```
 
     Returns true when the specified document exists and has a supported Word extension.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-WordExtension -LiteralPath "$env:TEMP\Document.docm"
     ```
 
     Returns true when the exact file path exists and is recognized as a Word document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-WordExtension -Path "$env:TEMP\*.txt"
     ```
 

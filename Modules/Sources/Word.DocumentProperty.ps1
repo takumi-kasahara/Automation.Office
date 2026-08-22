@@ -33,14 +33,14 @@ function Get-WordDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title
     ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-WordDocumentProperty -LiteralPath "$env:TEMP\Document.docx" -PasswordToOpen $password -Name Title
     ```
@@ -48,7 +48,7 @@ function Get-WordDocumentProperty {
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -PasswordToModify $password -Name Title
     ```
@@ -56,7 +56,7 @@ function Get-WordDocumentProperty {
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Custom -Name MyCustomProperty
     ```
 
@@ -172,7 +172,7 @@ function Get-WordDocumentPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-WordDocumentPropertyValue -Path "$env:TEMP\Document.docx" -Name Title
     ```
 
@@ -257,28 +257,28 @@ function Set-WordDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Monthly report'
     ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Custom -Name MyProperty -Value 'Custom value'
     ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
     ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Protected document' -PasswordToOpen $password
     ```
@@ -286,7 +286,7 @@ function Set-WordDocumentProperty {
     Updates a protected document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-WordDocumentProperty -Path "$env:TEMP\Document.docx" -Name Title -Value 'Monthly report' -PassThru
     ```
 
@@ -454,14 +454,14 @@ function Remove-WordDocumentProperty {
     The default value is `wdRDIDocumentProperties`.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx"
     ```
 
     Removes document properties from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx" -PasswordToOpen $password
     ```
@@ -469,7 +469,7 @@ function Remove-WordDocumentProperty {
     Removes document properties from a protected document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-WordDocumentProperty -Path "$env:TEMP\Document.docx" -RemoveDocInfoType wdRDIAll
     ```
 

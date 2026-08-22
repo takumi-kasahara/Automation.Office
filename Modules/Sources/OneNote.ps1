@@ -173,7 +173,7 @@ function New-OneNoteNotebook {
     The path must be a valid directory path.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookPath = "$env:TEMP\MyNotebook"
     $notebookId = New-OneNoteNotebook -Path $notebookPath
     $notebookId
@@ -182,7 +182,7 @@ function New-OneNoteNotebook {
     Creates a new OneNote notebook and returns its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookId = New-OneNoteNotebook -Path 'C:\Notes\Work'
     $sectionId = New-OneNoteSection -Path 'C:\Notes\Work\Tasks.one' -ParentId $notebookId
     ```
@@ -249,7 +249,7 @@ function New-OneNoteSection {
     When specified, only the file name part of Path is used for OpenHierarchy.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $sectionId = New-OneNoteSection -Path 'C:\Notes\MySection.one'
     $sectionId
     ```
@@ -257,7 +257,7 @@ function New-OneNoteSection {
     Creates a new OneNote section at the given path and returns its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $path = "$env:TEMP\Section.one"
     $sectionId = New-OneNoteSection -Path $path
     $pageId = New-OneNotePage -SectionId $sectionId
@@ -266,7 +266,7 @@ function New-OneNoteSection {
     Creates a section (PathSet default), then creates a page within that section.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookPath = "$env:TEMP\MyNotebook"
     $notebookId = New-OneNoteNotebook -Path $notebookPath
     $sectionPath = "$notebookPath\Section.one"
@@ -350,7 +350,7 @@ function New-OneNoteSectionGroup {
     When specified, only the folder name part of Path is used for OpenHierarchy.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookPath = "$env:TEMP\MyNotebook"
     $notebookId = New-OneNoteNotebook -Path $notebookPath
     $groupPath = "$notebookPath\ProjectGroup"
@@ -361,7 +361,7 @@ function New-OneNoteSectionGroup {
     Creates a section group by path and returns its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $groupPath = "$notebookPath\ProjectGroup"
     $groupId = New-OneNoteSectionGroup -Path $groupPath -ParentId $notebookId
     ```
@@ -436,7 +436,7 @@ function New-OneNotePage {
     Obtain this value from New-OneNoteSection or Get-OneNoteHierarchy.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $path = "$env:TEMP\NoteBook.one"
     $sectionId = New-OneNoteSection -Path $path
     $pageId = New-OneNotePage -SectionId $sectionId
@@ -509,7 +509,7 @@ function Get-OneNoteHierarchy {
     Throws an error if the output file already exists.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookId = New-OneNoteNotebook -Path 'C:\Notes\Work'
     $hierarchy = Get-OneNoteHierarchy -Id $notebookId
     $hierarchy
@@ -518,7 +518,7 @@ function Get-OneNoteHierarchy {
     Retrieves the hierarchy of the specified notebook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $hierarchy = Get-OneNoteHierarchy -Id $notebookId -HierarchyScope hsPages
     $hierarchy.Section.Page | Select-Object -ExpandProperty name
     ```
@@ -580,7 +580,7 @@ function Get-OneNotePageContent {
     Use piAll to include binary object callback IDs required for Export-OneNoteBinaryObject.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $pageId = New-OneNotePage -SectionId $sectionId
     $content = Get-OneNotePageContent -Id $pageId
     $content.DocumentElement.name
@@ -589,7 +589,7 @@ function Get-OneNotePageContent {
     Retrieves the XML content of the specified page.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $content = Get-OneNotePageContent -Id $pageId -PageInfo piAll
     $content.SelectNodes('//one:CallbackID', $ns)
     ```
@@ -659,7 +659,7 @@ function Export-OneNoteHierarchy {
     instead of its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookId = New-OneNoteNotebook -Path 'C:\Notes\Work'
     Export-OneNoteHierarchy -Id $notebookId -Destination $env:TEMP
     ```
@@ -667,7 +667,7 @@ function Export-OneNoteHierarchy {
     Exports the hierarchy of the specified notebook to $env:TEMP\<notebookId>.hierarchy.xml.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-OneNoteHierarchy -Id $notebookId -Destination $env:TEMP -HierarchyScope hsPages -UseName
     ```
 
@@ -777,7 +777,7 @@ function Export-OneNotePageContent {
     When specified, the output file is named using the page's display name instead of its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $pageId = New-OneNotePage -SectionId $sectionId
     Export-OneNotePageContent -Id $pageId -Destination $env:TEMP
     ```
@@ -785,7 +785,7 @@ function Export-OneNotePageContent {
     Exports the page content to $env:TEMP\<pageId>.content.xml.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-OneNotePageContent -Id $pageId -Destination $env:TEMP -PageInfo piAll -UseName
     ```
 
@@ -894,7 +894,7 @@ function Export-OneNotePageAsDocument {
     Throws an error if the output file already exists.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $pageId = New-OneNotePage -SectionId $sectionId
     Export-OneNotePageAsDocument -Id $pageId -Destination $env:TEMP
     ```
@@ -902,7 +902,7 @@ function Export-OneNotePageAsDocument {
     Exports the page as a .one file to $env:TEMP\<pageId>.one.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-OneNotePageAsDocument -Id $pageId -Destination $env:TEMP -PublishFormat pfWord -UseName
     ```
 
@@ -1015,7 +1015,7 @@ function Export-OneNoteBinaryObject {
     instead of its object ID.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $pageId = New-OneNotePage -SectionId $sectionId
     Export-OneNoteBinaryObject -Id $pageId -Destination $env:TEMP
     ```
@@ -1023,7 +1023,7 @@ function Export-OneNoteBinaryObject {
     Exports all binary objects from the page to $env:TEMP\<pageId>\.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-OneNoteBinaryObject -Id $pageId -Destination $env:TEMP -UseName
     ```
 
@@ -1153,7 +1153,7 @@ function Import-OneNoteHierarchy {
     No wildcard expansion is performed. Accepts pipeline input by property name.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $notebookId = New-OneNoteNotebook -Path 'C:\Notes\Work'
     $xmlFile = Export-OneNoteHierarchy -Id $notebookId -Destination $env:TEMP
     Import-OneNoteHierarchy -LiteralPath $xmlFile.FullName
@@ -1162,7 +1162,7 @@ function Import-OneNoteHierarchy {
     Exports the hierarchy of a notebook and re-imports it from the XML file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ChildItem -Path "$env:TEMP\*.hierarchy.xml" | Import-OneNoteHierarchy
     ```
 

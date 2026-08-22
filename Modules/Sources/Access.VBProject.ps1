@@ -45,28 +45,28 @@ function Export-AccessVBProject {
     Corresponds to the ExcludeAcObjectType parameter in the Access VBA object model.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json"
     ```
 
     Exports the VBA project from the Access database to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ComponentRoot "$env:TEMP\Components"
     ```
 
     Exports the VBA project to VBProject.json and places component files in the specified ComponentRoot directory.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -IncludeAcObjectType acForm
     ```
 
     Exports only form components from the VBA project.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessVBProject -Path "$env:TEMP\Database.accdb" -Destination "$env:TEMP\VBProject.json" -ExcludeAcObjectType acReport
     ```
 
@@ -154,14 +154,14 @@ function Import-AccessVBProject {
     Specifies the source file path for `VBProject.json`.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json"
     ```
 
     Imports VBA project from JSON file to Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-AccessVBProject -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\VBProject.json" -Password $password
     ```

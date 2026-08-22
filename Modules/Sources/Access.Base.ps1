@@ -83,21 +83,21 @@ function New-AccessFile {
     The script block receives the CurrentProject object as its first argument.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb"
     ```
 
     Creates a new database in the temporary directory.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-AccessFile -Path "$env:TEMP\Database.mdb" -FileFormat acNewDatabaseFormatAccess2000 -Force
     ```
 
     Creates or overwrites a legacy Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     New-AccessFile -Path "$env:TEMP\Database.accdb" -Password $password
     ```
@@ -105,14 +105,14 @@ function New-AccessFile {
     Creates a database protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -RemovePersonalInformation
     ```
 
     Creates a new database and removes personal information from the file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeDb {
       param($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
@@ -122,7 +122,7 @@ function New-AccessFile {
     Creates a database and creates a table using DAO.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeProject {
       param($Project)
       return $Project.Connection
@@ -273,14 +273,14 @@ function Open-AccessFile {
     When this parameter is specified, the database is automatically closed after the action completes.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb"
     ```
 
     Opens a database and returns the CurrentProject object.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
       param($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
@@ -290,7 +290,7 @@ function Open-AccessFile {
     Opens a database, creates a table using DAO, and closes the database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionProject {
       param($Project)
       return $Project.Connection
@@ -409,14 +409,14 @@ function Get-AccessFileProperty {
     Specifies the password required to open the database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation
     ```
 
     Gets the `RemovePersonalInformation` file property from a database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-AccessFileProperty -LiteralPath "$env:TEMP\Database.accdb" -Password $password -Name RemovePersonalInformation
     ```
@@ -548,21 +548,21 @@ function Set-AccessFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true
     ```
 
     Sets a single file property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -InputObject ([PSCustomObject]@{ RemovePersonalInformation = $true })
     ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -Password $password
     ```
@@ -570,7 +570,7 @@ function Set-AccessFileProperty {
     Updates file properties on a protected database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-AccessFileProperty -Path "$env:TEMP\Database.accdb" -Name RemovePersonalInformation -Value $true -PassThru
     ```
 
@@ -759,21 +759,21 @@ function Export-AccessDatabase {
     This parameter is only valid with the **SpreadsheetSet** parameter set.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt"
     ```
 
     Exports the Employees table to a delimited text file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -HasFieldNames
     ```
 
     Exports the Employees table to a text file with field names as the first row.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.txt" -Password $password
     ```
@@ -781,21 +781,21 @@ function Export-AccessDatabase {
     Exports data from a password-protected database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.html" -TransferType acExportHTML
     ```
 
     Exports the Employees table to an HTML file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml
     ```
 
     Exports the Employees table to an Excel spreadsheet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-AccessDatabase -Path "$env:TEMP\Database.accdb" -TableName 'Employees' -Destination "$env:TEMP\Employees.xlsx" -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
     ```
 
@@ -988,21 +988,21 @@ function Import-AccessDatabase {
     This parameter is only valid with the **SpreadsheetSet** parameter set.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees'
     ```
 
     Imports data from a CSV file into the Employees table.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -HasFieldNames
     ```
 
     Imports data from a CSV file with field names in the first row.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.csv" -TableName 'Employees' -Password $password
     ```
@@ -1010,14 +1010,14 @@ function Import-AccessDatabase {
     Imports data into a password-protected database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml
     ```
 
     Imports data from an Excel spreadsheet into the Employees table.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-AccessDatabase -Path "$env:TEMP\Database.accdb" -Source "$env:TEMP\Employees.xlsx" -TableName 'Employees' -SpreadsheetType acSpreadsheetTypeExcel12Xml -Range 'A1:C10'
     ```
 

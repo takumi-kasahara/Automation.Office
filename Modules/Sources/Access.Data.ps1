@@ -26,42 +26,42 @@ function Get-AccessTable {
     Specifies the password required to open a protected Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTable -Path '$env:TEMP\Database.accdb'
     ```
 
     Gets all tables in the specified Access database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTable -LiteralPath '$env:TEMP\Database.accdb'
     ```
 
     Gets all tables using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     '$env:TEMP\Database.accdb' | Get-AccessTable
     ```
 
     Gets all tables by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTable -Path '$env:TEMP\*.accdb'
     ```
 
     Gets all tables from all .accdb files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTable -LiteralPath '$env:TEMP\Database.mdb'
     ```
 
     Gets all tables from an .mdb format database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-AccessTable -LiteralPath '$env:TEMP\Database.accdb' -Password $password
     ```
@@ -141,42 +141,42 @@ function Get-AccessTableColumn {
     Specifies the password required to open a protected Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTableColumn -Path '$env:TEMP\Database.accdb' -Table Employees
     ```
 
     Gets column metadata for the Employees table in the specified Access database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table Employees
     ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     '$env:TEMP\Database.accdb' | Get-AccessTableColumn -Table Employees
     ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTableColumn -Path '$env:TEMP\*.accdb' -Table Employees
     ```
 
     Gets column metadata from all .accdb files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.mdb' -Table Employees
     ```
 
     Gets column metadata from an .mdb format database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table Employees -Password $password
     ```
@@ -262,42 +262,42 @@ function Get-AccessView {
     Specifies the password required to open a protected Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessView -Path '$env:TEMP\Database.accdb'
     ```
 
     Gets all views in the specified Access database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessView -LiteralPath '$env:TEMP\Database.accdb'
     ```
 
     Gets all views using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     '$env:TEMP\Database.accdb' | Get-AccessView
     ```
 
     Gets all views by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessView -Path '$env:TEMP\*.accdb'
     ```
 
     Gets all views from all .accdb files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessView -LiteralPath '$env:TEMP\Legacy.mdb'
     ```
 
     Gets all views from an .mdb format database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-AccessView -LiteralPath '$env:TEMP\Protected.accdb' -Password $password
     ```
@@ -373,42 +373,42 @@ function Get-AccessViewColumn {
     Specifies the password required to open a protected Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessViewColumn -Path '$env:TEMP\Database.accdb' -View vwSalesEmployees
     ```
 
     Gets column metadata for the vwSalesEmployees view in the specified Access database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessViewColumn -LiteralPath '$env:TEMP\Database.accdb' -View vwSalesEmployees
     ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     '$env:TEMP\Database.accdb' | Get-AccessViewColumn -View vwSalesEmployees
     ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessViewColumn -Path '$env:TEMP\*.accdb' -View vwSalesEmployees
     ```
 
     Gets column metadata from all .accdb files in the specified directory using wildcards.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-AccessViewColumn -LiteralPath '$env:TEMP\Database.mdb' -View vwSalesEmployees
     ```
 
     Gets column metadata from an .mdb format database file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-AccessViewColumn -LiteralPath '$env:TEMP\Database.accdb' -View vwSalesEmployees -Password $password
     ```
@@ -510,56 +510,56 @@ function Invoke-AccessQuery {
     Specifies the password required to open a protected Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table Employees
     ```
 
     Gets all rows from the Employees table in the specified Access database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table Employees -Columns Id, Name, Department
     ```
 
     Gets only the Id, Name, and Department columns from the Employees table.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Query 'SELECT [Id], [Name] FROM Employees WHERE [Department] = "Sales"'
     ```
 
     Executes a custom SQL query against the database.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Query "INSERT INTO [Employees] (Id, Name, Department) VALUES (4, 'David', 'Marketing')"
     ```
 
     Inserts a new row and returns the number of affected rows.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Query "UPDATE [Employees] SET [Department] = 'Sales' WHERE [Id] = 4"
     ```
 
     Updates existing rows and returns the number of affected rows.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Query 'DELETE FROM [Employees] WHERE [Id] = 4'
     ```
 
     Deletes rows and returns the number of affected rows.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -View vwSalesEmployees
     ```
 
     Gets all rows from the vwSalesEmployees view.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Invoke-AccessQuery -LiteralPath '$env:TEMP\Protected.accdb' -Query 'SELECT * FROM Employees' -Password $password
     ```

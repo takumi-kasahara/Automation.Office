@@ -37,14 +37,14 @@ function Export-ExcelVBProject {
     If omitted, existing output is overwritten.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json"
     ```
 
     Exports VBA project metadata and components from an Excel workbook to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
     ```
@@ -52,7 +52,7 @@ function Export-ExcelVBProject {
     Exports VBA project from a workbook protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-ExcelVBProject -Path "$env:TEMP\ProtectedBook.xlsm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
     ```
@@ -60,7 +60,7 @@ function Export-ExcelVBProject {
     Exports VBA project from a workbook protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Destination "$env:TEMP\VBProject.json" -WhatIf
     ```
 
@@ -154,14 +154,14 @@ function Import-ExcelVBProject {
     Imports while keeping the workbook window hidden.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json"
     ```
 
     Imports VBA project from JSON file to Excel workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
     ```
@@ -169,7 +169,7 @@ function Import-ExcelVBProject {
     Imports into workbook protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-ExcelVBProject -Path "$env:TEMP\Book.xlsm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
     ```

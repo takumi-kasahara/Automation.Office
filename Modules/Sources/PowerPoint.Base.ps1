@@ -101,21 +101,21 @@ function New-PowerPointFile {
     The script block receives the presentation object as its first argument.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
     ```
 
     Creates a new presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptm" -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -Force
     ```
 
     Creates or overwrites a macro-enabled presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
     ```
@@ -123,14 +123,14 @@ function New-PowerPointFile {
     Creates a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -ReadOnlyRecommended
     ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Initialize {
       param($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
@@ -268,14 +268,14 @@ function Open-PowerPointFile {
     When this parameter is specified, the presentation is automatically closed after the action completes.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx"
     ```
 
     Opens a presentation and returns the presentation object.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Action {
       param($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
@@ -397,14 +397,14 @@ function Get-PowerPointFileProperty {
     Specifies the password required to modify the presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final
     ```
 
     Gets the `Final` file property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointFileProperty -LiteralPath "$env:TEMP\Presentation.pptx" -PasswordToOpen $password -Name Final
     ```
@@ -412,7 +412,7 @@ function Get-PowerPointFileProperty {
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToModify $password -Name Final
     ```
@@ -550,21 +550,21 @@ function Set-PowerPointFileProperty {
     Returns the updated file property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true
     ```
 
     Sets a single file property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -InputObject ([PSCustomObject]@{ Final = $true })
     ```
 
     Updates multiple file properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true -PasswordToOpen $password
     ```
@@ -572,7 +572,7 @@ function Set-PowerPointFileProperty {
     Updates file properties on a protected presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointFileProperty -Path "$env:TEMP\Presentation.pptx" -Name Final -Value $true -PassThru
     ```
 
@@ -736,21 +736,21 @@ function Test-PowerPointExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-PowerPointExtension -Path "$env:TEMP\Presentation.pptx"
     ```
 
     Returns true when the specified file exists and has a supported PowerPoint extension.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-PowerPointExtension -LiteralPath "$env:TEMP\Presentation.ppsx"
     ```
 
     Returns true when the exact file path exists and is recognized as a PowerPoint presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-PowerPointExtension -Path "$env:TEMP\*.txt"
     ```
 

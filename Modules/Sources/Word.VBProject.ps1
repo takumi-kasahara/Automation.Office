@@ -37,14 +37,14 @@ function Export-WordVBProject {
     If omitted, existing output is overwritten.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-WordVBProject -Path "$env:TEMP\Document.docm" -Destination "$env:TEMP\VBProject.json"
     ```
 
     Exports VBA project metadata and components from a Word document to VBProject.json and creates a companion component folder.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Export-WordVBProject -Path "$env:TEMP\Document.docm" -PasswordToOpen $password -Destination "$env:TEMP\VBProject.json"
     ```
@@ -52,14 +52,14 @@ function Export-WordVBProject {
     Exports VBA project from a document protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-WordVBProject -Path "$env:TEMP\Document.docm" -PasswordToModify $password -Destination "$env:TEMP\VBProject.json"
     ```
 
     Exports VBA project from a document protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Export-WordVBProject -Path "$env:TEMP\Document.docm" -Destination "$env:TEMP\VBProject.json" -WhatIf
     ```
 
@@ -147,14 +147,14 @@ function Import-WordVBProject {
     Specifies the source file path for `VBProject.json`.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json"
     ```
 
     Imports VBA project from JSON file to Word document.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString -Prompt 'Enter password'
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -PasswordToOpen $password
     ```
@@ -162,7 +162,7 @@ function Import-WordVBProject {
     Imports into document protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -PasswordToModify $password
     ```
@@ -170,14 +170,14 @@ function Import-WordVBProject {
     Imports into document protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -WhatIf
     ```
 
     Shows what would happen if the command were executed without actually importing the VBA project.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -Hidden
     ```
 

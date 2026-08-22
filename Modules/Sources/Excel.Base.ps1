@@ -102,21 +102,21 @@ function New-ExcelFile {
     The script block receives the workbook object as its first argument.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx"
     ```
 
     Creates a new workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsm" -FileFormat xlOpenXMLWorkbookMacroEnabled -Force
     ```
 
     Creates or overwrites a macro-enabled workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -PasswordToOpen $password
     ```
@@ -124,14 +124,14 @@ function New-ExcelFile {
     Creates a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -ReadOnlyRecommended
     ```
 
     Creates a file that recommends opening as read-only.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -Initialize {
       param($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Data'
@@ -267,14 +267,14 @@ function Open-ExcelFile {
     When this parameter is specified, the workbook is automatically closed after the action completes.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-ExcelFile -Path "$env:TEMP\Book.xlsx"
     ```
 
     Opens a workbook and returns the workbook object.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Open-ExcelFile -Path "$env:TEMP\Book.xlsx" -Action {
       param($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Sheet1'
@@ -284,7 +284,7 @@ function Open-ExcelFile {
     Opens a workbook, renames the first worksheet, and closes the workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $app = New-ExcelObject
     Open-ExcelFile -Application $app -Path "$env:TEMP\Book.xlsx" -Action {
       param($Workbook)
@@ -407,14 +407,14 @@ function Get-ExcelFileProperty {
     Specifies the password required to modify the workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues
     ```
 
     Gets the `SaveLinkValues` workbook property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-ExcelFileProperty -LiteralPath "$env:TEMP\Book.xlsx" -PasswordToOpen $password -Name SaveLinkValues
     ```
@@ -422,7 +422,7 @@ function Get-ExcelFileProperty {
     Gets file properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -PasswordToModify $password -Name SaveLinkValues
     ```
@@ -564,21 +564,21 @@ function Set-ExcelFileProperty {
     Forces update processing when a file is marked as read-only recommended.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false
     ```
 
     Sets a single workbook property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -InputObject ([PSCustomObject]@{ SaveLinkValues = $false; CheckCompatibility = $false })
     ```
 
     Updates multiple workbook properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PasswordToOpen $password -Force
     ```
@@ -586,7 +586,7 @@ function Set-ExcelFileProperty {
     Updates file properties on a protected workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PassThru
     ```
 
@@ -747,21 +747,21 @@ function Test-ExcelExtension {
     Specifies one or more exact file paths to evaluate.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-ExcelExtension -Path "$env:TEMP\Book.xlsx"
     ```
 
     Returns true when the specified file exists and has a supported Excel extension.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-ExcelExtension -LiteralPath "$env:TEMP\Book.xlsx"
     ```
 
     Returns true when the exact file path exists and is recognized as a Excel presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Test-ExcelExtension -Path "$env:TEMP\*.txt"
     ```
 

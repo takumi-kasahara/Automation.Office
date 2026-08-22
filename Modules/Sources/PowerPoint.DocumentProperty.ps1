@@ -33,14 +33,14 @@ function Get-PowerPointDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title
     ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointDocumentProperty -LiteralPath "$env:TEMP\Presentation.pptx" -PasswordToOpen $password -Name Title
     ```
@@ -48,7 +48,7 @@ function Get-PowerPointDocumentProperty {
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToModify $password -Name Title
     ```
@@ -56,7 +56,7 @@ function Get-PowerPointDocumentProperty {
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Custom -Name MyCustomProperty
     ```
 
@@ -172,7 +172,7 @@ function Get-PowerPointDocumentPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-PowerPointDocumentPropertyValue -Path "$env:TEMP\Presentation.pptx" -Name Title
     ```
 
@@ -257,28 +257,28 @@ function Set-PowerPointDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Monthly report'
     ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Custom -Name MyProperty -Value 'Custom value'
     ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
     ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Protected deck' -PasswordToOpen $password
     ```
@@ -286,7 +286,7 @@ function Set-PowerPointDocumentProperty {
     Updates a protected presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -Name Title -Value 'Monthly report' -PassThru
     ```
 
@@ -454,14 +454,14 @@ function Remove-PowerPointDocumentProperty {
     The default value is `ppRDIDocumentProperties`.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx"
     ```
 
     Removes document properties from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -PasswordToOpen $password
     ```
@@ -469,7 +469,7 @@ function Remove-PowerPointDocumentProperty {
     Removes document properties from a protected presentation.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-PowerPointDocumentProperty -Path "$env:TEMP\Presentation.pptx" -RemoveDocInfoType ppRDIAll
     ```
 

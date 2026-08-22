@@ -33,14 +33,14 @@ function Get-ExcelDocumentProperty {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title
     ```
 
     Gets the built-in `Title` property from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-ExcelDocumentProperty -LiteralPath "$env:TEMP\Workbook.xlsx" -PasswordToOpen $password -Name Title
     ```
@@ -48,7 +48,7 @@ function Get-ExcelDocumentProperty {
     Gets properties from a file protected with an open password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -PasswordToModify $password -Name Title
     ```
@@ -56,7 +56,7 @@ function Get-ExcelDocumentProperty {
     Gets properties from a file protected with a modify password.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Custom -Name MyCustomProperty
     ```
 
@@ -172,7 +172,7 @@ function Get-ExcelDocumentPropertyValue {
     Gets custom document properties.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Get-ExcelDocumentPropertyValue -Path "$env:TEMP\Workbook.xlsx" -Name Title
     ```
 
@@ -261,28 +261,28 @@ function Set-ExcelDocumentProperty {
     Returns the updated document property object when specified.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Monthly report'
     ```
 
     Sets the `Title` built-in document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Custom -Name MyProperty -Value 'Custom value'
     ```
 
     Sets the `MyProperty` custom document property.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -InputObject ([PSCustomObject]@{ Title = 'Monthly report'; Subject = 'Sales' })
     ```
 
     Updates multiple built-in document properties in a single call.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Protected book' -PasswordToOpen $password -Force
     ```
@@ -290,7 +290,7 @@ function Set-ExcelDocumentProperty {
     Updates a protected workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Set-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -Name Title -Value 'Monthly report' -PassThru
     ```
 
@@ -464,14 +464,14 @@ function Remove-ExcelDocumentProperty {
     Forces removal processing when a file is marked as read-only recommended.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx"
     ```
 
     Removes document properties from a file.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     $password = Read-Host -AsSecureString
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -PasswordToOpen $password -Force
     ```
@@ -479,7 +479,7 @@ function Remove-ExcelDocumentProperty {
     Removes document properties from a protected workbook.
 
   .EXAMPLE
-    ``` powershell
+    ```powershell
     Remove-ExcelDocumentProperty -Path "$env:TEMP\Workbook.xlsx" -RemoveDocInfoType xlRDIAll
     ```
 
