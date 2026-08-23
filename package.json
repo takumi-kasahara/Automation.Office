@@ -3,7 +3,12 @@
     "lint": "prettier --write . && markdownlint-cli2 --fix ."
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.9.0",
     "markdownlint-cli2": "^0.23.2",
-    "prettier": "^3.9.6"
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
   }
 }
