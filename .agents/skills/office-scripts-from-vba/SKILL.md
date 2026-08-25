@@ -20,7 +20,7 @@ Convert VBA macros into runnable Office Scripts.
 
 1. VBA procedure name and source location.
 2. Expected behavior (must-preserve logic, acceptable simplifications).
-3. Runtime constraints (interactive UI prompts, clipboard, dialogs, confirmations).
+3. Runtime constraints (clipboard, dialogs, confirmations).
 
 ## Conversion Workflow
 

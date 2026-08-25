@@ -7,11 +7,10 @@
  *   3) fill the whole area with that value.
  *
  * References:
- * - Office Scripts docs: https://learn.microsoft.com/en-us/office/dev/scripts/
  * - ExcelScript.Range.unmerge:
- *   https://learn.microsoft.com/javascript/api/office-scripts/excelscript/excelscript.range?view=office-scripts
+ *   https://learn.microsoft.com/en-us/javascript/api/office-scripts/excelscript/excelscript.range?view=office-scripts
  * - ExcelScript.Range.getMergedAreas / RangeAreas.getAreas:
- *   https://learn.microsoft.com/javascript/api/office-scripts/excelscript/excelscript.rangeareas?view=office-scripts
+ *   https://learn.microsoft.com/en-us/javascript/api/office-scripts/excelscript/excelscript.rangeareas?view=office-scripts
  */
 /* global ExcelScript */
 function main(workbook: ExcelScript.Workbook) {

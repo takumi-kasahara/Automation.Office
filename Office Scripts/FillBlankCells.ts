@@ -4,11 +4,10 @@
  * - Fills each blank cell with the value from the previous row in the same column.
  *
  * References:
- * - Office Scripts docs: https://learn.microsoft.com/en-us/office/dev/scripts/
  * - Range.getSpecialCells (blanks):
- *   https://learn.microsoft.com/office/dev/scripts/resources/samples/range-samples#get-groups-of-cells-based-on-special-criteria
+ *   https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/range-samples#get-groups-of-cells-based-on-special-criteria
  * - Range.setFormulaR1C1:
- *   https://learn.microsoft.com/javascript/api/office-scripts/excelscript/excelscript.range?view=office-scripts
+ *   https://learn.microsoft.com/en-us/javascript/api/office-scripts/excelscript/excelscript.range?view=office-scripts
  */
 /* global ExcelScript */
 function main(workbook: ExcelScript.Workbook) {
@@ -23,6 +22,6 @@ function main(workbook: ExcelScript.Workbook) {
 
   const areas = blankCells.getAreas();
   for (const area of areas) {
-    area.setFormulaR1C1('=R[-1]C');
+    area.setFormulaR1C1("=R[-1]C");
   }
 }
