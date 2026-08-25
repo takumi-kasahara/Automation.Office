@@ -25,6 +25,14 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 1. Edit files under `Apps/`.
 2. Run `Compile.ps1`.
 
+### Office Scripts development cycle
+
+1. Edit the TypeScript source file under `Office Scripts/` (e.g., `Script.ts`).
+2. Run the compile script: `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "./Compile.OfficeScripts.ps1"`.
+   - This converts `.ts` to `.osts` format using the JSON schema defined in `Script.osts`.
+3. To decompile, run: `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "./Decompile.OfficeScripts.ps1"`.
+   - This extracts the TypeScript source from `.osts` back to `.ts`.
+
 ## Coding Conventions
 
 - Avoid breaking changes unless necessary, and always seek review for such changes.

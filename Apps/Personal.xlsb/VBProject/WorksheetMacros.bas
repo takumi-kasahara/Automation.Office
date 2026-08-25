@@ -188,8 +188,8 @@ End Sub
 ' https://forest.watch.impress.co.jp/docs/serial/exceltips/1193072.html
 '@Description("Fills blank cells in the selected range with the value from the previous row.")
 '@ExcelHotkey "D"
-Public Sub FillBlanks()
-Attribute FillBlanks.VB_ProcData.VB_Invoke_Func = "D\n14"
+Public Sub FillBlankCells()
+Attribute FillBlankCells.VB_ProcData.VB_Invoke_Func = "D\n14"
   If Not WorkbookExtensions.Backup Then Exit Sub
   Dim rng As Range
   Set rng = WorksheetExtensions.GetSelectedRange
@@ -236,8 +236,8 @@ End Sub
 ' https://www.relief.jp/docs/excel-vba-unmerge-and-fill.html
 '@Description("Unmerges selected merged cells and preserves their values.")
 '@ExcelHotkey "M"
-Public Sub UnMerge()
-Attribute UnMerge.VB_ProcData.VB_Invoke_Func = "M\n14"
+Public Sub UnMergeCells()
+Attribute UnMergeCells.VB_ProcData.VB_Invoke_Func = "M\n14"
   If Not WorkbookExtensions.Backup Then Exit Sub
 
   With New Optimizer

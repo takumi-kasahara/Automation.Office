@@ -9,5 +9,5 @@
     "strict": true,
     "target": "ESNext"
   },
-  "include": ["Office Scripts/*.ts"]
+  "include": ["*.ts"]
 }

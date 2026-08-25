@@ -9,7 +9,9 @@ Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 
 $root = Resolve-Path -LiteralPath '.\Office Scripts'
-Get-ChildItem -LiteralPath $root -Filter '*.ts' | ForEach-Object {
+Get-ChildItem -LiteralPath $root -Filter '*.ts' |
+Where-Object { $_.Name -notlike '*.d.ts' } |
+ForEach-Object {
   $source = [Path]::ChangeExtension($_.FullName, '.osts')
   $json = Get-Content -Path $source -Raw | ConvertFrom-Json
   $json.body = (Get-Content -Path $_.FullName -Raw).ToString()
