@@ -46,3 +46,10 @@ ForEach-Object {
     Write-Warning -Message "$($_.LiteralPath) not found."
   }
 }
+
+$scripts = Resolve-Path -LiteralPath '.\Office Scripts'
+$target = (Get-ItemProperty -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders').Personal | Join-Path -ChildPath 'Office Scripts'
+if (-not (Test-Path -LiteralPath $target)) {
+  throw [ItemNotFoundException]::new("$target not found.")
+}
+Copy-Item -Path ([WildcardPattern]::Escape($scripts) | Join-Path -ChildPath '*.osts') -Destination $target -PassThru

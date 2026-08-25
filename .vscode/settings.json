@@ -4,6 +4,10 @@
   },
   "json.schemas": [
     {
+      "fileMatch": ["**/*.osts"],
+      "url": "./json/OfficeScripts.json"
+    },
+    {
       "fileMatch": ["**/VBProject.json", "**/VBProject.*.json"],
       "url": "./json/VBProject.json"
     }

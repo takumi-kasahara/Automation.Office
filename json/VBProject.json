@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "./.temp/VBProject.schema.json",
+  "$id": "./json/VBProject.json",
   "title": "VBProject",
   "description": "Schema for unified VBProject.json format.",
   "type": "object",

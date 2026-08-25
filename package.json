@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint": "prettier --write . && markdownlint-cli2 --fix ."
+    "lint": "prettier --write . && markdownlint-cli2 --fix . && eslint --fix ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

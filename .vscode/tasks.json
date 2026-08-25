@@ -7,7 +7,7 @@
   },
   "tasks": [
     {
-      "label": "compile (debug)",
+      "label": "compile macros (debug)",
       "type": "shell",
       "command": "powershell.exe",
       "args": [
@@ -16,7 +16,7 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Compile.ps1"
+        "Compile.Macros.ps1"
       ],
       "problemMatcher": [],
       "group": {
@@ -24,7 +24,7 @@
       }
     },
     {
-      "label": "compile (release)",
+      "label": "compile macros (release)",
       "type": "shell",
       "command": "powershell.exe",
       "args": [
@@ -33,7 +33,7 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Compile.ps1",
+        "Compile.Macros.ps1",
         "-Release"
       ],
       "problemMatcher": [],
@@ -42,7 +42,7 @@
       }
     },
     {
-      "label": "decompile (debug)",
+      "label": "compile office scripts",
       "type": "shell",
       "command": "powershell.exe",
       "args": [
@@ -51,12 +51,29 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Decompile.ps1"
+        "Compile.OfficeScripts.ps1"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "decompile macros (debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.Macros.ps1"
       ],
       "problemMatcher": []
     },
     {
-      "label": "decompile (release)",
+      "label": "decompile macros (release)",
       "type": "shell",
       "command": "powershell.exe",
       "args": [
@@ -65,8 +82,22 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Decompile.ps1",
+        "Decompile.Macros.ps1",
         "-Release"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "decompile office scripts",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.OfficeScripts.ps1"
       ],
       "problemMatcher": []
     },
