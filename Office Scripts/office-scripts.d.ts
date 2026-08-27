@@ -14,13 +14,16 @@ declare namespace ExcelScript {
   }
 
   interface Worksheet {
+    getName(): string;
     getUsedRange(valuesOnly?: boolean): Range | undefined;
     getRange(address: string): Range;
   }
 
   interface Range {
+    getWorksheet(): Worksheet;
     getFormat(): RangeFormat;
     getUsedRange(valuesOnly?: boolean): Range | undefined;
+    getValues(): CellValue[][];
     getSpecialCells(
       cellType: SpecialCellType,
       cellValueType?: unknown,
@@ -42,4 +45,13 @@ declare namespace ExcelScript {
     autofitColumns(): void;
     autofitRows(): void;
   }
+}
+
+declare namespace OfficeScript {
+  interface DownloadFileProperties {
+    content: string;
+    name: string;
+  }
+
+  function downloadFile(fileProperties: DownloadFileProperties): void;
 }
