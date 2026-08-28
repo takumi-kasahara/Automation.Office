@@ -1,4 +1,4 @@
-﻿{
+{
   "VBComponents": [
     {
       "Name": "ThisWorkbook",
@@ -104,6 +104,16 @@
       "Name": "WorksheetExtensions",
       "Path": ".\\VBProject\\WorksheetExtensions.cls",
       "Type": "vbext_ct_ClassModule"
+    },
+    {
+      "Name": "Csv",
+      "Path": ".\\VBProject\\Csv.bas",
+      "Type": "vbext_ct_StdModule"
+    },
+    {
+      "Name": "Shape",
+      "Path": ".\\VBProject\\Shape.bas",
+      "Type": "vbext_ct_StdModule"
     },
     {
       "Name": "CollectionExtensionsTests",

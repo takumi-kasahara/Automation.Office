@@ -164,27 +164,6 @@ Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
   End With
 End Sub
 
-'@Description("Imports CSV data into the active worksheet.")
-'@ExcelHotkey "I"
-Public Sub ImportCsv()
-Attribute ImportCsv.VB_ProcData.VB_Invoke_Func = "I\n14"
-  With New CsvLoader
-    .Import
-  End With
-End Sub
-
-'@Description("Exports the selected range as CSV.")
-'@ExcelHotkey "E"
-Public Sub ExportCsv()
-Attribute ExportCsv.VB_ProcData.VB_Invoke_Func = "E\n14"
-  Dim rng As Range
-  Set rng = WorksheetExtensions.GetSelectedRange
-  If rng Is Nothing Then Exit Sub
-  With New CsvCreator
-    .Export rng
-  End With
-End Sub
-
 ' https://forest.watch.impress.co.jp/docs/serial/exceltips/1193072.html
 '@Description("Fills blank cells in the selected range with the value from the previous row.")
 '@ExcelHotkey "D"
@@ -220,17 +199,6 @@ Attribute FollowHyperlinks.VB_ProcData.VB_Invoke_Func = "H\n14"
 Continue:
     Next
   Next
-End Sub
-
-'@Description("Opens the resize picture dialog for the selected shape range.")
-'@ExcelHotkey "Z"
-Public Sub ResizePicture()
-Attribute ResizePicture.VB_ProcData.VB_Invoke_Func = "Z\n14"
-  If Not WorkbookExtensions.Backup Then Exit Sub
-
-  With New ResizePictureDialog
-    .Show
-  End With
 End Sub
 
 ' https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/row-and-column-visibility#show-all-rows-and-columns
