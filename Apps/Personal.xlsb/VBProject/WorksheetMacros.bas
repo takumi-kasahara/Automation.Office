@@ -233,6 +233,26 @@ Attribute ResizePicture.VB_ProcData.VB_Invoke_Func = "Z\n14"
   End With
 End Sub
 
+' https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/row-and-column-visibility#show-all-rows-and-columns
+'@Description("Unhides all rows and columns in the used range of the active worksheet.")
+Public Sub ShowAllRowsAndColumns()
+  Dim rng As Range
+  Set rng = ActiveSheet.UsedRange
+  If rng Is Nothing Then
+    Exit Sub
+  End If
+
+  Dim col As Range
+  For Each col In rng.Columns
+    If col.Hidden Then col.Hidden = False
+  Next
+
+  Dim row As Range
+  For Each row In rng.Rows
+    If row.Hidden Then row.Hidden = False
+  Next
+End Sub
+
 ' https://www.relief.jp/docs/excel-vba-unmerge-and-fill.html
 '@Description("Unmerges selected merged cells and preserves their values.")
 '@ExcelHotkey "M"
