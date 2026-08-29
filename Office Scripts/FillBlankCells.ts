@@ -22,6 +22,6 @@ function main(workbook: ExcelScript.Workbook) {
 
   const areas = blankCells.getAreas();
   for (const area of areas) {
-    area.setFormulaR1C1("=R[-1]C");
+    area.setFormulaR1C1('=R[-1]C');
   }
 }

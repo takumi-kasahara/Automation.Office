@@ -51,9 +51,11 @@ function main(workbook: ExcelScript.Workbook, csvLines: string[]) {
     // Remove the preceding comma and surrounding quotation marks.
     row.forEach((cell, index) => {
       let normalized = cell.indexOf(',') === 0 ? cell.substring(1) : cell;
-      normalized = normalized.indexOf('"') === 0 && normalized.lastIndexOf('"') === normalized.length - 1
-        ? normalized.substring(1, normalized.length - 1)
-        : normalized;
+      normalized
+        = normalized.indexOf('"') === 0
+          && normalized.lastIndexOf('"') === normalized.length - 1
+          ? normalized.substring(1, normalized.length - 1)
+          : normalized;
       row[index] = normalized;
     });
 
