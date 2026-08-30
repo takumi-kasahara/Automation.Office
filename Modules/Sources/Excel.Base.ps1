@@ -86,6 +86,13 @@ function New-ExcelFile {
   .PARAMETER PasswordToModify
     Specifies the password required to modify the workbook.
 
+  .PARAMETER Recurse
+    Recursively reads nested COM object properties.
+
+  .PARAMETER Depth
+    Specifies recursion depth used with `-Recurse`.
+    The default value is `1`.
+
   .PARAMETER ReadOnlyRecommended
     Saves the workbook with the read-only recommended flag set.
     When this switch is specified, Excel recommends that users open the workbook as read-only.
@@ -429,6 +436,13 @@ function Get-ExcelFileProperty {
 
     Gets file properties from a file protected with a modify password.
 
+  .EXAMPLE
+    ```powershell
+    Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Recurse -Depth 2
+    ```
+
+    Gets file properties including nested COM object properties up to 2 levels deep.
+
   .OUTPUTS
     PSCustomObject
       Each NoteProperty corresponds to a file property.
@@ -456,7 +470,12 @@ function Get-ExcelFileProperty {
     [SecureString]
     $PasswordToOpen = $null,
     [SecureString]
-    $PasswordToModify = $null
+    $PasswordToModify = $null,
+    [switch]
+    $Recurse,
+    [ValidateRange(0, [int]::MaxValue)]
+    [int]
+    $Depth = 1
   )
   begin {
     $app = New-ExcelObject
@@ -478,7 +497,7 @@ function Get-ExcelFileProperty {
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
-          $properties = Get-ObjectProperty -InputObject $Workbook
+          $properties = Get-ObjectProperty -InputObject $Workbook -Recurse:$Recurse -Depth $Depth
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {

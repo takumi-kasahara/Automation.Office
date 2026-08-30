@@ -323,6 +323,10 @@ InModuleScope 'Automation.Office' {
         { Get-AccessFileProperty -Path $path -Password (Get-AccessPassword) } | Should-Throw
         { Get-AccessFileProperty -Path $path -Password $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse and Depth' {
+        New-AccessFile -Path $path
+        { Get-AccessFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
+      }
     }
   }
   Describe 'Get-AccessFileProperty.Unit' {

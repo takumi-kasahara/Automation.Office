@@ -338,6 +338,10 @@ InModuleScope 'Automation.Office' {
         { Get-PowerPointFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-PowerPointFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse and Depth' {
+        New-PowerPointFile -Path $path
+        { Get-PowerPointFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
+      }
     }
   }
   Describe 'Get-PowerPointFileProperty.Unit' {

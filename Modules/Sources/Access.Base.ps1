@@ -67,6 +67,13 @@ function New-AccessFile {
   .PARAMETER Password
     Specifies the password required to open the database.
 
+  .PARAMETER Recurse
+    Recursively retrieves nested COM object properties.
+
+  .PARAMETER Depth
+    Specifies the maximum recursion depth when `-Recurse` is used.
+    The default value is `1`.
+
   .PARAMETER Force
     Overwrites an existing file at `-Path`.
     Without this switch, the cmdlet stops when the destination file already exists.
@@ -448,7 +455,12 @@ function Get-AccessFileProperty {
     [string[]]
     $Name,
     [SecureString]
-    $Password = $null
+    $Password = $null,
+    [switch]
+    $Recurse,
+    [ValidateRange(0, [int]::MaxValue)]
+    [int]
+    $Depth = 1
   )
   begin {
     $app = New-AccessObject
@@ -467,7 +479,7 @@ function Get-AccessFileProperty {
       ForEach-Object {
         Open-AccessFile -Application $app -Path $_.FullName -Password $Password
         try {
-          $properties = Get-ObjectProperty -InputObject $app.CurrentProject
+          $properties = Get-ObjectProperty -InputObject $app.CurrentProject -Recurse:$Recurse -Depth $Depth
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {

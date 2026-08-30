@@ -427,6 +427,10 @@ InModuleScope 'Automation.Office' {
         { Get-WordFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-WordFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse and Depth' {
+        New-WordFile -Path $path
+        { Get-WordFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
+      }
     }
   }
   Describe 'Get-WordFileProperty.Unit' {

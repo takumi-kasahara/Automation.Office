@@ -84,6 +84,13 @@ function New-WordFile {
   .PARAMETER PasswordToModify
     Specifies the password required to modify the document.
 
+  .PARAMETER Recurse
+    Recursively retrieves nested COM object properties.
+
+  .PARAMETER Depth
+    Specifies the maximum recursion depth when `-Recurse` is used.
+    The default value is `1`.
+
   .PARAMETER ReadOnlyRecommended
     Saves the document with the read-only recommended flag set.
 
@@ -448,7 +455,12 @@ function Get-WordFileProperty {
     [SecureString]
     $PasswordToOpen = $null,
     [SecureString]
-    $PasswordToModify = $null
+    $PasswordToModify = $null,
+    [switch]
+    $Recurse,
+    [ValidateRange(0, [int]::MaxValue)]
+    [int]
+    $Depth = 1
   )
   begin {
     $app = New-WordObject
@@ -470,7 +482,7 @@ function Get-WordFileProperty {
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
-          $properties = Get-ObjectProperty -InputObject $Document
+          $properties = Get-ObjectProperty -InputObject $Document -Recurse:$Recurse -Depth $Depth
           if ($Name) {
             $selected = [PSCustomObject]@{}
             foreach ($propertyName in $Name) {

@@ -20,6 +20,15 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 2. When editing `Modules/Sources/Module.psm1`, also update or create the corresponding test file `Modules/Tests/Module.Tests.ps1` and ensure tests cover your changes.
 3. When add or remove cmdlets, also update the module manifest files (`Modules/*.psd1`) to reflect the changes.
 
+#### Pester Invocation
+
+Run tests with `Pester.ps1`:
+
+- `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "Pester.ps1" -Path ".\Module.Tests.ps1"`
+- Filter by line: add `-LineNumber 42`
+
+Requires PowerShell Desktop (`$PSEdition -eq 'Desktop'`).
+
 ### VBA development cycle
 
 1. Edit files under `Apps/`.
@@ -40,15 +49,6 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 - Keep functions and modules small and single-responsibility.
 - Prefer explicit error handling and fail-fast behavior.
 - Prefer self-documenting code; use comments for intent, not for restating code.
-
-## Pester Invocation
-
-Run tests with `Pester.ps1`:
-
-- `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "Pester.ps1" -Path ".\Module.Tests.ps1"`
-- Filter by line: add `-LineNumber 42`
-
-Requires PowerShell Desktop (`$PSEdition -eq 'Desktop'`).
 
 ## Command Execution Guidelines
 

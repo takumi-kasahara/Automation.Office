@@ -360,6 +360,11 @@ InModuleScope 'Automation.Office' {
         { Get-ExcelFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-ExcelFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse and Depth' {
+        New-ExcelFile -Path $path
+        $properties = Get-ExcelFileProperty -Path $path -Recurse
+        $properties.Application | Should-HaveType ([PSCustomObject])
+      }
     }
   }
   Describe 'Get-ExcelFileProperty.Unit' {
