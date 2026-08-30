@@ -41,6 +41,15 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 - Prefer explicit error handling and fail-fast behavior.
 - Prefer self-documenting code; use comments for intent, not for restating code.
 
+## Pester Invocation
+
+Run tests with `Pester.ps1`:
+
+- `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "Pester.ps1" -Path ".\Module.Tests.ps1"`
+- Filter by line: add `-LineNumber 42`
+
+Requires PowerShell Desktop (`$PSEdition -eq 'Desktop'`).
+
 ## Command Execution Guidelines
 
 - Do not run one-line PowerShell commands directly for auditability and reproducibility.

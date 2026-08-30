@@ -4,7 +4,7 @@
 
 .DESCRIPTION
   The script validates the provided path, locates the corresponding module and test files, configures Pester settings, and invokes Pester.
-  It supports code coverage collection when not running in parallel and outputs results in NUnitXml format.
+  It supports code coverage collection and outputs results in NUnitXml format.
   If not running in PowerShell Desktop edition, the script exits without running tests.
 
 .PARAMETER Path
@@ -13,23 +13,15 @@
 .PARAMETER LineNumber
   The line number in the test file to filter tests to. Only applicable when a single test file is specified. Default is 0 (no line filter).
 
-.PARAMETER Parallel
-  Run tests in parallel. When this switch is used, code coverage collection is skipped.
-
 .EXAMPLE
    .\Pester.ps1 -Path ".\MyModule.Tests.ps1"
 
    Runs all tests in the specified test file.
-
+　
 .EXAMPLE
    .\Pester.ps1 -Path ".\MyModule.Tests.ps1" -LineNumber 42
 
    Runs only the test at or near line 42 in the specified test file.
-
-.EXAMPLE
-   .\Pester.ps1 -Path ".\MyModule" -Parallel
-
-   Runs all tests for the module in parallel, without code coverage.
 
 .OUTPUTS
   None
