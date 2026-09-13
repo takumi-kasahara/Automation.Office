@@ -29,5 +29,5 @@ Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
 If you want to run tests:
 
 ```powershell
-. .\Pester.ps1
+. .\.agents\skills\powershell-5-pester-v6\scripts\Pester.ps1 -Path 'Modules\Sources'
 ```

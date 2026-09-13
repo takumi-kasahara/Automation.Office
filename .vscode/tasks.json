@@ -115,7 +115,7 @@
         "-NoLogo",
         "-NoProfile",
         "-File",
-        "Pester.ps1",
+        ".agents\\skills\\powershell-5-pester-v6\\scripts\\Pester.ps1",
         "-Path",
         "${file}"
       ],
