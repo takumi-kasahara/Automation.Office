@@ -47,6 +47,11 @@ Public Function JoinByComma(ByVal this As Object) As String
   JoinByComma = Me.JoinBy(this, ",")
 End Function
 
+''@Description("Joins all items with tab characters.")
+Public Function JoinByTab(ByVal this As Object) As String
+  JoinByTab = Me.JoinBy(this, vbTab)
+End Function
+
 '@Description("Joins all items with line breaks.")
 Public Function JoinByLine(ByVal this As Object) As String
   JoinByLine = Me.JoinBy(this, vbNewLine)

@@ -235,6 +235,28 @@ TestFail:
   Resume TestExit
 End Sub
 
+'@TestMethod("JoinByTab")
+Private Sub JoinByTabUsesTabDelimiter()
+  On Error GoTo TestFail
+
+  Dim target As Collection
+  Set target = New Collection
+  target.Add "A"
+  target.Add "B"
+  target.Add "C"
+
+  Assert.AreEqual "A" & vbTab & "B" & vbTab & "C", CollectionExtensions.JoinByTab(target), "JoinByTab should use vbTab as delimiter."
+
+TestExit:
+  '@Ignore UnhandledOnErrorResumeNext
+  On Error Resume Next
+  Set target = Nothing
+  Exit Sub
+TestFail:
+  Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+  Resume TestExit
+End Sub
+
 '@TestMethod("JoinByLine")
 Private Sub JoinByLineUsesLineBreakDelimiter()
   On Error GoTo TestFail

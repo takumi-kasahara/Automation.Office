@@ -130,7 +130,7 @@ Public Sub CopyPrintArea()
   End With
 End Sub
 
-'@Description("Copies text from the current selection to the clipboard.")
+'@Description("Copies text from the current selection to the clipboard. Columns are tab-separated; rows are line-separated.")
 '@ExcelHotkey "X"
 Public Sub CopyText()
 Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
@@ -139,18 +139,26 @@ Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
     Select Case TypeName(Application.Selection)
       Case "Range"
         With WorksheetExtensions.GetSelectedRange
-          Dim texts As Collection
-          Set texts = New Collection
+          Dim rows As Collection
+          Set rows = New Collection
           Dim area As Range
           For Each area In .Areas
-            Dim cell As Range
-            For Each cell In area
-              If Trim$(cell.text) <> vbNullString Then
-                texts.Add Trim$(cell.text)
+            Dim r As Long
+            For r = 1 To area.Rows.Count
+              Dim cell As Range
+              Dim texts As Collection
+              Set texts = New Collection
+              For Each cell In area.Rows(r).Cells
+                If Trim$(cell.text) <> vbNullString Then
+                  texts.Add Trim$(cell.text)
+                End If
+              Next
+              If texts.Count > 0 Then
+                rows.Add CollectionExtensions.JoinByTab(texts)
               End If
             Next
-            If texts.Count > 0 Then Clipboard.Copy CollectionExtensions.JoinByLine(texts)
           Next
+          If rows.Count > 0 Then Clipboard.Copy CollectionExtensions.JoinByLine(rows)
         End With
       Case "Picture"
         .Copy
