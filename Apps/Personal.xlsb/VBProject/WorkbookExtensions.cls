@@ -19,28 +19,22 @@ Public Function Backup(Optional ByVal wb As Workbook) As Boolean
   Backup = False
   If wb Is Nothing Then Set wb = Application.ActiveWorkbook
 
+  If wb.Path = vbNullString Then
+    Backup = True
+    Exit Function
+  End If
+
   With New FileSystemObject
     Dim fileName As String
     fileName = .GetBaseName(wb.name)
     Dim ext As String
     ext = .GetExtensionName(wb.name)
-  End With
-
-  If ext = vbNullString Then
-    Dim filePath As Variant
-    filePath = Application.GetSaveAsFilename
-    If VarType(filePath) = vbBoolean Then Exit Function
-    wb.SaveAs filePath
-    Backup = True
-    Exit Function
-  End If
-
-  Dim bakPath As String
-  With New FileSystemObject
+    Dim bakPath As String
     bakPath = .BuildPath(Environ("TEMP"), fileName & "." & Format$(Now, "yyyymmddhhmmss") & "." & ext)
   End With
-  Debug.Print "Saved:" & vbTab & bakPath
+  Debug.Print "Saving:" & vbTab & bakPath
   wb.SaveCopyAs bakPath
+  Debug.Print "Backup created."
   Backup = True
   Exit Function
 Catch:
