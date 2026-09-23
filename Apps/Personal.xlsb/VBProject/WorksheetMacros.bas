@@ -203,7 +203,7 @@ End Sub
 
 ' https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/row-and-column-visibility#show-all-rows-and-columns
 '@Description("Unhides all rows and columns in the used range of the active worksheet.")
-Public Sub ShowAllRowsAndColumns()
+Public Sub UnHideAllCells()
   Dim rng As Range
   Set rng = ActiveSheet.UsedRange
   If rng Is Nothing Then
