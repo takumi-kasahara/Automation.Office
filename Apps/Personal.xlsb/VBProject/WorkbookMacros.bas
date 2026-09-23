@@ -94,6 +94,8 @@ End Sub
 Public Sub RevealInExplorer()
 Attribute RevealInExplorer.VB_ProcData.VB_Invoke_Func = "R\n14"
   With ActiveWorkbook
+    If .Path = vbNullString Then Exit Sub
+
     If .FullName Like "http://*" Or .FullName Like "https://*" Then
       Dim url As String
       url = ActiveWorkbook.FullName
