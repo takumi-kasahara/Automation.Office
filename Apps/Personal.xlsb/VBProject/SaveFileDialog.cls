@@ -34,6 +34,7 @@ Public Function Show() As String
       msg = path & vbNewLine & "already exists. Do you want to overwrite it?"
       If MsgBox(msg, vbOKCancel) <> vbOK Then
         Show = vbNullString
+        Exit Function
       End If
     End If
     Show = path
