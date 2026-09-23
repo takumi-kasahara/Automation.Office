@@ -122,11 +122,11 @@ Public Sub CopyPrintArea()
     For Each c In .rows
       text = text & "R" & c.row & " = " & c.Height & " pt" & vbNewLine
     Next
-    text = text & "Width = " & .Width & " pt (" & .Columns.Count & " cells)" & vbNewLine
+    text = text & "Width = " & .Width & " pt (" & .Columns.Count & " columns)" & vbNewLine
     For Each c In .Columns
       text = text & "C" & c.Column & " = " & c.Width & " pt" & vbNewLine
     Next
-    If Clipboard.Copy(text) Then MsgBox "PrintArea Infomation Copied."
+    If Clipboard.Copy(text) Then MsgBox "Copied to clipboard."
   End With
 End Sub
 
@@ -134,7 +134,7 @@ End Sub
 '@ExcelHotkey "X"
 Public Sub CopyText()
 Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
-  Debug.Print "Copy:" & vbTab & TypeName(Application.Selection)
+  Debug.Print "Copying:" & vbTab & TypeName(Application.Selection)
   With Application.Selection
     Select Case TypeName(Application.Selection)
       Case "Range"
@@ -170,6 +170,7 @@ Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
         If Trim$(text) <> vbNullString Then Clipboard.Copy Trim$(text)
     End Select
   End With
+  Debug.Print "Copied to clipboard."
 End Sub
 
 ' https://forest.watch.impress.co.jp/docs/serial/exceltips/1193072.html
@@ -196,7 +197,7 @@ Attribute FollowHyperlinks.VB_ProcData.VB_Invoke_Func = "H\n14"
   Dim link As Hyperlink
   For Each rng In WorksheetExtensions.GetUsedRange
     For Each link In rng.Hyperlinks
-      Select Case MsgBox("Open " & link.Address & " at " & rng.Address & " ?", vbYesNoCancel)
+      Select Case MsgBox("Open " & link.Address & " at " & rng.Address & "?", vbYesNoCancel)
         Case vbYes
           link.Follow
         Case vbNo

@@ -12,7 +12,7 @@ Public Sub CopySheetNames()
     sheetNames.Add ws.name
   Next
 
-  If Clipboard.Copy(CollectionExtensions.JoinByLine(sheetNames)) Then MsgBox "Worksheet Names Copied."
+  If Clipboard.Copy(CollectionExtensions.JoinByLine(sheetNames)) Then MsgBox "Copied to clipboard."
 End Sub
 
 '@Description("Resets worksheet and chart views and refreshes pivot tables.")

@@ -31,7 +31,7 @@ Public Function Show() As String
   With New FileSystemObject
     If .FileExists(path) Then
       Dim msg As String
-      msg = path & vbNewLine & "already exists. Do you want to replace it ?"
+      msg = path & vbNewLine & "already exists. Do you want to overwrite it?"
       If MsgBox(msg, vbOKCancel) <> vbOK Then
         Show = vbNullString
       End If
