@@ -1,0 +1,123 @@
+{
+  "version": "2.0.0",
+  "options": {},
+  "presentation": {
+    "reveal": "silent",
+    "revealProblems": "onProblem"
+  },
+  "tasks": [
+    {
+      "label": "compile macros (debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Compile.Macros.ps1"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "compile macros (release)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Compile.Macros.ps1",
+        "-Release"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "compile office scripts",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Compile.OfficeScripts.ps1"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "decompile macros (debug)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.Macros.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "decompile macros (release)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.Macros.ps1",
+        "-Release"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "decompile office scripts",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Decompile.OfficeScripts.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "pester current file",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-File",
+        ".agents\\skills\\powershell-5-pester-v6\\scripts\\Pester.ps1",
+        "-Path",
+        "${file}"
+      ],
+      "problemMatcher": ["$pester"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    }
+  ]
+}

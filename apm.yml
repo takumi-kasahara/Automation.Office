@@ -1,0 +1,21 @@
+name: AutoHotkey.Scripts
+version: 1.0.0
+description: APM project for AutoHotkey.Scripts
+author: takumi-kasahara
+targets:
+  - copilot
+dependencies:
+  apm:
+    - takumi-kasahara/Dotfiles/.apm/skills/csharp-for-powershell-5
+    - takumi-kasahara/Dotfiles/.apm/skills/office-scripts
+    - takumi-kasahara/Dotfiles/.apm/skills/office-scripts-from-vba
+    - takumi-kasahara/Dotfiles/.apm/skills/office-scripts-to-vba
+    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5
+    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-cmdlet
+    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-help
+    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-pester-v6
+    - takumi-kasahara/Dotfiles/.apm/skills/vba-annotation
+    - takumi-kasahara/Dotfiles/.apm/skills/vba-unittest
+  mcp: []
+includes: auto
+scripts: {}

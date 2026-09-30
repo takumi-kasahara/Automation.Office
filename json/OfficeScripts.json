@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./json/OfficeScripts.json",
+  "title": "OfficeScripts",
+  "description": "Schema for Office Scripts (*.osts) files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "body", "description", "parameterInfo", "apiInfo"],
+  "properties": {
+    "version": {
+      "description": "Office Scripts manifest format version.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "body": {
+      "description": "TypeScript source code of the Office Script.",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description of the Office Script.",
+      "type": "string"
+    },
+    "parameterInfo": {
+      "description": "Parameter and return type metadata for the script entry point.",
+      "type": "string"
+    },
+    "apiInfo": {
+      "description": "Execution variant metadata for the script.",
+      "type": "string"
+    }
+  }
+}

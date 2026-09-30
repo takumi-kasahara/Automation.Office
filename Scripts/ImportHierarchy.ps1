@@ -1,0 +1,36 @@
+﻿<#
+.SYNOPSIS
+  Imports OneNote hierarchy from XML files.
+
+.DESCRIPTION
+  This script imports OneNote hierarchy structures from XML files into the OneNote hierarchy.
+
+.NOTES
+  The script expects a Config.psd1 file with an Output property specifying the source directory.
+#>
+using module .\Modules\Automation.Office.psd1
+using namespace System.IO
+
+[CmdletBinding()]
+param ()
+
+Set-StrictMode -Version Latest
+Set-Location -LiteralPath $PSScriptRoot
+
+$config = Import-PowerShellDataFile -LiteralPath 'Config.psd1'
+if ($null -eq $config.Output) {
+  throw [InvalidOperationException]::new('Output is required.')
+}
+$source = $config.Output | Join-Path -ChildPath 'Hierarchy'
+if (-not (Test-Path -LiteralPath $source)) {
+  throw [DirectoryNotFoundException]::new("$source does not exist.")
+}
+
+Compress-Archive -Path "$source/*" -Destination "$source.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+Get-ChildItem -LiteralPath $source -Filter '*.xml' |
+ForEach-Object {
+  "Import:`t$($_.FullName)" | Out-Host
+  Import-OneNoteHierarchy -LiteralPath $_.FullName
+}
+
+& .\ExportHierarchy.ps1

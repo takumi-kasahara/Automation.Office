@@ -1,0 +1,14 @@
+.agents
+apm_modules
+node_modules
+
+.vscode/*
+!.vscode/*.code-snippets
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+
+# APM dependencies
+apm_modules/

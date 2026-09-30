@@ -1,0 +1,10 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "powershell.powerShellDefaultVersion": "Windows PowerShell (x64)",
+  },
+}
