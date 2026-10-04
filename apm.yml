@@ -11,11 +11,7 @@ dependencies:
     - takumi-kasahara/Dotfiles/.apm/skills/office-scripts-from-vba
     - takumi-kasahara/Dotfiles/.apm/skills/office-scripts-to-vba
     - takumi-kasahara/Dotfiles/.apm/skills/powershell-5
-    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-cmdlet
-    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-help
-    - takumi-kasahara/Dotfiles/.apm/skills/powershell-5-pester-v6
-    - takumi-kasahara/Dotfiles/.apm/skills/vba-annotation
-    - takumi-kasahara/Dotfiles/.apm/skills/vba-unittest
+    - takumi-kasahara/Dotfiles/.apm/skills/rubberduck-vba
   mcp: []
 includes: auto
 scripts: {}
