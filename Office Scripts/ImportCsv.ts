@@ -28,7 +28,7 @@ function main(workbook: ExcelScript.Workbook, csvLines: string[]) {
 
   const sheet = workbook.getActiveWorksheet();
   const selectedRange = workbook.getSelectedRange();
-  const csvMatchRegex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
+  const csvMatchRegex = /(?:,|\n|^)("(?:""|[^"])*"|[^",\n]*|(?:\n|$))/g;
 
   const parsedRows: string[][] = [];
   let maxColumnCount = 0;
