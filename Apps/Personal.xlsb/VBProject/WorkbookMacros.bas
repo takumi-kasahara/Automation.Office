@@ -1,10 +1,12 @@
 Attribute VB_Name = "WorkbookMacros"
 '@Folder("Macros")
 '@ModuleDescription("Provides workbook-level utility macros.")
+Attribute VB_Description = "Provides workbook-level utility macros."
 Option Explicit
 
 '@Description("Copies worksheet names in the active workbook to the clipboard.")
 Public Sub CopySheetNames()
+Attribute CopySheetNames.VB_Description = "Copies worksheet names in the active workbook to the clipboard."
   Dim sheetNames As Collection
   Set sheetNames = New Collection
   Dim ws As Worksheet
@@ -17,6 +19,7 @@ End Sub
 
 '@Description("Resets worksheet and chart views and refreshes pivot tables.")
 Public Sub ResetView()
+Attribute ResetView.VB_Description = "Resets worksheet and chart views and refreshes pivot tables."
   If Not WorkbookExtensions.Backup Then Exit Sub
 
   With New Optimizer
@@ -53,6 +56,7 @@ End Sub
 '@ExcelHotkey "Q"
 Public Sub MoveToDefaultPosition()
 Attribute MoveToDefaultPosition.VB_ProcData.VB_Invoke_Func = "Q\n14"
+Attribute MoveToDefaultPosition.VB_Description = "Moves each visible worksheet to a default zoom and cursor position."
   If Not WorkbookExtensions.Backup Then Exit Sub
 
   With New Optimizer
@@ -75,6 +79,7 @@ End Sub
 '@Description("Toggles worksheet outline summary orientation.")
 Public Sub ToggleOutlineStyle()
 Attribute ToggleOutlineStyle.VB_ProcData.VB_Invoke_Func = "K\n14"
+Attribute ToggleOutlineStyle.VB_Description = "Toggles worksheet outline summary orientation."
   Dim ws As Worksheet
   For Each ws In ActiveWorkbook.Worksheets
     With ws.Outline
@@ -93,6 +98,7 @@ End Sub
 '@ExcelHotkey "R"
 Public Sub RevealInExplorer()
 Attribute RevealInExplorer.VB_ProcData.VB_Invoke_Func = "R\n14"
+Attribute RevealInExplorer.VB_Description = "Reveals the active workbook location in Explorer or browser."
   With ActiveWorkbook
     If .Path = vbNullString Then Exit Sub
 

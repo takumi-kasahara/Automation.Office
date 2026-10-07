@@ -1,10 +1,12 @@
 Attribute VB_Name = "ApplicationMacros"
 '@Folder("Macros")
 '@ModuleDescription("Provides application-level Excel utility macros.")
+Attribute VB_Description = "Provides application-level Excel utility macros."
 Option Explicit
 
 '@Description("Toggles full screen mode for the Excel application window.")
 Public Sub ToggleFullScreen()
+Attribute ToggleFullScreen.VB_Description = "Toggles full screen mode for the Excel application window."
   With Application
     .DisplayFullScreen = Not .DisplayFullScreen
   End With
@@ -14,6 +16,7 @@ End Sub
 '@Description("Toggles cell reference style between A1 and R1C1.")
 '@ExcelHotkey "T"
 Public Sub ToggleReferenceStyle()
+Attribute ToggleReferenceStyle.VB_Description = "Toggles cell reference style between A1 and R1C1."
 Attribute ToggleReferenceStyle.VB_ProcData.VB_Invoke_Func = "T\n14"
   With Application
     Select Case .ReferenceStyle

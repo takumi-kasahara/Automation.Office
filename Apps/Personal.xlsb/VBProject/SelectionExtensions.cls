@@ -10,15 +10,18 @@ Attribute VB_Exposed = False
 '@Folder("Utils.Extensions")
 '@PredeclaredId
 '@ModuleDescription("Provides safe helpers for reading selection state.")
+Attribute VB_Description = "Provides safe helpers for reading selection state."
 Option Explicit
 
 '@Description("Returns ShapeRange from the current selection when available.")
 Public Property Get GetShapeRange() As ShapeRange
+Attribute GetShapeRange.VB_Description = "Returns ShapeRange from the current selection when available."
   Set GetShapeRange = ShapeRangeFrom(Application.Selection)
 End Property
 
 '@Description("Returns ShapeRange from the specified selection object when available.")
 Public Property Get ShapeRangeFrom(ByVal selection As Object) As ShapeRange
+Attribute ShapeRangeFrom.VB_Description = "Returns ShapeRange from the specified selection object when available."
   If selection Is Nothing Then Exit Property
 
   On Error Resume Next
@@ -28,11 +31,13 @@ End Property
 
 '@Description("Returns text from the current selection when available.")
 Public Property Get GetText() As String
+Attribute GetText.VB_Description = "Returns text from the current selection when available."
   GetText = TextFrom(Application.Selection)
 End Property
 
 '@Description("Returns text from the specified selection object when available.")
 Public Property Get TextFrom(ByVal selection As Object) As String
+Attribute TextFrom.VB_Description = "Returns text from the specified selection object when available."
   If selection Is Nothing Then Exit Property
 
   On Error Resume Next

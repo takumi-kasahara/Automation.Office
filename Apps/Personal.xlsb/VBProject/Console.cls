@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder "Utils"
 '@ModuleDescription("Executes shell commands and returns standard output.")
+Attribute VB_Description = "Executes shell commands and returns standard output."
 Option Explicit
 
 '@Description("Runs a command and returns stdout as text.")
 Public Function Exec(ByVal cmd As String) As String
+Attribute Exec.VB_Description = "Runs a command and returns stdout as text."
   With New WshShell
     With .Exec(cmd)
       Do While .Status

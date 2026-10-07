@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder("Utils")
 '@ModuleDescription("Wraps clipboard read and write operations.")
+Attribute VB_Description = "Wraps clipboard read and write operations."
 Option Explicit
 
 '@Description("Copies text to the system clipboard and returns success state.")
 Public Function Copy(ByVal text As String) As Boolean
+Attribute Copy.VB_Description = "Copies text to the system clipboard and returns success state."
   On Error GoTo Catch
 
   With New DataObject

@@ -9,6 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '@Folder "Utils.Classes"
 '@ModuleDescription("Temporarily applies performance-friendly Excel application settings.")
+Attribute VB_Description = "Temporarily applies performance-friendly Excel application settings."
 Option Explicit
 
 Private Optimizing As Boolean

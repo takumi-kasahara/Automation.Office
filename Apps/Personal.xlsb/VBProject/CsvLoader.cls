@@ -9,10 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '@Folder("Utils.Classes")
 '@ModuleDescription("Imports CSV files into the active worksheet as text columns.")
+Attribute VB_Description = "Imports CSV files into the active worksheet as text columns."
 Option Explicit
 
 '@Description("Loads a CSV file into the active worksheet and auto fits imported cells.")
 Public Sub Import()
+Attribute Import.VB_Description = "Loads a CSV file into the active worksheet and auto fits imported cells."
   Dim path As Variant
   path = Application.GetOpenFilename("CSV Files (*.csv), *.csv")
   If VarType(path) = vbBoolean Then Exit Sub

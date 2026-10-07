@@ -9,10 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '@Folder("Utils.Classes")
 '@ModuleDescription("Builds and exports CSV data from selected worksheet ranges.")
+Attribute VB_Description = "Builds and exports CSV data from selected worksheet ranges."
 Option Explicit
 
 '@Description("Exports the target range as CSV rows.")
 Public Sub Export(ByVal target As Range)
+Attribute Export.VB_Description = "Exports the target range as CSV rows."
   Dim columnIndices As Collection
   Set columnIndices = New Collection
   With target
@@ -47,6 +49,7 @@ End Sub
 
 '@Description("Prompts for destination path and saves CSV rows to a file.")
 Private Sub Save(ByVal rs As Collection, ByVal InitialFileName As String)
+Attribute Save.VB_Description = "Prompts for destination path and saves CSV rows to a file."
   On Error GoTo Finally
 
   Dim path As String

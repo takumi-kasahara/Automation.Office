@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder "Utils"
 '@ModuleDescription("Provides safe helpers for assumptions about the active Excel context.")
+Attribute VB_Description = "Provides safe helpers for assumptions about the active Excel context."
 Option Explicit
 
 '@Description("Returns the active worksheet when available.")
 Public Property Get ActiveWorksheet() As Worksheet
+Attribute ActiveWorksheet.VB_Description = "Returns the active worksheet when available."
   On Error Resume Next
   Set ActiveWorksheet = ActiveSheet
   On Error GoTo 0
