@@ -4,6 +4,7 @@
   CompatiblePSEditions = @('Desktop')
   FunctionsToExport    = @(
     #region Access
+    'Get-AccessVersionInfo'
     'New-AccessFile'
     'Open-AccessFile'
     'Get-AccessFileProperty'
@@ -19,6 +20,7 @@
     'Import-AccessVBProject'
     #endregion
     #region Excel
+    'Get-ExcelVersionInfo'
     'New-ExcelFile'
     'Open-ExcelFile'
     'Get-ExcelFileProperty'
@@ -34,6 +36,7 @@
     'Import-ExcelVBProject'
     #endregion
     #region Word
+    'Get-WordVersionInfo'
     'New-WordFile'
     'Open-WordFile'
     'Get-WordFileProperty'
@@ -46,6 +49,7 @@
     'Import-WordVBProject'
     #endregion
     #region PowerPoint
+    'Get-PowerPointVersionInfo'
     'New-PowerPointFile'
     'Open-PowerPointFile'
     'Get-PowerPointFileProperty'

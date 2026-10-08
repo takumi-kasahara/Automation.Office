@@ -60,6 +60,24 @@ function New-PowerPointObject {
 }
 #endregion
 #region Public
+function Get-PowerPointVersionInfo {
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param()
+  <#
+  .SYNOPSIS
+    Retrieves the version information of the PowerPoint application.
+
+  .DESCRIPTION
+    Returns the FileVersionInfo object for the PowerPoint executable (POWERPNT.EXE) located in the PowerPoint installation directory.
+    This helps determine which version of PowerPoint is currently installed and available for automation.
+
+  .NOTES
+    Requires PowerPoint to be installed and accessible via COM automation.
+    The function uses the New-PowerPointObject helper to locate the PowerPoint executable.
+  #>
+  (New-PowerPointObject).Path | Join-Path -ChildPath 'POWERPNT.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
+}
 function New-PowerPointFile {
   <#
   .SYNOPSIS

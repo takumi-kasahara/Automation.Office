@@ -61,6 +61,24 @@ function New-ExcelObject {
 }
 #endregion
 #region Public
+function Get-ExcelVersionInfo {
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param()
+  <#
+  .SYNOPSIS
+    Retrieves the version information of the Excel application.
+
+  .DESCRIPTION
+    Returns the FileVersionInfo object for the Excel executable (EXCEL.EXE) located in the Excel installation directory.
+    This helps determine which version of Excel is currently installed and available for automation.
+
+  .NOTES
+    Requires Excel to be installed and accessible via COM automation.
+    The function uses the New-ExcelObject helper to locate the Excel executable.
+  #>
+  (New-ExcelObject).Path | Join-Path -ChildPath 'EXCEL.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
+}
 function New-ExcelFile {
   <#
   .SYNOPSIS
