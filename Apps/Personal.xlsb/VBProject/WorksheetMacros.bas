@@ -1,6 +1,7 @@
 Attribute VB_Name = "WorksheetMacros"
 '@Folder("Macros")
 '@ModuleDescription("Provides worksheet-level utility macros and hotkeys.")
+Attribute VB_Description = "Provides worksheet-level utility macros and hotkeys."
 
 Option Explicit
 
@@ -8,6 +9,7 @@ Option Explicit
 '@ExcelHotkey "J"
 Public Sub AdjustCells()
 Attribute AdjustCells.VB_ProcData.VB_Invoke_Func = "J\n14"
+Attribute AdjustCells.VB_Description = "Auto-fits used columns and rows on the active worksheet."
   If Not WorkbookExtensions.Backup Then Exit Sub
   Dim rng As Range
   Set rng = WorksheetExtensions.GetUsedRange
@@ -28,6 +30,7 @@ End Sub
 '@ExcelHotkey "j"
 Public Sub AppendLine()
 Attribute AppendLine.VB_ProcData.VB_Invoke_Func = "j\n14"
+Attribute AppendLine.VB_Description = "Appends clipboard lines to cells from the active selection downward."
   If Not WorkbookExtensions.Backup Then Exit Sub
   Dim ws As Worksheet
   Set ws = Assumed.ActiveWorksheet
@@ -57,6 +60,7 @@ End Sub
 '@ExcelHotkey "A"
 Public Sub CopyAddress()
 Attribute CopyAddress.VB_ProcData.VB_Invoke_Func = "A\n14"
+Attribute CopyAddress.VB_Description = "Copies the selected range addresses to the clipboard."
   Dim rng As Range
   Set rng = WorksheetExtensions.GetSelectedRange
   If rng Is Nothing Then Exit Sub
@@ -77,6 +81,7 @@ End Sub
 '@ExcelHotkey "F"
 Public Sub CopyFormula()
 Attribute CopyFormula.VB_ProcData.VB_Invoke_Func = "F\n14"
+Attribute CopyFormula.VB_Description = "Copies formulas from the selected range to the clipboard."
   Dim rng As Range
   Set rng = WorksheetExtensions.GetSelectedRange
   If rng Is Nothing Then Exit Sub
@@ -107,6 +112,7 @@ End Sub
 
 '@Description("Copies print area dimensions and row or column sizes to the clipboard.")
 Public Sub CopyPrintArea()
+Attribute CopyPrintArea.VB_Description = "Copies print area dimensions and row or column sizes to the clipboard."
   Dim ws As Worksheet
   Set ws = Assumed.ActiveWorksheet
   If ws Is Nothing Then Exit Sub
@@ -132,6 +138,7 @@ End Sub
 
 '@Description("Copies the selected range to the clipboard in a diff-friendly format (row by row, column by column).")
 Public Sub CopyRangeForDiffByRow()
+Attribute CopyRangeForDiffByRow.VB_Description = "Copies the selected range to the clipboard in a diff-friendly format (row by row, column by column)."
   Dim rng As Range
   Set rng = ActiveSheet.UsedRange
   If rng Is Nothing Then Exit Sub
@@ -153,6 +160,8 @@ End Sub
 
 '@Description("Copies the selected range to the clipboard in a diff-friendly format (column by column, row by row).")
 Public Sub CopyRangeForDiffByColumn()
+Attribute CopyRangeForDiffByColumn.VB_Description = "Copies the selected range to the clipboard in a diff-friendly format (column by column, row by row)."
+Attribute CopyRangeForDiffByColumn.VB_Description = "Copies the selected range to the clipboard in a diff-friendly format (column by column, row by row)."
   Dim rng As Range
   Set rng = ActiveSheet.UsedRange
   If rng Is Nothing Then Exit Sub
@@ -176,6 +185,7 @@ End Sub
 '@ExcelHotkey "X"
 Public Sub CopyText()
 Attribute CopyText.VB_ProcData.VB_Invoke_Func = "X\n14"
+Attribute CopyText.VB_Description = "Copies text from the current selection to the clipboard. Columns are tab-separated; rows are line-separated."
   Debug.Print "Copying:" & vbTab & TypeName(Application.Selection)
   With Application.Selection
     Select Case TypeName(Application.Selection)
@@ -220,6 +230,7 @@ End Sub
 '@ExcelHotkey "D"
 Public Sub FillBlankCells()
 Attribute FillBlankCells.VB_ProcData.VB_Invoke_Func = "D\n14"
+Attribute FillBlankCells.VB_Description = "Fills blank cells in the selected range with the value from the previous row."
   If Not WorkbookExtensions.Backup Then Exit Sub
   Dim rng As Range
   Set rng = WorksheetExtensions.GetSelectedRange
@@ -235,6 +246,7 @@ End Sub
 '@ExcelHotkey "H"
 Public Sub FollowHyperlinks()
 Attribute FollowHyperlinks.VB_ProcData.VB_Invoke_Func = "H\n14"
+Attribute FollowHyperlinks.VB_Description = "Prompts and opens hyperlinks found in the used range."
   Dim rng As Range
   Dim link As Hyperlink
   For Each rng In WorksheetExtensions.GetUsedRange
@@ -255,6 +267,7 @@ End Sub
 ' https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/row-and-column-visibility#show-all-rows-and-columns
 '@Description("Unhides all rows and columns in the used range of the active worksheet.")
 Public Sub UnHideAllCells()
+Attribute UnHideAllCells.VB_Description = "Unhides all rows and columns in the used range of the active worksheet."
   Dim rng As Range
   Set rng = ActiveSheet.UsedRange
   If rng Is Nothing Then Exit Sub
@@ -277,6 +290,7 @@ End Sub
 '@ExcelHotkey "M"
 Public Sub UnMergeCells()
 Attribute UnMergeCells.VB_ProcData.VB_Invoke_Func = "M\n14"
+Attribute UnMergeCells.VB_Description = "Unmerges selected merged cells and preserves their values."
   If Not WorkbookExtensions.Backup Then Exit Sub
 
   With New Optimizer

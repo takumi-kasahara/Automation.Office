@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder("Utils.Extensions")
 '@ModuleDescription("Provides workbook helper functions used across macros.")
+Attribute VB_Description = "Provides workbook helper functions used across macros."
 Option Explicit
 
 '@Description("Creates a timestamped backup copy of a workbook.")
 Public Function Backup(Optional ByVal wb As Workbook) As Boolean
+Attribute Backup.VB_Description = "Creates a timestamped backup copy of a workbook."
   On Error GoTo Catch
 
   Backup = False
@@ -43,6 +45,7 @@ End Function
 
 '@Description("Activates the first visible worksheet in the active workbook.")
 Public Sub MoveToFirstSheet()
+Attribute MoveToFirstSheet.VB_Description = "Activates the first visible worksheet in the active workbook."
   Dim ws As Worksheet
   For Each ws In ActiveWorkbook.Worksheets
     If ws.Visible Then
@@ -54,6 +57,7 @@ End Sub
 
 '@Description("Finds a worksheet by name in the active workbook.")
 Public Function FindWorksheet(ByVal name As String) As Worksheet
+Attribute FindWorksheet.VB_Description = "Finds a worksheet by name in the active workbook."
   Dim ws As Worksheet
   For Each ws In ActiveWorkbook.Worksheets
     If ws.name = name Then
@@ -65,6 +69,7 @@ End Function
 
 '@Description("Finds a table by name across all worksheets in the active workbook.")
 Public Function FindListObject(ByVal name As String) As ListObject
+Attribute FindListObject.VB_Description = "Finds a table by name across all worksheets in the active workbook."
   Dim ws As Worksheet
   Dim tbl As ListObject
   For Each ws In ActiveWorkbook.Worksheets
@@ -79,6 +84,7 @@ End Function
 
 '@Description("Returns the base name part from a qualified workbook identifier.")
 Public Function GetBaseName(ByVal name As String) As String
+Attribute GetBaseName.VB_Description = "Returns the base name part from a qualified workbook identifier."
   Dim pos As Long
   pos = InStr(1, name, "!")
   If pos > 0 Then

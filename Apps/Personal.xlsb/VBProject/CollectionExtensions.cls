@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder("Utils.Extensions")
 '@ModuleDescription("Provides helper functions for collection-like objects.")
+Attribute VB_Description = "Provides helper functions for collection-like objects."
 Option Explicit
 
 '@Description("Returns True when the specified key exists in the collection-like object.")
 Public Function Contains(ByVal this As Object, ByVal key As Variant) As Boolean
+Attribute Contains.VB_Description = "Returns True when the specified key exists in the collection-like object."
   On Error GoTo Catch
 
   ' Force Error
@@ -27,6 +29,7 @@ End Function
 ' https://stackoverflow.com/questions/48153398/converting-vba-collection-to-array
 '@Description("Converts a collection-like object to a Variant array.")
 Public Function ToArray(ByVal this As Object) As Variant()
+Attribute ToArray.VB_Description = "Converts a collection-like object to a Variant array."
   Dim values() As Variant
   If this.Count = 0 Then Exit Function
   ReDim values(0 To this.Count - 1)

@@ -9,10 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 '@Folder "Utils.Dialogs"
 '@ModuleDescription("Shows a dialog workflow to scale selected shapes.")
+Attribute VB_Description = "Shows a dialog workflow to scale selected shapes."
 Option Explicit
 
 '@Description("Prompts for a scale percentage and resizes selected shapes.")
 Public Sub Show()
+Attribute Show.VB_Description = "Prompts for a scale percentage and resizes selected shapes."
   Dim sr As ShapeRange
   Set sr = SelectionExtensions.GetShapeRange
   If sr Is Nothing Then Exit Sub

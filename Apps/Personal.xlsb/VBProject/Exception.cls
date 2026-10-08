@@ -10,10 +10,12 @@ Attribute VB_Exposed = False
 '@PredeclaredId
 '@Folder "Utils"
 '@ModuleDescription("Displays VBA runtime errors to the user.")
+Attribute VB_Description = "Displays VBA runtime errors to the user."
 Option Explicit
 
 '@Description("Shows the current Err details in a message box.")
 Public Sub Show()
+Attribute Show.VB_Description = "Shows the current Err details in a message box."
   Debug.Assert Err.Number <> 0
   MsgBox Err.Description & "(" & Err.Number & ")", vbExclamation
 End Sub
