@@ -61,6 +61,24 @@ function New-WordObject {
 }
 #endregion
 #region Public
+function Get-WordVersionInfo {
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param()
+  <#
+  .SYNOPSIS
+    Retrieves the version information of the Word application.
+
+  .DESCRIPTION
+    Returns the FileVersionInfo object for the Word executable (WINWORD.EXE) located in the Word installation directory.
+    This helps determine which version of Word is currently installed and available for automation.
+
+  .NOTES
+    Requires Word to be installed and accessible via COM automation.
+    The function uses the New-WordObject helper to locate the Word executable.
+  #>
+  (New-WordObject).Path | Join-Path -ChildPath 'WINWORD.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
+}
 function New-WordFile {
   <#
   .SYNOPSIS
