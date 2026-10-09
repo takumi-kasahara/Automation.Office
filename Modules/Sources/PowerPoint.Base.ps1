@@ -15,10 +15,7 @@ function New-PowerPointObject {
   [CmdletBinding()]
   [OutputType([__ComObject])]
   [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
-  param (
-    [switch]
-    $NoSetup
-  )
+  param ()
   # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.application
   while ($true) {
     try {
@@ -32,10 +29,6 @@ function New-PowerPointObject {
     Start-Sleep -Milliseconds 100
   }
   try {
-    if (-not $NoSetup) {
-      # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.ppalertlevel
-      $app.DisplayAlerts = [Microsoft.Office.Interop.PowerPoint.PpAlertLevel]::ppAlertsNone
-    }
     return $app
   } catch {
     try {
