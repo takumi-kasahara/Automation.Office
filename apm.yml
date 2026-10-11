@@ -6,6 +6,7 @@ targets:
   - copilot
 dependencies:
   apm:
+    - takumi-kasahara/Dotfiles/.apm/skills/batchfile
     - takumi-kasahara/Dotfiles/.apm/skills/csharp-for-powershell-5
     - takumi-kasahara/Dotfiles/.apm/skills/office-scripts
     - takumi-kasahara/Dotfiles/.apm/skills/office-scripts-from-vba
