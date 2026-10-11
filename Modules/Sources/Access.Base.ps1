@@ -47,6 +47,24 @@ function New-AccessObject {
 }
 #endregion
 #region Public
+function Get-AccessVersionInfo {
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param()
+  <#
+  .SYNOPSIS
+    Retrieves the version information of the Access application.
+
+  .DESCRIPTION
+    Returns the FileVersionInfo object for the Access executable (ACCESS.EXE) located in the Access installation directory.
+    This helps determine which version of Access is currently installed and available for automation.
+
+  .NOTES
+    Requires Access to be installed and accessible via COM automation.
+    The function uses the New-AccessObject helper to locate the Access executable.
+  #>
+  (New-AccessObject).Path | Join-Path -ChildPath 'ACCESS.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
+}
 function New-AccessFile {
   <#
   .SYNOPSIS
