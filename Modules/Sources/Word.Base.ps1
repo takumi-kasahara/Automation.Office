@@ -14,10 +14,7 @@ function New-WordObject {
   [CmdletBinding()]
   [OutputType([__ComObject])]
   [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for Word application and does not change persistent state')]
-  param (
-    [switch]
-    $NoSetup
-  )
+  param ()
   # https://learn.microsoft.com/en-us/office/vba/api/word.application
   while ($true) {
     try {
@@ -31,12 +28,6 @@ function New-WordObject {
     Start-Sleep -Milliseconds 100
   }
   try {
-    if (-not $NoSetup) {
-      # https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.interop.word.wdalertlevel?view=word-pia
-      $app.DisplayAlerts = [Microsoft.Office.Interop.Word.WdAlertLevel]::wdAlertsNone
-      $app.Visible = $false
-      $app.ScreenUpdating = $false
-    }
     return $app
   } catch {
     try {

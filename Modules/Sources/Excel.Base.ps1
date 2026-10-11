@@ -14,10 +14,7 @@ function New-ExcelObject {
   [CmdletBinding()]
   [OutputType([__ComObject])]
   [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for Excel application and does not change persistent state')]
-  param (
-    [switch]
-    $NoSetup
-  )
+  param ()
   # https://learn.microsoft.com/en-us/office/vba/api/excel.application(object)
   while ($true) {
     try {
@@ -31,12 +28,6 @@ function New-ExcelObject {
     Start-Sleep -Milliseconds 100
   }
   try {
-    if (-not $NoSetup) {
-      $app.DisplayAlerts = $false
-      $app.Visible = $false
-      $app.EnableEvents = $false
-      $app.ScreenUpdating = $false
-    }
     return $app
   } catch {
     try {
