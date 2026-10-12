@@ -51,7 +51,9 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Compile.OfficeScripts.ps1"
+        ".agents\\skills\\office-scripts\\scripts\\Compile.OfficeScripts.ps1",
+        "-LiteralPath",
+        ".\\Office Scripts"
       ],
       "problemMatcher": [],
       "group": {
@@ -97,7 +99,9 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Decompile.OfficeScripts.ps1"
+        ".agents\\skills\\office-scripts\\scripts\\Decompile.OfficeScripts.ps1",
+        "-LiteralPath",
+        ".\\Office Scripts"
       ],
       "problemMatcher": []
     },
