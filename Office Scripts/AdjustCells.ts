@@ -4,6 +4,8 @@
  *   https://learn.microsoft.com/en-us/javascript/api/office-scripts/excelscript/excelscript.rangeformat?view=office-scripts
  */
 /* global ExcelScript */
+// @ts-expect-error `main` function is starting point
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 function main(workbook: ExcelScript.Workbook) {
   const worksheet = workbook.getActiveWorksheet();
 
