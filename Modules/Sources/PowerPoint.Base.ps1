@@ -56,7 +56,7 @@ function New-PowerPointObject {
 function Get-PowerPointVersionInfo {
   [CmdletBinding()]
   [OutputType([System.Diagnostics.FileVersionInfo])]
-  param()
+  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the PowerPoint application.
@@ -150,7 +150,7 @@ function New-PowerPointFile {
   .EXAMPLE
     ```powershell
     New-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Initialize {
-      param($Presentation)
+      param ($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
     ```
@@ -295,7 +295,7 @@ function Open-PowerPointFile {
   .EXAMPLE
     ```powershell
     Open-PowerPointFile -Path "$env:TEMP\Presentation.pptx" -Action {
-      param($Presentation)
+      param ($Presentation)
       $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
     }
     ```
@@ -308,7 +308,7 @@ function Open-PowerPointFile {
   #>
   [CmdletBinding()]
   [OutputType([__ComObject])]
-  param(
+  param (
     [Alias('FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
@@ -487,7 +487,7 @@ function Get-PowerPointFileProperty {
       $items |
       ForEach-Object {
         Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -684,7 +684,7 @@ function Set-PowerPointFileProperty {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
-          param(
+          param (
             [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation

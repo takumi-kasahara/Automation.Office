@@ -267,7 +267,7 @@ InModuleScope 'Automation.Office' {
       It 'opens a workbook with Action script block' {
         New-ExcelFile -Path $path
         $result = Open-ExcelFile -Path $path -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -564,7 +564,7 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
-        param(
+        param (
           [string]
           $LiteralPath
         )

@@ -55,7 +55,7 @@ function New-WordObject {
 function Get-WordVersionInfo {
   [CmdletBinding()]
   [OutputType([System.Diagnostics.FileVersionInfo])]
-  param()
+  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Word application.
@@ -149,7 +149,7 @@ function New-WordFile {
   .EXAMPLE
     ```powershell
     New-WordFile -Path "$env:TEMP\Document.docx" -Initialize {
-      param($Document)
+      param ($Document)
       $Document.Range().Text = 'Hello, World!'
     }
     ```
@@ -291,7 +291,7 @@ function Open-WordFile {
   .EXAMPLE
     ```powershell
     Open-WordFile -Path "$env:TEMP\Document.docx" -Action {
-      param($Document)
+      param ($Document)
       $Document.Range().Text = 'Hello, World!'
     }
     ```
@@ -304,7 +304,7 @@ function Open-WordFile {
   #>
   [CmdletBinding()]
   [OutputType([__ComObject])]
-  param(
+  param (
     [Alias('FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]

@@ -202,7 +202,7 @@ public enum XMLSchema
         param ()
         $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetHierarchy -Value {
-          param(
+          param (
             [string]
             $Id,
             [object]
@@ -291,7 +291,7 @@ public enum XMLSchema
         param ()
         $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetPageContent -Value {
-          param(
+          param (
             [string]
             $Id,
             [ref]
@@ -782,7 +782,7 @@ public enum XMLSchema
         )
         $app = [PSCustomObject]@{ Base64 = $Base64 }
         $app | Add-Member -MemberType ScriptMethod -Name GetBinaryPageContent -Value {
-          param(
+          param (
             [string]
             $Id,
             [string]
@@ -919,7 +919,7 @@ public enum XMLSchema
         param ()
         $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdateHierarchy -Value {
-          param(
+          param (
             [string]
             $Content,
             [object]
@@ -1022,7 +1022,7 @@ public enum XMLSchema
         param ()
         $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdatePageContent -Value {
-          param(
+          param (
             [string]
             $Content,
             [object]

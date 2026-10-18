@@ -13,7 +13,7 @@ function Start-DialogSuppressor {
   $csPath = $PSScriptRoot | Join-Path -ChildPath 'DialogSuppressor.cs'
   $stopFilePath = $env:TEMP | Join-Path -ChildPath ("NUIDialogSuppressor.$([guid]::NewGuid().ToString('N')).stop")
   $job = Start-Job -ScriptBlock {
-    param()
+    param ()
     Add-Type -LiteralPath $using:csPath
     [NUIDialogSuppressor]::Run($using:stopFilePath, $using:TargetExe)
     [VBProjectDialogSuppressor]::Run($using:stopFilePath, $using:TargetExe)

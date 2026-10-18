@@ -128,7 +128,7 @@ InModuleScope 'Automation.Office' {
         New-AccessFile -Path $path -Password $password
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-AccessFile -Path $path -Password $password -ActionProject {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
@@ -140,7 +140,7 @@ InModuleScope 'Automation.Office' {
         New-AccessFile -Path $path -RemovePersonalInformation
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-AccessFile -Path $path -ActionProject {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
@@ -150,7 +150,7 @@ InModuleScope 'Automation.Office' {
       It 'creates a database with InitializeDb script block' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeDb {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.Dao.Database]
             $Database
           )
@@ -165,7 +165,7 @@ InModuleScope 'Automation.Office' {
       It 'creates a database with InitializeProject script block' {
         $path = Get-TempFile
         $item = New-AccessFile -Path $path -InitializeProject {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
@@ -244,7 +244,7 @@ InModuleScope 'Automation.Office' {
       It 'opens a database and executes ActionDb script block' {
         New-AccessFile -Path $path
         Open-AccessFile -Path $path -ActionDb {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.Dao.Database]
             $Database
           )
@@ -256,7 +256,7 @@ InModuleScope 'Automation.Office' {
       It 'opens a database and executes ActionProject script block' {
         New-AccessFile -Path $path
         Open-AccessFile -Path $path -ActionProject {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
@@ -485,14 +485,14 @@ InModuleScope 'Automation.Office' {
         }
       }
       function Initialize-AccessFixture {
-        param(
+        param (
           [string]
           $Path,
           [SecureString]
           $Password = $null
         )
         New-AccessFile -Path $Path -Password $Password -Force -InitializeDb {
-          param(
+          param (
             [Microsoft.Office.Interop.Access.Dao.Database]
             $Database
           )
@@ -726,7 +726,7 @@ InModuleScope 'Automation.Office' {
           $PasswordToModify
         )
         New-ExcelFile -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Initialize {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )

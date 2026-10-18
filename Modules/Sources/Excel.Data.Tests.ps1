@@ -29,7 +29,7 @@ InModuleScope 'Automation.Office' {
       return $env:TEMP | Join-Path -ChildPath "Book.$([guid]::NewGuid().ToString('N'))$Extension"
     }
     function Initialize-ExcelFixture {
-      param(
+      param (
         [string]
         $Path,
         [SecureString]
@@ -41,7 +41,7 @@ InModuleScope 'Automation.Office' {
         '.xlsm' { [Microsoft.Office.Interop.Excel.XlFileFormat]::xlOpenXMLWorkbookMacroEnabled }
       }
       New-ExcelFile -Path $Path -FileFormat $fileFormat -PasswordToOpen $PasswordToOpen -Initialize {
-        param(
+        param (
           [Microsoft.Office.Interop.Excel.Workbook]
           $Workbook
         )

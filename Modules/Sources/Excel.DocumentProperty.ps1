@@ -109,7 +109,7 @@ function Get-ExcelDocumentProperty {
       $items |
       ForEach-Object {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
@@ -374,7 +374,7 @@ function Set-ExcelDocumentProperty {
         }
         $parameterSetName = $PSCmdlet.ParameterSetName
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )

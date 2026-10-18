@@ -55,7 +55,7 @@ function New-ExcelObject {
 function Get-ExcelVersionInfo {
   [CmdletBinding()]
   [OutputType([System.Diagnostics.FileVersionInfo])]
-  param()
+  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Excel application.
@@ -149,7 +149,7 @@ function New-ExcelFile {
   .EXAMPLE
     ```powershell
     New-ExcelFile -Path "$env:TEMP\Book.xlsx" -Initialize {
-      param($Workbook)
+      param ($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Data'
     }
     ```
@@ -292,7 +292,7 @@ function Open-ExcelFile {
   .EXAMPLE
     ```powershell
     Open-ExcelFile -Path "$env:TEMP\Book.xlsx" -Action {
-      param($Workbook)
+      param ($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Sheet1'
     }
     ```
@@ -303,7 +303,7 @@ function Open-ExcelFile {
     ```powershell
     $app = New-ExcelObject
     Open-ExcelFile -Application $app -Path "$env:TEMP\Book.xlsx" -Action {
-      param($Workbook)
+      param ($Workbook)
       $Workbook.Worksheets.Item(1).Name = 'Sheet1'
     }
     $app.Quit()
@@ -316,7 +316,7 @@ function Open-ExcelFile {
       Returns the opened workbook object.
   #>
   [OutputType([__ComObject])]
-  param(
+  param (
     [Alias('FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
@@ -502,7 +502,7 @@ function Get-ExcelFileProperty {
       $items |
       ForEach-Object {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
@@ -705,7 +705,7 @@ function Set-ExcelFileProperty {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
         Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $file
           )
