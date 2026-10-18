@@ -370,6 +370,8 @@ function Open-AccessFile {
           , $true                   # ReadOnly
           , ";PWD=$passwordString"  # Connect
         ).Close()
+        # https://learn.microsoft.com/en-us/office/vba/api/access.application.automationsecurity
+        $app.AutomationSecurity = [Microsoft.Office.Core.MsoAutomationSecurity]::msoAutomationSecurityForceDisable
         # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
         $app.OpenCurrentDatabase(
           $resolved         # filePath

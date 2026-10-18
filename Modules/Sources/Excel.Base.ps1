@@ -356,6 +356,8 @@ function Open-ExcelFile {
       }
       $dialogSuppressor = Start-DialogSuppressor -TargetExe 'EXCEL.EXE'
       try {
+        # https://learn.microsoft.com/en-us/office/vba/api/excel.application.automationsecurity
+        $app.AutomationSecurity = [Microsoft.Office.Core.MsoAutomationSecurity]::msoAutomationSecurityForceDisable
         # https://learn.microsoft.com/en-us/office/vba/api/excel.workbooks.open
         $file = $app.Workbooks.Open(
           $resolved                  # FileName

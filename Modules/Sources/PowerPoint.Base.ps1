@@ -351,6 +351,8 @@ function Open-PowerPointFile {
       }
       $dialogSuppressor = Start-DialogSuppressor -TargetExe 'POWERPNT.EXE'
       try {
+        # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.application.automationsecurity
+        $app.AutomationSecurity = [Microsoft.Office.Core.MsoAutomationSecurity]::msoAutomationSecurityForceDisable
         # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.presentations.open
         $file = $app.Presentations.Open(
           "$resolved::$passwordToOpenString::$passwordToModifyString" # FileName

@@ -342,6 +342,8 @@ function Open-WordFile {
       }
       $dialogSuppressor = Start-DialogSuppressor -TargetExe 'WINWORD.EXE'
       try {
+        # https://learn.microsoft.com/en-us/office/vba/api/word.application.automationsecurity
+        $app.AutomationSecurity = [Microsoft.Office.Core.MsoAutomationSecurity]::msoAutomationSecurityForceDisable
         # https://learn.microsoft.com/en-us/office/vba/api/word.documents.open
         $file = $app.Documents.Open(
           $resolved                 # FileName
