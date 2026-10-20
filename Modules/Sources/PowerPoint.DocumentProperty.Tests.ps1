@@ -96,9 +96,8 @@ InModuleScope 'Automation.Office' {
         $allProperties = Get-PowerPointDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-PowerPointDocumentProperty -Path $path -Name $name
-
-        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
         @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
@@ -114,6 +113,15 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
+    }
+    Context 'Edge cases' {
+      It 'throws when invalid Name is specified' {
+        New-PowerPointFile -Path $path
+
+        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' } | Should-Throw
+        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy', 'Title' } | Should-Throw
+        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' -Custom } | Should-Throw
+      }
       It 'does not return properties when Custom is specified' {
         New-PowerPointFile -Path $path
 
@@ -121,8 +129,6 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 0
       }
-    }
-    Context 'Edge cases' {
     }
   }
   Describe 'Get-PowerPointDocumentProperty.Unit' {
@@ -140,35 +146,6 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointDocumentProperty -Path $path } | Should-Throw
-      }
-    }
-  }
-  Describe 'Get-PowerPointDocumentPropertyValue.Unit' {
-    BeforeAll {
-      Mock -CommandName Test-Path -MockWith { $true }
-    }
-    Context 'ParameterSetName' {
-      It 'returns null when Get-PowerPointDocumentProperty returns null' {
-        Mock -CommandName Get-PowerPointDocumentProperty
-
-        $result = Get-PowerPointDocumentPropertyValue -LiteralPath 'dummy.pptx' -Name Title
-
-        $result | Should-BeNull
-      }
-      It 'returns property values from Get-PowerPointDocumentProperty output' {
-        Mock -CommandName Get-PowerPointDocumentProperty -MockWith {
-          [PSCustomObject]@{
-            Title = 'A'
-          },
-          [PSCustomObject]@{
-            Title = 'B'
-          }
-        }
-
-        $result = @(Get-PowerPointDocumentPropertyValue -LiteralPath 'dummy.pptx' -Name Title)
-
-        $result.Count | Should-Be 2
-        $result | Should-BeCollection @('A', 'B')
       }
     }
   }
@@ -334,9 +311,7 @@ InModuleScope 'Automation.Office' {
 
         $property | Should-HaveType ([PSCustomObject])
         $properties.PSObject.Properties.Name |
-        ForEach-Object {
-          $property.$_ | Should-Be $properties.$_
-        }
+        ForEach-Object { $property.$_ | Should-Be $properties.$_ }
       }
       It 'sets a custom property' {
         New-PowerPointFile -Path $path
@@ -357,6 +332,19 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
+      It 'throws when invalid Name is specified' {
+        New-PowerPointFile -Path $path
+
+        { Set-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
+        {
+          Set-PowerPointDocumentProperty -LiteralPath $path -InputObject (
+            [PSCustomObject]@{
+              Dummy = [guid]::NewGuid().ToString('N')
+              Title = [guid]::NewGuid().ToString('N')
+            }
+          )
+        } | Should-Throw
+      }
       It 'throws when read-only recommended presentation' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
 
