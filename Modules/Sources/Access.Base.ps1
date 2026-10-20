@@ -50,7 +50,7 @@ function New-AccessObject {
 function Get-AccessVersionInfo {
   [CmdletBinding()]
   [OutputType([System.Diagnostics.FileVersionInfo])]
-  param()
+  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Access application.
@@ -139,7 +139,7 @@ function New-AccessFile {
   .EXAMPLE
     ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeDb {
-      param($Database)
+      param ($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
     ```
@@ -149,7 +149,7 @@ function New-AccessFile {
   .EXAMPLE
     ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -InitializeProject {
-      param($Project)
+      param ($Project)
       return $Project.Connection
     }
     ```
@@ -307,7 +307,7 @@ function Open-AccessFile {
   .EXAMPLE
     ```powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionDb {
-      param($Database)
+      param ($Database)
       $Database.Execute('CREATE TABLE Employees (Id INTEGER, Name TEXT(255))')
     }
     ```
@@ -317,7 +317,7 @@ function Open-AccessFile {
   .EXAMPLE
     ```powershell
     Open-AccessFile -Path "$env:TEMP\Database.accdb" -ActionProject {
-      param($Project)
+      param ($Project)
       return $Project.Connection
     }
     ```
@@ -333,7 +333,7 @@ function Open-AccessFile {
   #>
   [CmdletBinding()]
   [OutputType([__ComObject])]
-  param(
+  param (
     [Alias('FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
@@ -370,6 +370,8 @@ function Open-AccessFile {
           , $true                   # ReadOnly
           , ";PWD=$passwordString"  # Connect
         ).Close()
+        # https://learn.microsoft.com/en-us/office/vba/api/access.application.automationsecurity
+        $app.AutomationSecurity = [Microsoft.Office.Core.MsoAutomationSecurity]::msoAutomationSecurityForceDisable
         # https://learn.microsoft.com/en-us/office/vba/api/access.application.opencurrentdatabase
         $app.OpenCurrentDatabase(
           $resolved         # filePath

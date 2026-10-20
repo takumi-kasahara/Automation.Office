@@ -120,7 +120,7 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -PasswordToOpen $password -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -132,7 +132,7 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path -PasswordToModify $password
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -PasswordToModify $password -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -144,7 +144,7 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         Test-Path -LiteralPath $path | Should-BeTrue
         Open-PowerPointFile -Path $path -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -241,7 +241,7 @@ InModuleScope 'Automation.Office' {
       It 'opens a presentation with Action script block' {
         New-PowerPointFile -Path $path
         $result = Open-PowerPointFile -Path $path -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -536,7 +536,7 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
-        param(
+        param (
           [string]
           $LiteralPath
         )

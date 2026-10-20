@@ -30,14 +30,14 @@ InModuleScope 'Automation.Office' {
       return $env:TEMP | Join-Path -ChildPath "Database.$([guid]::NewGuid().ToString('N'))$Extension"
     }
     function Initialize-AccessFixture {
-      param(
+      param (
         [string]
         $Path,
         [SecureString]
         $Password = $null
       )
       New-AccessFile -Path $Path -Password $Password -Force -InitializeDb {
-        param(
+        param (
           [Microsoft.Office.Interop.Access.Dao.Database]
           $Database
         )

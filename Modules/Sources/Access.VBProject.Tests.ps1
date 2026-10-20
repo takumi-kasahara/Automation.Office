@@ -70,7 +70,7 @@ InModuleScope 'Automation.Office' {
     $fixture = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Bin\Database.accdb'
     $source = $PSScriptRoot | Join-Path -ChildPath '..\..\Tests\Modules\Database\VBProject.json'
     New-AccessFile -Path $fixture -RemovePersonalInformation -Force -InitializeDb {
-      param(
+      param (
         [Microsoft.Office.Interop.Access.Dao.Database]
         $Database
       )
@@ -79,7 +79,7 @@ InModuleScope 'Automation.Office' {
       $Database.Execute("INSERT INTO Employees (Id, Name, Department) VALUES (2, 'Bob', 'Engineering')")
       $Database.CreateQueryDef('vwSalesEmployees', "SELECT Id, Name FROM Employees WHERE Department = 'Sales'")
     } -InitializeProject {
-      param(
+      param (
         [Microsoft.Office.Interop.Access.CurrentProject]
         $Project
       )

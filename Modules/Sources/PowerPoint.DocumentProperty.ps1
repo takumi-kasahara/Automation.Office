@@ -109,7 +109,7 @@ function Get-PowerPointDocumentProperty {
       $items |
       ForEach-Object {
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -368,7 +368,7 @@ function Set-PowerPointDocumentProperty {
         }
         $parameterSetName = $PSCmdlet.ParameterSetName
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -525,7 +525,7 @@ function Remove-PowerPointDocumentProperty {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
         return Open-PowerPointFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )

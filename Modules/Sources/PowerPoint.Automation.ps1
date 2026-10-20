@@ -170,7 +170,7 @@ function Get-PowerPointSpeakerNote {
       ForEach-Object {
         $item = $_
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
@@ -279,7 +279,7 @@ function Export-PowerPointAsFixedFormat {
       try {
         # Presentation must be opened in read/write mode because PrintOptions.Ranges.Add() requires it.
         Open-PowerPointFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
-          param(
+          param (
             [Parameter(Mandatory)]
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation

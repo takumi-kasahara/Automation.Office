@@ -52,7 +52,7 @@ function ConvertTo-SafeFileName {
 function Get-ExtensionByPublishFormat {
   [CmdletBinding()]
   [OutputType([string])]
-  param(
+  param (
     [Parameter(Mandatory)]
     [Microsoft.Office.Interop.OneNote.PublishFormat]
     $PublishFormat
@@ -91,7 +91,7 @@ function Get-ExtensionByPublishFormat {
 function Get-ExtensionBySignature {
   [CmdletBinding()]
   [OutputType([string])]
-  param(
+  param (
     [Parameter(Mandatory)]
     [byte[]]
     $Bytes

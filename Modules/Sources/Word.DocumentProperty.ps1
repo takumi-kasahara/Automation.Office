@@ -366,6 +366,7 @@ function Set-WordDocumentProperty {
         if ($_.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
         }
+        $parameterSetName = $PSCmdlet.ParameterSetName
         Open-WordFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Microsoft.Office.Interop.Word.Document]
@@ -374,7 +375,7 @@ function Set-WordDocumentProperty {
           if ($Document.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
-          switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+          switch -Exact -CaseSensitive ($parameterSetName) {
             { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
               $Document.Saved = -not (Set-DocumentProperty -InputObject $Document -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
             }

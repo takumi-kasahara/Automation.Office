@@ -106,7 +106,7 @@ function Export-ExcelVBProject {
     }
     try {
       Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
-        param(
+        param (
           [Microsoft.Office.Interop.Excel.Workbook]
           $Workbook
         )
@@ -213,7 +213,7 @@ function Import-ExcelVBProject {
     $app = New-ExcelObject
     try {
       Open-ExcelFile -Application $app -Path $Path -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
-        param(
+        param (
           [Microsoft.Office.Interop.Excel.Workbook]
           $file
         )

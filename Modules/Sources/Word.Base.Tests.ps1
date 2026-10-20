@@ -334,7 +334,7 @@ InModuleScope 'Automation.Office' {
       It 'opens a document with Action script block' {
         New-WordFile -Path $path
         $result = Open-WordFile -Path $path -Action {
-          param(
+          param (
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
@@ -625,7 +625,7 @@ InModuleScope 'Automation.Office' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
-        param(
+        param (
           [string]
           $LiteralPath
         )
