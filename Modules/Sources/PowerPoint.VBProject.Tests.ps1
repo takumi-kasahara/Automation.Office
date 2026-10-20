@@ -403,7 +403,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended presentation' {
+      It 'throws when read-only recommended presentation' {
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -ReadOnlyRecommended
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
       }

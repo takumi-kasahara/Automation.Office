@@ -425,7 +425,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended workbook without Force' {
+      It 'throws when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled -ReadOnlyRecommended
         { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
       }

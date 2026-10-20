@@ -492,7 +492,7 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path
         { Set-PowerPointFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
       }
-      It 'throws an error when read-only recommended file' {
+      It 'throws when read-only recommended file' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }

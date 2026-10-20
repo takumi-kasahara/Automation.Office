@@ -581,7 +581,7 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
         { Set-WordFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
       }
-      It 'throws an error when read-only recommended file' {
+      It 'throws when read-only recommended file' {
         New-WordFile -Path $path -ReadOnlyRecommended
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }

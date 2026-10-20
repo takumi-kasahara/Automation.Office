@@ -24,10 +24,13 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 
 Run tests with `Pester.ps1`:
 
-- `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File ".agents\skills\powershell-5\scripts\Pester.ps1" -Path ".\Module.Tests.ps1"`
-- Filter by line: add `-LineNumber 42`
+```powershell
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File ".agents\skills\powershell-5\scripts\Pester.ps1" -Path ".\Module.Tests.ps1" -LineNumber 42
+```
 
-Requires PowerShell Desktop (`$PSEdition -eq 'Desktop'`).
+- COM calls make test execution slow:
+  - Always specify the file path with `-Path`.
+  - Always specify the target line number with `-LineNumber`.
 
 ### VBA development cycle
 

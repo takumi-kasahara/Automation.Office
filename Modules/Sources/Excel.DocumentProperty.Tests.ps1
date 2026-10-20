@@ -101,7 +101,7 @@ InModuleScope 'Automation.Office' {
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
-      It 'does not return built-in properties when Custom is specified' {
+      It 'does not return properties when Custom is specified' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -Custom
         @($properties.PSObject.Properties).Count | Should-Be 0
@@ -321,7 +321,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended workbook without Force' {
+      It 'throws when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -483,7 +483,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended workbook without Force' {
+      It 'throws when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
       }

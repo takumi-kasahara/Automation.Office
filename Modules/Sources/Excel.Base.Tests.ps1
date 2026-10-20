@@ -520,7 +520,7 @@ InModuleScope 'Automation.Office' {
         New-ExcelFile -Path $path
         { Set-ExcelFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
       }
-      It 'throws an error when read-only recommended file without Force' {
+      It 'throws when read-only recommended file without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }

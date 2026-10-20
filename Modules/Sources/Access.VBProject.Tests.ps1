@@ -427,7 +427,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when the database is read-only' {
+      It 'throws when the database is read-only' {
         New-AccessFile -Path $path -RemovePersonalInformation
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
         { Import-AccessVBProject -Path $path -Source $source } | Should-Throw

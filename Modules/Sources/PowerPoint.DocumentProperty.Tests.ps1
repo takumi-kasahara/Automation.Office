@@ -101,7 +101,7 @@ InModuleScope 'Automation.Office' {
         $properties = Get-PowerPointDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
-      It 'does not return built-in properties when Custom is specified' {
+      It 'does not return properties when Custom is specified' {
         New-PowerPointFile -Path $path
         $properties = Get-PowerPointDocumentProperty -LiteralPath $path -Custom
         @($properties.PSObject.Properties).Count | Should-Be 0
@@ -316,7 +316,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended presentation' {
+      It 'throws when read-only recommended presentation' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -473,7 +473,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended presentation' {
+      It 'throws when read-only recommended presentation' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
       }

@@ -418,7 +418,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended document' {
+      It 'throws when read-only recommended document' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -ReadOnlyRecommended
         { Import-WordVBProject -Path $path -Source $source } | Should-Throw
       }

@@ -316,7 +316,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended document' {
+      It 'throws when read-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
@@ -472,7 +472,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read- la-only recommended document' {
+      It 'throws when read- la-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
         { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
       }
