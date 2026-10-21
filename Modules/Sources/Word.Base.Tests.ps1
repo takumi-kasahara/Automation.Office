@@ -68,21 +68,27 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'creates a file at the requested path' {
         $path = Get-TempFile
+
         $item = New-WordFile -Path $path
+
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipeline' {
         $path = Get-TempFile
+
         $item = $path | New-WordFile
+
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipelineByPropertyName' {
         $path = Get-TempFile
+
         $item = [PSCustomObject]@{ FullName = $path } | New-WordFile
+
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
@@ -91,31 +97,39 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not create a file when WhatIf is specified' {
         $path = Get-TempFile
+
         New-WordFile -Path $path -Force -WhatIf
       }
       It 'asks for confirmation when Confirm is specified' {
         $path = Get-TempFile
         $exitCode = 'N' | Invoke-Confirm -Path $path
+
         $exitCode | Should-Be 0
       }
       It 'overwrites an existing document when Force is specified' {
         $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
+
         New-WordFile -Path $path -Force -Confirm
+
         (Get-Item -LiteralPath $path).Length | Should-BeGreaterThan 0
       }
     }
     Context 'Other parameters' {
       It 'creates a file using the requested file format' {
         $path = Get-TempFile -Extension '.docm'
+
         $item = New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file with PasswordToOpen' {
         $path = Get-TempFile
+
         New-WordFile -Path $path -PasswordToOpen $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-WordObject
         try {
@@ -143,7 +157,9 @@ InModuleScope 'Automation.Office' {
       }
       It 'creates a file with PasswordToModify' {
         $path = Get-TempFile
+
         New-WordFile -Path $path -PasswordToModify $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-WordObject
         try {
@@ -171,7 +187,9 @@ InModuleScope 'Automation.Office' {
       }
       It 'creates a file with ReadOnlyRecommended' {
         $path = Get-TempFile
+
         New-WordFile -Path $path -ReadOnlyRecommended
+
         Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-WordObject
         try {
@@ -198,7 +216,9 @@ InModuleScope 'Automation.Office' {
       }
       It 'creates a file with RemovePersonalInformation' {
         $path = Get-TempFile
+
         New-WordFile -Path $path -RemovePersonalInformation
+
         Test-Path -LiteralPath $path | Should-BeTrue
         $app = New-WordObject
         try {
@@ -225,6 +245,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'creates a file with Initialize script block' {
         $path = Get-TempFile
+
         $item = New-WordFile -Path $path -Initialize {
           param (
             [Microsoft.Office.Interop.Word.Document]
@@ -232,6 +253,7 @@ InModuleScope 'Automation.Office' {
           )
           $Document.Range().Text = 'TestData'
         }
+
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
         Test-Path -LiteralPath $path | Should-BeTrue
@@ -263,6 +285,7 @@ InModuleScope 'Automation.Office' {
       It 'fails when the path already exists and Force is not specified' {
         $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
+
         { New-WordFile -Path $path } | Should-Throw
       }
     }
@@ -307,32 +330,39 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'opens a document by Path and returns the document object' {
         New-WordFile -Path $path
+
         Open-WordFile -Path $path | Should-NotBeNull
       }
       It 'opens a document by Path with ValueFromPipeline' {
         New-WordFile -Path $path
+
         $path | Open-WordFile | Should-NotBeNull
       }
       It 'opens a document by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
+
         [PSCustomObject]@{ FullName = $path } | Open-WordFile | Should-NotBeNull
       }
     }
     Context 'Other parameters' {
       It 'opens a document with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
+
         Open-WordFile -Path $path -PasswordToOpen $password | Should-NotBeNull
       }
       It 'opens a document with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
+
         Open-WordFile -Path $path -PasswordToModify $password | Should-NotBeNull
       }
       It 'opens a document with ReadOnly' {
         New-WordFile -Path $path
+
         Open-WordFile -Path $path -ReadOnly | Should-NotBeNull
       }
       It 'opens a document with Action script block' {
         New-WordFile -Path $path
+
         $result = Open-WordFile -Path $path -Action {
           param (
             [Microsoft.Office.Interop.Word.Document]
@@ -341,11 +371,13 @@ InModuleScope 'Automation.Office' {
           $Document.Range().Text = 'TestContent'
           return $Document.Range().Text
         }
+
         $result | Should-Be 'TestContent'
       }
       It 'opens a document using an existing Application object' {
         New-WordFile -Path $path
         $app = New-WordObject
+
         try {
           Open-WordFile -Path $path -Application $app | Should-NotBeNull
         } finally {
@@ -390,45 +422,57 @@ InModuleScope 'Automation.Office' {
     }
     It 'returns file properties' {
       New-WordFile -Path $path
+
       { Get-WordFileProperty -Path $path | Out-Host } | Should -Not -Throw
     }
     Context 'ParameterSetName' {
       It 'returns selected file properties by Path' {
         New-WordFile -Path $path
+
         $properties = Get-WordFileProperty -Path $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'returns selected file properties by LiteralPath' {
         New-WordFile -Path $path
+
         $properties = Get-WordFileProperty -LiteralPath $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-WordFile -Path $path
+
         $properties = $path | Get-WordFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
+
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-WordFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
       }
     }
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
+
         { Get-WordFileProperty -Path $path } | Should-Throw
         { Get-WordFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
         { Get-WordFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
+
         { Get-WordFileProperty -Path $path } | Should -Not -Throw
         { Get-WordFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-WordFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
       It 'returns file properties with Recurse and Depth' {
         New-WordFile -Path $path
+
         { Get-WordFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
       }
     }
@@ -503,46 +547,61 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'updates a file property by Path with Name and Value' {
         New-WordFile -Path $path
+
         Set-WordFileProperty -Path $path -Name $name -Value $value
+
         (Get-WordFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file property by LiteralPath with Name and Value' {
         New-WordFile -Path $path
+
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value
+
         (Get-WordFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file properties by Path with InputObject' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
+
         Set-WordFileProperty -Path $path -InputObject $properties
+
         (Get-WordFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
+
         Set-WordFileProperty -LiteralPath $path -InputObject $properties
+
         (Get-WordFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-WordFile -Path $path
+
         $path | Set-WordFileProperty -Name $name -Value $value
+
         (Get-WordFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
+
         [PSCustomObject]@{ PSPath = $path } | Set-WordFileProperty -Name $name -Value $value
+
         (Get-WordFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update properties when WhatIf is specified' {
         New-WordFile -Path $path
+
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
+
         (Get-WordFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-WordFile -Path $path
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
+
         $exitCode | Should-Be 0
         (Get-WordFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
@@ -550,6 +609,7 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
+
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
@@ -557,6 +617,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'updates a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify $password
+
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
@@ -564,14 +625,18 @@ InModuleScope 'Automation.Office' {
       }
       It 'returns updated file properties when PassThru is specified' {
         New-WordFile -Path $path
+
         $property = Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
+
         $property | Should-HaveType ([PSCustomObject])
         $property.Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified with InputObject' {
         New-WordFile -Path $path
         $properties = [PSCustomObject]@{ Final = $true }
+
         $property = Set-WordFileProperty -LiteralPath $path -InputObject $properties -PassThru
+
         $property | Should-NotBeNull
         $property.Final | Should-BeTrue
       }
@@ -579,10 +644,12 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist.' {
         New-WordFile -Path $path
+
         { Set-WordFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
       }
-      It 'throws an error when read-only recommended file' {
+      It 'throws when read-only recommended file' {
         New-WordFile -Path $path -ReadOnlyRecommended
+
         { Set-WordFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
@@ -611,12 +678,14 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not call Open-WordFile when WhatIf is specified' {
         Set-WordFileProperty -LiteralPath $path -Name Final -Value $true -WhatIf
+
         Should-NotInvoke -CommandName Open-WordFile
       }
     }
     Context 'Edge cases' {
       It 'throws when target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
+
         { Set-WordFileProperty -LiteralPath $path -Name Final -Value $true } | Should-Throw
       }
     }
@@ -657,6 +726,7 @@ InModuleScope 'Automation.Office' {
           }
         }
       }
+
       Test-WordExtension -Path '*.docx' | Should-BeTrue
     }
     It 'returns true for *.docx files by LiteralPath' {

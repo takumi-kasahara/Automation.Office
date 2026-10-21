@@ -52,16 +52,17 @@ function Get-DocumentProperty {
   }
   $properties |
   ForEach-Object {
+    $key = [__ComObject].InvokeMember('Name', [BindingFlags]::GetProperty, $null, $_, $null)
+    if ($null -ne $Name -and $Name.Count -gt 0 -and $key -notin $Name) {
+      return
+    }
     try {
-      $key = [__ComObject].InvokeMember('Name', [BindingFlags]::GetProperty, $null, $_, $null)
-      if ($null -ne $Name -and $Name.Count -gt 0 -and $key -notin $Name) {
-        return
-      }
       $value = [__ComObject].InvokeMember('Value', [BindingFlags]::GetProperty, $null, $_, $null)
-      $values | Add-Member -MemberType NoteProperty -Name $key -Value $value
     } catch [COMException] {
+      $value = $null
       Write-Warning -Message "$($_.Exception.Message) on $key"
     }
+    $values | Add-Member -MemberType NoteProperty -Name $key -Value $value
   }
   return $values
 }
