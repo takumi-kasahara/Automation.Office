@@ -47,7 +47,6 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'creates a new notebook' {
         $notebookId = New-OneNoteNotebook -Path $notebookPath
-
         $notebookId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -76,13 +75,11 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'creates a new section by Path' {
         $sectionId = New-OneNoteSection -Path $sectionPath
-
         $sectionId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'creates a new section by ParentId' {
         $sectionId = New-OneNoteSection -Path $sectionPath -ParentId $notebookId
-
         $sectionId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -111,13 +108,11 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'creates a new section group by Path' {
         $sectionGroupId = New-OneNoteSectionGroup -Path $sectionGroupPath
-
         $sectionGroupId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'creates a new section group by ParentId' {
         $sectionGroupId = New-OneNoteSectionGroup -Path $sectionGroupPath -ParentId $notebookId
-
         $sectionGroupId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -147,7 +142,6 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'creates a new page' {
         $pageId = New-OneNotePage -SectionId $sectionId
-
         $pageId | Should-NotBeNull
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -179,7 +173,6 @@ InModuleScope 'Automation.Office' {
       It 'retrieves the hierarchy of a notebook' {
         $hierarchy = Get-OneNoteHierarchy -Id $notebookId
         $hierarchy | ForEach-Object { $_ -is [System.Xml.XmlNode] | Should-BeTrue }
-
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
@@ -187,7 +180,6 @@ InModuleScope 'Automation.Office' {
       It 'retrieves the hierarchy of a notebook with HierarchyScope' {
         $hierarchy = Get-OneNoteHierarchy -Id $notebookId -HierarchyScope hsPages
         $hierarchy | ForEach-Object { $_ -is [System.Xml.XmlNode] | Should-BeTrue }
-
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
@@ -236,7 +228,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNoteHierarchy -Id 'notebook-id'
-
         $result | Should-NotBeNull
         $result.DocumentElement.LocalName | Should-Be 'Notebook'
         $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Notebook'
@@ -251,7 +242,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNoteHierarchy -Id 'notebook-id' -HierarchyScope hsPages
-
         $result | Should-NotBeNull
         $app.Calls.Count | Should-Be 1
         $app.Calls[0].HierarchyScope.ToString() | Should-Be 'hsPages'
@@ -277,7 +267,6 @@ public enum XMLSchema
       It 'retrieves the content of a page as XML' {
         $pageContent = Get-OneNotePageContent -Id $pageId
         $pageContent | ForEach-Object { $_ -is [System.Xml.XmlNode] | Should-BeTrue }
-
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
     }
@@ -328,7 +317,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { $app }
 
         $result = Get-OneNotePageContent -Id 'page-id'
-
         $result | Should-NotBeNull
         $result.DocumentElement.LocalName | Should-Be 'Page'
         $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Page'
@@ -369,7 +357,6 @@ public enum XMLSchema
     Context 'ParameterSetName' {
       It 'exports the hierarchy as XML' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath
-
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -383,14 +370,12 @@ public enum XMLSchema
       It 'overwrites read-only output when Force is specified' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath
         (Get-Item -LiteralPath $destination -Force).IsReadOnly = $true
-
         { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -Force } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'throws with -NoClobber when output exists' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath
-
         { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -NoClobber } | Should-Throw
         { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -Force -NoClobber } | Should-Throw
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
@@ -399,16 +384,13 @@ public enum XMLSchema
     Context 'Other parameters' {
       It 'exports the hierarchy as XML with HierarchyScope' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -HierarchyScope hsPages
-
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'exports the hierarchy as XML with UseName' {
         $notebookName = Split-Path -Path $notebookPath -Leaf
         $destinationByName = $notebookPath | Join-Path -ChildPath "$notebookName.hierarchy.xml"
-
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -UseName
-
         Test-Path -LiteralPath $destinationByName | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -441,7 +423,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $null }
 
         $result = Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
@@ -476,7 +457,6 @@ public enum XMLSchema
 
         $existingFile = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'throws when resolved output path already exists as a directory' {
@@ -486,7 +466,6 @@ public enum XMLSchema
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination } | Should-Throw
       }
     }
@@ -508,7 +487,6 @@ public enum XMLSchema
     Context 'ParameterSetName' {
       It 'exports the content of a page as XML' {
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath
-
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -522,14 +500,12 @@ public enum XMLSchema
       It 'overwrites read-only output when Force is specified' {
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath
         (Get-Item -LiteralPath $destination -Force).IsReadOnly = $true
-
         { Export-OneNotePageContent -Id $pageId -Destination $notebookPath -Force } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'throws with -NoClobber when output exists' {
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath
-
         { Export-OneNotePageContent -Id $pageId -Destination $notebookPath -NoClobber } | Should-Throw
         { Export-OneNotePageContent -Id $pageId -Destination $notebookPath -Force -NoClobber } | Should-Throw
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
@@ -538,15 +514,12 @@ public enum XMLSchema
     Context 'Other parameters' {
       It 'exports the content of a page as XML with PageInfo' {
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath -PageInfo piAll
-
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'exports the content of a page as XML with UseName' {
         $destinationByName = $notebookPath | Join-Path -ChildPath 'Untitled page.content.xml'
-
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath -UseName
-
         Test-Path -LiteralPath $destinationByName | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -579,7 +552,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNotePageContent -MockWith { $null }
 
         $result = Export-OneNotePageContent -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
@@ -614,7 +586,6 @@ public enum XMLSchema
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.content.xml'
         [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'throws when resolved output path already exists as a directory' {
@@ -622,7 +593,6 @@ public enum XMLSchema
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'page-id.content.xml'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNotePageContent -Id 'page-id' -Destination $destination } | Should-Throw
       }
     }
@@ -644,7 +614,6 @@ public enum XMLSchema
     Context 'ParameterSetName' {
       It 'exports a page as a OneNote document' {
         Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath
-
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -658,14 +627,12 @@ public enum XMLSchema
       It 'overwrites read-only output when Force is specified' {
         Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath
         (Get-Item -LiteralPath $destination -Force).IsReadOnly = $true
-
         { Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath -Force } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'throws with -NoClobber when output exists' {
         Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath
-
         { Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath -NoClobber } | Should-Throw
         { Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath -Force -NoClobber } | Should-Throw
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
@@ -674,15 +641,12 @@ public enum XMLSchema
     Context 'Other parameters' {
       It 'exports a page as a OneNote document with PublishFormat' {
         Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath -PublishFormat pfWord
-
         Test-Path -LiteralPath ([Path]::ChangeExtension($destination, '.docx')) | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'exports a page as a OneNote document with UseName' {
         $destinationByName = $notebookPath | Join-Path -ChildPath 'Untitled page.one'
-
         Export-OneNotePageAsDocument -Id $pageId -Destination $notebookPath -UseName
-
         Test-Path -LiteralPath $destinationByName | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -738,7 +702,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $null }
 
         $result = Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
@@ -748,7 +711,6 @@ public enum XMLSchema
 
         $conflictDirectory = $destination | Join-Path -ChildPath 'page-id.one'
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
-
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination } | Should-Throw
       }
       It 'throws with NoClobber when output file already exists' {
@@ -756,7 +718,6 @@ public enum XMLSchema
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.one'
         [File]::WriteAllBytes($existingFile, [byte[]]@(0x00))
-
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
     }
@@ -867,7 +828,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $result = Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
       }
     }
@@ -878,7 +838,6 @@ public enum XMLSchema
 
         $filePath = $destination | Join-Path -ChildPath 'destination.txt'
         New-Item -Path $filePath -ItemType File -Force | Out-Null
-
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $filePath } | Should-Throw
       }
       It 'throws with NoClobber when output file already exists' {
@@ -889,7 +848,6 @@ public enum XMLSchema
         New-Item -Path $directory -ItemType Directory -Force | Out-Null
         $existingFile = $directory | Join-Path -ChildPath 'callback-01.docx'
         [File]::WriteAllBytes($existingFile, [byte[]]@(0x50, 0x4B, 0x03, 0x04))
-
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -NoClobber } | Should-Throw
       }
       It 'returns no output when page content has no binary objects' {
@@ -905,7 +863,6 @@ public enum XMLSchema
         Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
         $result = Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination
-
         $result | Should-BeNull
         Test-Path -LiteralPath ($destination | Join-Path -ChildPath 'page-id') | Should-BeFalse
       }

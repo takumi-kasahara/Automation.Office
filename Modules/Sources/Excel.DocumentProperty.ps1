@@ -21,7 +21,7 @@ function Get-ExcelDocumentProperty {
     Specifies workbook paths literally. Wildcards are not interpreted.
 
   .PARAMETER Name
-    Filters returned properties by name. Throws if any specified property does not exist. If not specified, all properties are returned.
+    Filters returned properties by name. If not specified, all properties are returned.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the workbook.
@@ -111,21 +111,9 @@ function Get-ExcelDocumentProperty {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -ReadOnly -Action {
           param (
             [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
+            $file
           )
-          $properties = Get-DocumentProperty -InputObject $Workbook -Name $Name -Custom:$Custom
-          $missingNames = @(if ($Name) {
-            @(
-              $Name |
-              Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
-            )
-          } else {
-            @()
-          })
-          if ($missingNames.Count -gt 0) {
-            throw [ArgumentException]::new("Document property not found: $($missingNames -join ', ')")
-          }
-          return $properties
+          return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
         }
       }
     } catch {
@@ -221,7 +209,12 @@ function Get-ExcelDocumentPropertyValue {
   )
   process {
     Get-ExcelDocumentProperty @PSBoundParameters |
-    ForEach-Object { $_.PSObject.Properties | Select-Object -ExpandProperty Value }
+    ForEach-Object {
+      if ($null -eq $_) {
+        return
+      }
+      $_.PSObject.Properties.Value
+    }
   }
 }
 function Set-ExcelDocumentProperty {
@@ -383,29 +376,29 @@ function Set-ExcelDocumentProperty {
         Open-ExcelFile -Application $app -Path $_.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           param (
             [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
+            $file
           )
-          if ($Workbook.ReadOnly) {
+          if ($file.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $_))
           }
           switch -Exact -CaseSensitive ($parameterSetName) {
             { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-              $Workbook.Saved = -not (Set-DocumentProperty -InputObject $Workbook -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
+              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties ([PSCustomObject]@{ $Name = $Value }) -Custom:$Custom)
             }
             { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-              $Workbook.Saved = -not (Set-DocumentProperty -InputObject $Workbook -Properties $InputObject -Custom:$Custom)
+              $file.Saved = -not (Set-DocumentProperty -InputObject $file -Properties $InputObject -Custom:$Custom)
             }
           }
-          if (-not $Workbook.Saved) {
-            $Workbook.Save()
+          if (-not $file.Saved) {
+            $file.Save()
           }
           if ($PassThru) {
             switch -Exact -CaseSensitive ($parameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $Workbook -Name $Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $file -Name $Name -Custom:$Custom
               }
               { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                return Get-DocumentProperty -InputObject $Workbook -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
+                return Get-DocumentProperty -InputObject $file -Name $InputObject.PSObject.Properties.Name -Custom:$Custom
               }
             }
           }

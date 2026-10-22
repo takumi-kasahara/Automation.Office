@@ -155,7 +155,6 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject by FilePath as JSON' {
         $item = Export-AccessVBProject -Path $fixture -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
@@ -164,7 +163,6 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject by Path with ValueFromPipeline' {
         $item = $fixture | Export-AccessVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
@@ -173,7 +171,6 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject by Path with ValueFromPipelineByPropertyName' {
         $item = [PSCustomObject]@{ Path = $fixture } | Export-AccessVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
@@ -181,7 +178,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports VBProject components to the specified ComponentRoot' {
         $customRoot = $env:TEMP | Join-Path -ChildPath "VBComponents.$([guid]::NewGuid().ToString('N'))"
-
         try {
           $item = Export-AccessVBProject -Path $fixture -Destination $destination -ComponentRoot $customRoot
           $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
@@ -200,20 +196,17 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not create outputs when WhatIf is specified' {
         Export-AccessVBProject -Path $fixture -Destination $destination -Force -WhatIf
-
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         $exitCode = 'N' | Invoke-Confirm -Path $fixture -Destination $destination
-
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
         (New-Item -Path $destination -ItemType File).IsReadOnly = $true
-
         { Export-AccessVBProject -Path $fixture -Destination $destination } | Should-Throw
         Export-AccessVBProject -Path $fixture -Destination $destination -Force -Confirm
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
@@ -223,7 +216,6 @@ InModuleScope 'Automation.Office' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         $bas = New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File
         $bas.IsReadOnly = $true
-
         { Export-AccessVBProject -Path $fixture -Destination $destination } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
@@ -234,7 +226,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
         New-Item -Path $destination -ItemType File | Out-Null
-
         { Export-AccessVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-AccessVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         (Get-Item -LiteralPath $destination).Length | Should-Be 0
@@ -243,7 +234,6 @@ InModuleScope 'Automation.Office' {
       It 'throws and keeps the existing component content unchanged when NoClobber is specified' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File | Out-Null
-
         { Export-AccessVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-AccessVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'Module1.bas') -PathType Leaf | Should-BeTrue
@@ -253,7 +243,6 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'exports VBProject by relative path' {
         Push-Location -Path $env:TEMP
-
         try {
           $relativeDestination = [Path]::GetFileName($destination)
           $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
@@ -266,7 +255,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports VBProject from a database protected with Password' {
         New-AccessFile -Path $path -Password $password
-
         { Export-AccessVBProject -Path $path -Destination $destination -Password (Get-AccessPassword) } | Should-Throw
         Export-AccessVBProject -Path $path -Destination $destination -Password $password
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
@@ -274,20 +262,16 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports VBProject with filtered AcObjectType when IncludeAcObjectType is specified' {
         $include = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
-
         Export-AccessVBProject -Path $fixture -Destination $destination -IncludeAcObjectType $include
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
         @($exported.VBComponents | Where-Object -Property Type -In $include).Count | Should-Be 1
       }
       It 'exports VBProject with filtered AcObjectType when ExcludeAcObjectType is specified' {
         $exclude = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
-
         Export-AccessVBProject -Path $fixture -Destination $destination -ExcludeAcObjectType $exclude
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
         @($exported.VBComponents | Where-Object -Property Type -In $exclude).Count | Should-Be 0
@@ -295,10 +279,8 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject with filtered AcObjectType when both IncludeAcObjectType and ExcludeAcObjectType are specified' {
         $include = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm, [Microsoft.Office.Interop.Access.AcObjectType]::acReport)
         $exclude = [Microsoft.Office.Interop.Access.AcObjectType[]]@([Microsoft.Office.Interop.Access.AcObjectType]::acForm)
-
         Export-AccessVBProject -Path $fixture -Destination $destination -IncludeAcObjectType $include -ExcludeAcObjectType $exclude
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
         @($exported.VBComponents | Where-Object -Property Type -In $include).Count | Should-Be 1
@@ -308,13 +290,11 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when the destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-
         { Export-AccessVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
       }
       It 'throws when the destination path already exists as a directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
-
         { Export-AccessVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-AccessVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
@@ -322,7 +302,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when the component directory path already exists as a file' {
         New-Item -Path $componentRoot -ItemType File | Out-Null
-
         { Export-AccessVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $componentRoot -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $destination | Should-BeFalse
@@ -388,28 +367,22 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject by FilePath from JSON' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -RemovePersonalInformation
-
         Import-AccessVBProject -Path $path -Source $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
-
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipeline' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -RemovePersonalInformation
-
         $path | Import-AccessVBProject -Source $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
-
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipelineByPropertyName' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -RemovePersonalInformation
-
         [PSCustomObject]@{ Path = $path } | Import-AccessVBProject -Source $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
-
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
     }
@@ -417,17 +390,14 @@ InModuleScope 'Automation.Office' {
       It 'does not import VBProject when WhatIf is specified' {
         New-AccessFile -Path $path -RemovePersonalInformation
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
-
         Import-AccessVBProject -Path $path -Source $source -WhatIf
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
-
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
       }
       It 'asks for confirmation when Confirm is specified' {
         New-AccessFile -Path $path -RemovePersonalInformation
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
         $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
-
         $exitCode | Should-Be 0
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
@@ -436,7 +406,6 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'imports VBProject by relative path' {
         Push-Location -Path $env:TEMP
-
         try {
           $relativeSource = [Path]::GetFileName($source)
           New-AccessFile -Path $path -RemovePersonalInformation
@@ -451,7 +420,6 @@ InModuleScope 'Automation.Office' {
       It 'imports VBProject into a database protected with Password' {
         $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-AccessFile -Path $path -Password $password
-
         { Import-AccessVBProject -Path $path -Source $source -Password (Get-AccessPassword) } | Should-Throw
         Import-AccessVBProject -Path $path -Source $source -Password $password
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -Password $password
@@ -459,10 +427,9 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the database is read-only' {
+      It 'throws an error when the database is read-only' {
         New-AccessFile -Path $path -RemovePersonalInformation
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
-
         { Import-AccessVBProject -Path $path -Source $source } | Should-Throw
       }
     }

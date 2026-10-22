@@ -21,7 +21,7 @@ function Get-WordDocumentProperty {
     Specifies document paths literally. Wildcards are not interpreted.
 
   .PARAMETER Name
-    Filters returned properties by name. Throws if any specified property does not exist. If not specified, all properties are returned.
+    Filters returned properties by name. If not specified, all properties are returned.
 
   .PARAMETER PasswordToOpen
     Specifies the password required to open the document.
@@ -113,19 +113,7 @@ function Get-WordDocumentProperty {
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
-          $properties = Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
-          $missingNames = @(if ($Name) {
-            @(
-              $Name |
-              Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
-            )
-          } else {
-            @()
-          })
-          if ($missingNames.Count -gt 0) {
-            throw [ArgumentException]::new("Document property not found: $($missingNames -join ', ')")
-          }
-          return $properties
+          return Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
         }
       }
     } catch {
@@ -221,7 +209,12 @@ function Get-WordDocumentPropertyValue {
   )
   process {
     Get-WordDocumentProperty @PSBoundParameters |
-    ForEach-Object { $_.PSObject.Properties | Select-Object -ExpandProperty Value }
+    ForEach-Object {
+      if ($null -eq $_) {
+        return
+      }
+      $_.PSObject.Properties.Value
+    }
   }
 }
 function Set-WordDocumentProperty {
