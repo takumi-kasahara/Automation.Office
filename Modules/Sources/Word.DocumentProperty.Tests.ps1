@@ -87,8 +87,8 @@ InModuleScope 'Automation.Office' {
         $allProperties = Get-WordDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-WordDocumentProperty -Path $path -Name $name
-        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
         @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -PasswordToOpen $password
@@ -101,13 +101,20 @@ InModuleScope 'Automation.Office' {
         $properties = Get-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
-      It 'does not return built-in properties when Custom is specified' {
+    }
+    Context 'Edge cases' {
+      It 'throws when invalid Name is specified' {
+        New-WordFile -Path $path
+
+        { Get-WordDocumentProperty -LiteralPath $path -Name 'Dummy' } | Should-Throw
+        { Get-WordDocumentProperty -LiteralPath $path -Name 'Dummy', 'Title' } | Should-Throw
+        { Get-WordDocumentProperty -LiteralPath $path -Name 'Dummy' -Custom } | Should-Throw
+      }
+      It 'does not return properties when Custom is specified' {
         New-WordFile -Path $path
         $properties = Get-WordDocumentProperty -LiteralPath $path -Custom
         @($properties.PSObject.Properties).Count | Should-Be 0
       }
-    }
-    Context 'Edge cases' {
     }
   }
   Describe 'Get-WordDocumentProperty.Unit' {
@@ -125,33 +132,6 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-WordObject -MockWith { throw }
 
         { Get-WordDocumentProperty -Path $path } | Should-Throw
-      }
-    }
-  }
-  Describe 'Get-WordDocumentPropertyValue.Unit' {
-    BeforeAll {
-      Mock -CommandName Test-Path -MockWith { $true }
-    }
-    Context 'ParameterSetName' {
-      It 'returns null when Get-WordDocumentProperty returns null' {
-        Mock -CommandName Get-WordDocumentProperty
-
-        $result = Get-WordDocumentPropertyValue -LiteralPath 'dummy.docx' -Name Title
-        $result | Should-BeNull
-      }
-      It 'returns property values from Get-WordDocumentProperty output' {
-        Mock -CommandName Get-WordDocumentProperty -MockWith {
-          [PSCustomObject]@{
-            Title = 'A'
-          },
-          [PSCustomObject]@{
-            Title = 'B'
-          }
-        }
-
-        $result = @(Get-WordDocumentPropertyValue -LiteralPath 'dummy.docx' -Name Title)
-        $result.Count | Should-Be 2
-        $result | Should-BeCollection @('A', 'B')
       }
     }
   }
@@ -256,7 +236,8 @@ InModuleScope 'Automation.Office' {
       It 'does not update properties when WhatIf is specified' {
         New-WordFile -Path $path
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
-        Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -Force -WhatIf
+        Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -WhatIf
+
         Get-WordDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
@@ -297,9 +278,7 @@ InModuleScope 'Automation.Office' {
         $property = Set-WordDocumentProperty -LiteralPath $path -InputObject $properties -PassThru
         $property | Should-HaveType ([PSCustomObject])
         $properties.PSObject.Properties.Name |
-        ForEach-Object {
-          $property.$_ | Should-Be $properties.$_
-        }
+        ForEach-Object { $property.$_ | Should-Be $properties.$_ }
       }
       It 'sets a custom property' {
         New-WordFile -Path $path
@@ -316,7 +295,20 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended document' {
+      It 'throws when invalid Name is specified' {
+        New-WordFile -Path $path
+
+        { Set-WordDocumentProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
+        {
+          Set-WordDocumentProperty -LiteralPath $path -InputObject (
+            [PSCustomObject]@{
+              Dummy = [guid]::NewGuid().ToString('N')
+              Title = [guid]::NewGuid().ToString('N')
+            }
+          )
+        } | Should-Throw
+      }
+      It 'throws when read-only recommended document' {
         New-WordFile -Path $path -ReadOnlyRecommended
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }

@@ -87,8 +87,8 @@ InModuleScope 'Automation.Office' {
         $allProperties = Get-ExcelDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-ExcelDocumentProperty -Path $path -Name $name
-        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
         @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
@@ -101,13 +101,20 @@ InModuleScope 'Automation.Office' {
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
-      It 'does not return built-in properties when Custom is specified' {
+    }
+    Context 'Edge cases' {
+      It 'throws when invalid Name is specified' {
+        New-ExcelFile -Path $path
+
+        { Get-ExcelDocumentProperty -LiteralPath $path -Name 'Dummy' } | Should-Throw
+        { Get-ExcelDocumentProperty -LiteralPath $path -Name 'Dummy', 'Title' } | Should-Throw
+        { Get-ExcelDocumentProperty -LiteralPath $path -Name 'Dummy' -Custom } | Should-Throw
+      }
+      It 'does not return properties when Custom is specified' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelDocumentProperty -LiteralPath $path -Custom
         @($properties.PSObject.Properties).Count | Should-Be 0
       }
-    }
-    Context 'Edge cases' {
     }
   }
   Describe 'Get-ExcelDocumentProperty.Unit' {
@@ -302,9 +309,7 @@ InModuleScope 'Automation.Office' {
         $property = Set-ExcelDocumentProperty -LiteralPath $path -InputObject $properties -PassThru
         $property | Should-HaveType ([PSCustomObject])
         $properties.PSObject.Properties.Name |
-        ForEach-Object {
-          $property.$_ | Should-Be $properties.$_
-        }
+        ForEach-Object { $property.$_ | Should-Be $properties.$_ }
       }
       It 'sets a custom property' {
         New-ExcelFile -Path $path
@@ -321,7 +326,20 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws an error when read-only recommended workbook without Force' {
+      It 'throws when invalid Name is specified' {
+        New-ExcelFile -Path $path
+
+        { Set-ExcelDocumentProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
+        {
+          Set-ExcelDocumentProperty -LiteralPath $path -InputObject (
+            [PSCustomObject]@{
+              Dummy = [guid]::NewGuid().ToString('N')
+              Title = [guid]::NewGuid().ToString('N')
+            }
+          )
+        } | Should-Throw
+      }
+      It 'throws when read-only recommended workbook without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
