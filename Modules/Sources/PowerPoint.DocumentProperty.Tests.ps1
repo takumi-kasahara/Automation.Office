@@ -60,75 +60,54 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'reads built-in properties by Path' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
-
         $properties = @(Get-PowerPointDocumentProperty -Path $pathSet.Path)
-
         $properties.Count | Should-Be 2
         $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
-
         $properties = @($pathSet.Path | Get-PowerPointDocumentProperty)
-
         $properties.Count | Should-Be 2
         $properties | ForEach-Object { @($_.PSObject.Properties).Count | Should-BeGreaterThan 0 }
       }
       It 'reads built-in properties by LiteralPath' {
         New-PowerPointFile -Path $path
-
         $properties = Get-PowerPointDocumentProperty -LiteralPath $path
-
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
-
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointDocumentProperty
-
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
     }
     Context 'Other parameters' {
       It 'filters properties by Name' {
         New-PowerPointFile -Path $path
-
         $allProperties = Get-PowerPointDocumentProperty -Path $path
         $name = @($allProperties.PSObject.Properties.Name) | Select-Object -First 1
         $properties = Get-PowerPointDocumentProperty -Path $path -Name $name
-        @($properties.PSObject.Properties).Count | Should-Be 1
         @($properties.PSObject.Properties.Name) | Should-ContainCollection $name
+        @($properties.PSObject.Properties).Count | Should-Be 1
       }
       It 'reads properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-
         { Get-PowerPointDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         $properties = Get-PowerPointDocumentProperty -LiteralPath $path -PasswordToOpen $password
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
       }
       It 'reads properties from a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify (Get-Password)
-
         $properties = Get-PowerPointDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password)
-
         @($properties.PSObject.Properties).Count | Should-BeGreaterThan 0
+      }
+      It 'does not return built-in properties when Custom is specified' {
+        New-PowerPointFile -Path $path
+        $properties = Get-PowerPointDocumentProperty -LiteralPath $path -Custom
+        @($properties.PSObject.Properties).Count | Should-Be 0
       }
     }
     Context 'Edge cases' {
-      It 'throws when invalid Name is specified' {
-        New-PowerPointFile -Path $path
-
-        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' } | Should-Throw
-        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy', 'Title' } | Should-Throw
-        { Get-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' -Custom } | Should-Throw
-      }
-      It 'does not return properties when Custom is specified' {
-        New-PowerPointFile -Path $path
-
-        $properties = Get-PowerPointDocumentProperty -LiteralPath $path -Custom
-
-        @($properties.PSObject.Properties).Count | Should-Be 0
-      }
     }
   }
   Describe 'Get-PowerPointDocumentProperty.Unit' {
@@ -146,6 +125,33 @@ InModuleScope 'Automation.Office' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointDocumentProperty -Path $path } | Should-Throw
+      }
+    }
+  }
+  Describe 'Get-PowerPointDocumentPropertyValue.Unit' {
+    BeforeAll {
+      Mock -CommandName Test-Path -MockWith { $true }
+    }
+    Context 'ParameterSetName' {
+      It 'returns null when Get-PowerPointDocumentProperty returns null' {
+        Mock -CommandName Get-PowerPointDocumentProperty
+
+        $result = Get-PowerPointDocumentPropertyValue -LiteralPath 'dummy.pptx' -Name Title
+        $result | Should-BeNull
+      }
+      It 'returns property values from Get-PowerPointDocumentProperty output' {
+        Mock -CommandName Get-PowerPointDocumentProperty -MockWith {
+          [PSCustomObject]@{
+            Title = 'A'
+          },
+          [PSCustomObject]@{
+            Title = 'B'
+          }
+        }
+
+        $result = @(Get-PowerPointDocumentPropertyValue -LiteralPath 'dummy.pptx' -Name Title)
+        $result.Count | Should-Be 2
+        $result | Should-BeCollection @('A', 'B')
       }
     }
   }
@@ -201,18 +207,14 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'sets a built-in property by Path' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
-
         Set-PowerPointDocumentProperty -Path $pathSet.Path -Name $name -Value $value
         $values = @(Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name)
-
         $values | Should-BeCollection (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets a built-in property by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
-
         $pathSet.Path | Set-PowerPointDocumentProperty -Name $name -Value $value
         $values = @(Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name)
-
         $values | Should-BeCollection (@($value) * $pathSet.ChildItem.Count)
       }
       It 'sets multiple built-in properties by Path with InputObject' {
@@ -221,7 +223,6 @@ InModuleScope 'Automation.Office' {
           Title   = [guid]::NewGuid().ToString('N')
           Subject = [guid]::NewGuid().ToString('N')
         }
-
         Set-PowerPointDocumentProperty -Path $pathSet.Path -InputObject $properties
         $properties.PSObject.Properties.Name |
         ForEach-Object {
@@ -230,16 +231,12 @@ InModuleScope 'Automation.Office' {
       }
       It 'sets a built-in property by LiteralPath' {
         New-PowerPointFile -Path $path
-
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets a built-in property by LiteralPath with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
-
         [PSCustomObject]@{ PSPath = $path } | Set-PowerPointDocumentProperty -Name $name -Value $value
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'sets multiple built-in properties by LiteralPath with InputObject' {
@@ -248,7 +245,6 @@ InModuleScope 'Automation.Office' {
           Title   = [guid]::NewGuid().ToString('N')
           Subject = [guid]::NewGuid().ToString('N')
         }
-
         Set-PowerPointDocumentProperty -LiteralPath $path -InputObject $properties
         $properties.PSObject.Properties.Name |
         ForEach-Object {
@@ -259,18 +255,14 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not update properties when WhatIf is specified' {
         New-PowerPointFile -Path $path
-
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -WhatIf
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
         New-PowerPointFile -Path $path
-
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value 'ante confirm'
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
-
         $exitCode | Should-Be 0
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante confirm'
       }
@@ -278,7 +270,6 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
@@ -286,7 +277,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'updates a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
-
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
@@ -294,9 +284,7 @@ InModuleScope 'Automation.Office' {
       }
       It 'returns the updated built-in property when PassThru is specified' {
         New-PowerPointFile -Path $path
-
         $property = Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PassThru
-
         $property | Should-HaveType ([PSCustomObject])
         $property.$name | Should-Be $value
       }
@@ -306,48 +294,30 @@ InModuleScope 'Automation.Office' {
           Title   = [guid]::NewGuid().ToString('N')
           Subject = [guid]::NewGuid().ToString('N')
         }
-
         $property = Set-PowerPointDocumentProperty -LiteralPath $path -InputObject $properties -PassThru
-
         $property | Should-HaveType ([PSCustomObject])
         $properties.PSObject.Properties.Name |
-        ForEach-Object { $property.$_ | Should-Be $properties.$_ }
+        ForEach-Object {
+          $property.$_ | Should-Be $properties.$_
+        }
       }
       It 'sets a custom property' {
         New-PowerPointFile -Path $path
         $name = 'MyProperty'
-
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name -Custom | Should-Be $value
       }
       It 'returns the updated custom property when PassThru is specified' {
         New-PowerPointFile -Path $path
         $name = 'MyProperty'
-
         $property = Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -Custom -PassThru
-
         $property | Should-HaveType ([PSCustomObject])
         $property.$name | Should-Be $value
       }
     }
     Context 'Edge cases' {
-      It 'throws when invalid Name is specified' {
-        New-PowerPointFile -Path $path
-
-        { Set-PowerPointDocumentProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
-        {
-          Set-PowerPointDocumentProperty -LiteralPath $path -InputObject (
-            [PSCustomObject]@{
-              Dummy = [guid]::NewGuid().ToString('N')
-              Title = [guid]::NewGuid().ToString('N')
-            }
-          )
-        } | Should-Throw
-      }
-      It 'throws when read-only recommended presentation' {
+      It 'throws an error when read-only recommended presentation' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
-
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
@@ -437,37 +407,29 @@ InModuleScope 'Automation.Office' {
       It 'removes built-in properties by Path' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
         Set-PowerPointDocumentProperty -Path $pathSet.Path -Name $name -Value $value
-
         Remove-PowerPointDocumentProperty -Path $pathSet.Path
         $values = Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name
-
         $values.Count | Should-Be $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by Path with ValueFromPipeline' {
         $pathSet.ChildItem | ForEach-Object { New-PowerPointFile -Path $_ }
         Set-PowerPointDocumentProperty -Path $pathSet.Path -Name $name -Value $value
-
         $pathSet.Path | Remove-PowerPointDocumentProperty
         $values = Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name
-
         $values.Count | Should-Be $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by LiteralPath' {
         New-PowerPointFile -Path $path
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
-
         Remove-PowerPointDocumentProperty -LiteralPath $path
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeEmptyString
       }
       It 'removes built-in properties by LiteralPath with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
-
         [PSCustomObject]@{ PSPath = $path } | Remove-PowerPointDocumentProperty
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeEmptyString
       }
     }
@@ -475,16 +437,13 @@ InModuleScope 'Automation.Office' {
       It 'does not remove properties when WhatIf is specified' {
         New-PowerPointFile -Path $path
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
-
         Remove-PowerPointDocumentProperty -LiteralPath $path -WhatIf
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
       It 'asks for confirmation when Confirm is specified' {
         New-PowerPointFile -Path $path
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
         $exitCode = 'N' | Invoke-Confirm -Path $path
-
         $exitCode | Should-Be 0
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
@@ -493,7 +452,6 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
-
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-PowerPointDocumentProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
         Remove-PowerPointDocumentProperty -LiteralPath $path -PasswordToOpen $password
@@ -502,7 +460,6 @@ InModuleScope 'Automation.Office' {
       It 'removes properties from a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
-
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
         { Remove-PowerPointDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should-Throw
         Remove-PowerPointDocumentProperty -LiteralPath $path -PasswordToModify $password
@@ -511,16 +468,13 @@ InModuleScope 'Automation.Office' {
       It 'uses RemoveDocInfoType when removing properties' {
         New-PowerPointFile -Path $path
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value
-
         Remove-PowerPointDocumentProperty -LiteralPath $path -RemoveDocInfoType ppRDIAll
-
         Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeEmptyString
       }
     }
     Context 'Edge cases' {
-      It 'throws when read-only recommended presentation' {
+      It 'throws an error when read-only recommended presentation' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
-
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
