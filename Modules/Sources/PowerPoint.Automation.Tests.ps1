@@ -233,7 +233,6 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'exports a presentation to PDF by default' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf
 
         $result | Should-NotBeNull
@@ -242,7 +241,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports by ValueFromPipelineByPropertyName using FullName alias' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         $result = [PSCustomObject]@{ FullName = $path } |
         Export-PowerPointAsFixedFormat -Destination $pdf
 
@@ -254,14 +252,12 @@ InModuleScope 'Automation.Office' {
     Context 'SupportShouldProcess' {
       It 'does not create file when WhatIf is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -WhatIf
 
         Test-Path -LiteralPath $pdf | Should-BeFalse
       }
       It 'overwrites existing file when Force is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Not -Throw
         { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should-Throw
 
@@ -271,7 +267,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when file exists and NoClobber is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         Export-PowerPointAsFixedFormat -Path $path -Destination $pdf | Out-Null
 
         { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -NoClobber } | Should-Throw
@@ -280,7 +275,6 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'exports a presentation to PDF with PasswordToOpen' {
         New-PowerPointFileWithSpeakerNote -Path $path -PasswordToOpen $passwordToOpen -SlideCount 2
-
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToOpen $passwordToOpen
 
         $result | Should-NotBeNull
@@ -289,7 +283,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports a presentation to PDF with PasswordToModify' {
         New-PowerPointFileWithSpeakerNote -Path $path -PasswordToModify $passwordToModify -SlideCount 2
-
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -PasswordToModify $passwordToModify
 
         $result | Should-NotBeNull
@@ -303,7 +296,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports a presentation with FixedFormatType' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $xps -FixedFormatType ([PpFixedFormatType]::ppFixedFormatTypeXPS)
 
         $result | Should-NotBeNull
@@ -312,7 +304,6 @@ InModuleScope 'Automation.Office' {
       }
       It 'exports a presentation with IncludeDocumentProperties' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -IncludeDocumentProperties
 
         $result | Should-NotBeNull
@@ -323,12 +314,10 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when source file does not exist' {
         $invalidPath = $env:TEMP | Join-Path -ChildPath 'NonExistent.pptx'
-
         { Export-PowerPointAsFixedFormat -Path $invalidPath -Destination $pdf } | Should-Throw
       }
       It 'throws when destination is an invalid path' {
         $invalidDest = 'Z:\Invalid\Path\File.pdf'
-
         { Export-PowerPointAsFixedFormat -Path $path -Destination $invalidDest } | Should-Throw
       }
     }
