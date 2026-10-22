@@ -499,20 +499,7 @@ function Get-AccessFileProperty {
       ForEach-Object {
         Open-AccessFile -Application $app -Path $_.FullName -Password $Password
         try {
-          $properties = Get-ObjectProperty -InputObject $app.CurrentProject -Recurse:$Recurse -Depth $Depth
-          if ($Name) {
-            $selected = [PSCustomObject]@{}
-            foreach ($propertyName in $Name) {
-              $property = $properties.PSObject.Properties |
-              Where-Object -Property Name -EQ $propertyName |
-              Select-Object -First 1
-              if ($property) {
-                $selected | Add-Member -MemberType NoteProperty -Name $property.Name -Value $property.Value
-              }
-            }
-            return $selected
-          }
-          return $properties
+          return Get-ObjectProperty -InputObject $app.CurrentProject -Name $Name -Recurse:$Recurse -Depth $Depth
         } finally {
           $app.CloseCurrentDatabase()
         }
@@ -687,7 +674,7 @@ function Set-AccessFileProperty {
         }
         Open-AccessFile -Application $app -Path $item.FullName -Password $Password
         try {
-          Set-ObjectProperty -InputObject $app.CurrentProject -Properties $properties | Out-Null
+          Set-ObjectProperty -InputObject $app.CurrentProject -Properties $properties
           if ($PassThru) {
             $updated = Get-ObjectProperty -InputObject $app.CurrentProject
             $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {

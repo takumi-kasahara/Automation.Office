@@ -427,9 +427,19 @@ InModuleScope 'Automation.Office' {
         { Get-WordFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-WordFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse' {
+        New-WordFile -Path $path
+
+        $properties = Get-WordFileProperty -Path $path -Recurse
+
+        $properties.Application | Should-HaveType ([PSCustomObject])
+      }
       It 'returns file properties with Recurse and Depth' {
         New-WordFile -Path $path
-        { Get-WordFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
+
+        $properties = Get-WordFileProperty -Path $path -Recurse -Depth 2
+
+        $properties.Application | Should-HaveType ([PSCustomObject])
       }
     }
   }
@@ -579,7 +589,8 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist.' {
         New-WordFile -Path $path
-        { Set-WordFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
+
+        { Set-WordFileProperty -Path $path -Name 'Dummy' -Value $value } | Should-Throw
       }
       It 'throws an error when read-only recommended file' {
         New-WordFile -Path $path -ReadOnlyRecommended

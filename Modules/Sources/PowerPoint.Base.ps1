@@ -29,6 +29,8 @@ function New-PowerPointObject {
     Start-Sleep -Milliseconds 100
   }
   try {
+    # https://learn.microsoft.com/en-us/office/vba/api/powerpoint.ppalertlevel
+    $app.DisplayAlerts = [Microsoft.Office.Interop.PowerPoint.PpAlertLevel]::ppAlertsNone
     return $app
   } catch {
     try {
@@ -493,20 +495,7 @@ function Get-PowerPointFileProperty {
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
           )
-          $properties = Get-ObjectProperty -InputObject $Presentation -Recurse:$Recurse -Depth $Depth
-          if ($Name) {
-            $selected = [PSCustomObject]@{}
-            foreach ($propertyName in $Name) {
-              $property = $properties.PSObject.Properties |
-              Where-Object -Property Name -EQ $propertyName |
-              Select-Object -First 1
-              if ($property) {
-                $selected | Add-Member -MemberType NoteProperty -Name $property.Name -Value $property.Value
-              }
-            }
-            return $selected
-          }
-          return $properties
+          return Get-ObjectProperty -InputObject $Presentation -Name $Name -Recurse:$Recurse -Depth $Depth
         }
       }
     } catch {
@@ -695,7 +684,7 @@ function Set-PowerPointFileProperty {
             if ($Presentation.ReadOnly -ne [MsoTriState]::msoFalse) {
               $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
             }
-            Set-ObjectProperty -InputObject $Presentation -Properties $properties | Out-Null
+            Set-ObjectProperty -InputObject $Presentation -Properties $properties
             if (-not $Presentation.Saved) {
               $Presentation.Save()
             }
