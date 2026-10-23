@@ -1,4 +1,4 @@
 # git config --local include.path ../.gitconfig
 [hook "lint"]
   event = pre-commit
-  command = npm run lint
+  command = npm run lint && git update-index --again
