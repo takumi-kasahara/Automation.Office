@@ -4,7 +4,7 @@ declare namespace ExcelScript {
   type CellValue = string | number | boolean | Date | null;
 
   enum SpecialCellType {
-    blanks = "blanks",
+    blanks = 'blanks',
   }
 
   interface Workbook {

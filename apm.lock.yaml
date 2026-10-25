@@ -1,11 +1,11 @@
-lockfile_version: "1"
-apm_version: 0.33.0
+lockfile_version: '1'
+apm_version: 0.35.0
 dependencies:
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: batchfile
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/batchfile
     is_virtual: true
@@ -17,16 +17,16 @@ dependencies:
       - .agents/skills/batchfile/scripts/script.bat
       - .agents/skills/batchfile/scripts/script.runas.bat
     deployed_file_hashes:
-      .agents/skills/batchfile/SKILL.md: sha256:f10a6c5ce51a9af9b50d655fbe5fd64fd138eed291493caf2629c3ab0bbc6796
+      .agents/skills/batchfile/SKILL.md: sha256:637775192d960d62483d6e54d05fec3eefb7dcabc84d3696af66d917b89f7d5e
       .agents/skills/batchfile/references/gotchas-argument-expansion.md: sha256:0246c76a512c1ae19359c53a2eec3048a3296d80c4b933ec85a4de6212233ac3
       .agents/skills/batchfile/scripts/script.bat: sha256:c4873f67984fc830d4f2159cb08d4904f5499e324df83f58320f41736a1622ea
       .agents/skills/batchfile/scripts/script.runas.bat: sha256:f88baff41b503da1b06645a2636e0943354e557228d354e01bb73e139abb32da
-    content_hash: sha256:bc7bb41e0ee67dac084373eef56a6d87734ef91fc40b87ce3f90c0fc8ce4ad27
+    content_hash: sha256:2c0ff27022816674a9fc842f582ad17393890cd6faaf1f52dfa22ad3a3fefead
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: csharp-for-powershell-5
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/csharp-for-powershell-5
     is_virtual: true
@@ -41,7 +41,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: office-scripts
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/office-scripts
     is_virtual: true
@@ -52,15 +52,15 @@ dependencies:
       - .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1
       - .agents/skills/office-scripts/scripts/Decompile.OfficeScripts.ps1
     deployed_file_hashes:
-      .agents/skills/office-scripts/SKILL.md: sha256:4e70c58b4f08fe2d7a29ea2ddad7580dbc02b6692d8b39a9438f430102fd497d
+      .agents/skills/office-scripts/SKILL.md: sha256:52ca1fe526e46f6b7445c863ee470cc6a92dbb4b43f861073b96b5c4cf2059fd
       .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1: sha256:97dab79806c86890393ddcbe1fad52a6efa0127f904f6973fc0fe47d3c147dcd
       .agents/skills/office-scripts/scripts/Decompile.OfficeScripts.ps1: sha256:55e7db02a1d70b496280b5aeea2f7ec8232a4873d8011f4bf6a97601a11635b1
-    content_hash: sha256:eeb40eb7228eb57c03457664414a1c0dbad248765f66941b94c617f7d83f8e2f
+    content_hash: sha256:c0805aa97a79df6c4cefcb063debf8a889048eb1a8e5202f6adce69eacf4b519
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: office-scripts-from-vba
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/office-scripts-from-vba
     is_virtual: true
@@ -75,7 +75,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: office-scripts-to-vba
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/office-scripts-to-vba
     is_virtual: true
@@ -90,7 +90,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: powershell-5
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/powershell-5
     is_virtual: true
@@ -121,7 +121,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: rubberduck-vba
     host: github.com
-    resolved_commit: 7e4751a70f216a5b4633fd2bd74548e6c5c4f39e
+    resolved_commit: 3383e38bcf70d0edb4d454abf105b8f18640665b
     version: unknown
     virtual_path: .apm/skills/rubberduck-vba
     is_virtual: true
@@ -152,7 +152,7 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/batchfile
     active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: sha256:f10a6c5ce51a9af9b50d655fbe5fd64fd138eed291493caf2629c3ab0bbc6796
+    content_hash: sha256:637775192d960d62483d6e54d05fec3eefb7dcabc84d3696af66d917b89f7d5e
   - kind: project-relative
     target: copilot
     value: .agents/skills/batchfile/references/gotchas-argument-expansion.md
@@ -251,7 +251,7 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/office-scripts
     active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts
-    content_hash: sha256:4e70c58b4f08fe2d7a29ea2ddad7580dbc02b6692d8b39a9438f430102fd497d
+    content_hash: sha256:52ca1fe526e46f6b7445c863ee470cc6a92dbb4b43f861073b96b5c4cf2059fd
   - kind: project-relative
     target: copilot
     value: .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1
