@@ -5,7 +5,7 @@
     <middle>Modules\Sources\PowerPoint.Base.ps1</middle>
     <right>Modules\Sources\Word.Base.ps1</right>
     <filter>*.*</filter>
-    <subfolders>1</subfolders>
+    <subfolders>0</subfolders>
     <left-readonly>0</left-readonly>
     <middle-readonly>0</middle-readonly>
     <right-readonly>0</right-readonly>
