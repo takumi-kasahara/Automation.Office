@@ -360,9 +360,17 @@ InModuleScope 'Automation.Office' {
         { Get-ExcelFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-ExcelFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
-      It 'returns file properties with Recurse and Depth' {
+      It 'returns file properties with Recurse' {
         New-ExcelFile -Path $path
         $properties = Get-ExcelFileProperty -Path $path -Recurse
+
+        $properties.Application | Should-HaveType ([PSCustomObject])
+      }
+      It 'returns file properties with Recurse and Depth' {
+        New-ExcelFile -Path $path
+
+        $properties = Get-ExcelFileProperty -Path $path -Recurse -Depth 2
+
         $properties.Application | Should-HaveType ([PSCustomObject])
       }
     }
@@ -518,7 +526,8 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist.' {
         New-ExcelFile -Path $path
-        { Set-ExcelFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
+
+        { Set-ExcelFileProperty -Path $path -Name 'Dummy' -Value $value } | Should-Throw
       }
       It 'throws an error when read-only recommended file without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended

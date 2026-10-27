@@ -28,6 +28,10 @@ function New-WordObject {
     Start-Sleep -Milliseconds 100
   }
   try {
+    # https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.interop.word.wdalertlevel?view=word-pia
+    $app.DisplayAlerts = [Microsoft.Office.Interop.Word.WdAlertLevel]::wdAlertsNone
+    $app.Visible = $false
+    $app.ScreenUpdating = $false
     return $app
   } catch {
     try {
@@ -493,20 +497,7 @@ function Get-WordFileProperty {
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
-          $properties = Get-ObjectProperty -InputObject $Document -Recurse:$Recurse -Depth $Depth
-          if ($Name) {
-            $selected = [PSCustomObject]@{}
-            foreach ($propertyName in $Name) {
-              $property = $properties.PSObject.Properties |
-              Where-Object -Property Name -EQ $propertyName |
-              Select-Object -First 1
-              if ($property) {
-                $selected | Add-Member -MemberType NoteProperty -Name $property.Name -Value $property.Value
-              }
-            }
-            return $selected
-          }
-          return $properties
+          return Get-ObjectProperty -InputObject $Document -Name $Name -Recurse:$Recurse -Depth $Depth
         }
       }
     } catch {
@@ -693,7 +684,7 @@ function Set-WordFileProperty {
           if ($Document.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
           }
-          Set-ObjectProperty -InputObject $Document -Properties $properties | Out-Null
+          Set-ObjectProperty -InputObject $Document -Properties $properties
           if (-not $Document.Saved) {
             $Document.Save()
           }
