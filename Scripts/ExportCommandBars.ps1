@@ -12,7 +12,6 @@
 #>
 [CmdletBinding()]
 param ()
-
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

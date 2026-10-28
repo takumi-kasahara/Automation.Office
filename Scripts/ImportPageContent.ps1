@@ -12,7 +12,6 @@ using module .\Modules\Automation.Office.psd1
 
 [CmdletBinding()]
 param ()
-
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

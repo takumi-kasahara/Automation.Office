@@ -15,7 +15,6 @@ using namespace System.Runtime.InteropServices
 # https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.core.msobuttonstyle?view=office-pia
 [CmdletBinding()]
 param ()
-
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

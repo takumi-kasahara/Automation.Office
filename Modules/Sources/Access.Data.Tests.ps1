@@ -8,7 +8,6 @@ using namespace System.IO
 [CmdletBinding()]
 [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', '', Justification = 'Test scripts often use variables for setup and verification that may not be assigned in a way that satisfies this rule')]
 param ()
-
 Set-StrictMode -Version Latest
 
 InModuleScope 'Automation.Office' {
