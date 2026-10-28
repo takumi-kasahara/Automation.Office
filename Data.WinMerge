@@ -4,7 +4,7 @@
     <left>Modules\Sources\Access.Data.ps1</left>
     <right>Modules\Sources\Excel.Data.ps1</right>
     <filter>*.*</filter>
-    <subfolders>1</subfolders>
+    <subfolders>0</subfolders>
     <left-readonly>0</left-readonly>
     <right-readonly>0</right-readonly>
     <window-type>1</window-type>
