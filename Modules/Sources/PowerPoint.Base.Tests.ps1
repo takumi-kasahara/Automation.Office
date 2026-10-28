@@ -337,9 +337,19 @@ InModuleScope 'Automation.Office' {
         { Get-PowerPointFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-PowerPointFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
       }
+      It 'returns file properties with Recurse' {
+        New-PowerPointFile -Path $path
+
+        $properties = Get-PowerPointFileProperty -Path $path -Recurse
+
+        $properties.Application | Should-HaveType ([PSCustomObject])
+      }
       It 'returns file properties with Recurse and Depth' {
         New-PowerPointFile -Path $path
-        { Get-PowerPointFileProperty -Path $path -Recurse -Depth 1 } | Should -Not -Throw
+
+        $properties = Get-PowerPointFileProperty -Path $path -Recurse -Depth 2
+
+        $properties.Application | Should-HaveType ([PSCustomObject])
       }
     }
   }
@@ -489,7 +499,8 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws when trying to set a property that does not exist.' {
         New-PowerPointFile -Path $path
-        { Set-PowerPointFileProperty -Path $path -Name 'NonExistentProperty' -Value 'Value' } | Should-Throw
+
+        { Set-PowerPointFileProperty -Path $path -Name 'Dummy' -Value $value } | Should-Throw
       }
       It 'throws an error when read-only recommended file' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended

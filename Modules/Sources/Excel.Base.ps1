@@ -28,6 +28,10 @@ function New-ExcelObject {
     Start-Sleep -Milliseconds 100
   }
   try {
+    $app.DisplayAlerts = $false
+    $app.Visible = $false
+    $app.EnableEvents = $false
+    $app.ScreenUpdating = $false
     return $app
   } catch {
     try {
@@ -508,20 +512,7 @@ function Get-ExcelFileProperty {
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
-          $properties = Get-ObjectProperty -InputObject $Workbook -Recurse:$Recurse -Depth $Depth
-          if ($Name) {
-            $selected = [PSCustomObject]@{}
-            foreach ($propertyName in $Name) {
-              $property = $properties.PSObject.Properties |
-              Where-Object -Property Name -EQ $propertyName |
-              Select-Object -First 1
-              if ($property) {
-                $selected | Add-Member -MemberType NoteProperty -Name $property.Name -Value $property.Value
-              }
-            }
-            return $selected
-          }
-          return $properties
+          return Get-ObjectProperty -InputObject $Workbook -Name $Name -Recurse:$Recurse -Depth $Depth
         }
       }
     } catch {
@@ -709,17 +700,17 @@ function Set-ExcelFileProperty {
         Open-ExcelFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Force:$Force -Action {
           param (
             [Microsoft.Office.Interop.Excel.Workbook]
-            $file
+            $Workbook
           )
-          if ($file.ReadOnly) {
+          if ($Workbook.ReadOnly) {
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
           }
-          Set-ObjectProperty -InputObject $file -Properties $properties | Out-Null
-          if (-not $file.Saved) {
-            $file.Save()
+          Set-ObjectProperty -InputObject $Workbook -Properties $properties
+          if (-not $Workbook.Saved) {
+            $Workbook.Save()
           }
           if ($PassThru) {
-            $updated = Get-ObjectProperty -InputObject $file
+            $updated = Get-ObjectProperty -InputObject $Workbook
             $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
                 $Name

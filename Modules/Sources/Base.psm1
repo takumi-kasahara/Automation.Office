@@ -15,9 +15,11 @@ function Get-ObjectProperty {
     [Parameter(Mandatory)]
     [__ComObject]
     $InputObject,
+    [string[]]
+    $Name,
     [switch]
     $Recurse,
-    [ValidateRange(0, [int]::MaxValue)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
@@ -49,6 +51,10 @@ function Get-ObjectProperty {
       $memberProperties = @(
         Get-Member -InputObject $TargetObject -MemberType Properties -ErrorAction SilentlyContinue
       )
+      if ($Name -and $RemainingDepth -eq $Depth) {
+        $memberProperties = $memberProperties |
+        Where-Object -Property Name -In -Value $Name
+      }
       $memberProperties |
       ForEach-Object {
         $propertyInfo = $TargetObject.GetType().GetProperty($_.Name)
@@ -68,7 +74,6 @@ function Get-ObjectProperty {
           }
           $type = [type]$property.TypeNameOfValue
         }
-
         if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime]) {
           try {
             $value = $TargetObject.$($_.Name)
@@ -78,7 +83,7 @@ function Get-ObjectProperty {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        if (-not $Recursive -or $RemainingDepth -le 0) {
+        if (-not $Recursive) {
           return
         }
         try {
@@ -87,6 +92,10 @@ function Get-ObjectProperty {
           return
         }
         if ($null -eq $value -or $value -isnot [__ComObject]) {
+          return
+        }
+        if ($RemainingDepth -le 0) {
+          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
         $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -Recursive:$Recursive
@@ -140,30 +149,15 @@ function Set-ObjectProperty {
       }
       if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime]) {
         if ($InputObject.$($_.Name) -eq $_.Value) {
-          return [PSCustomObject]@{
-            Name   = $_.Name
-            Value  = $_.Value
-            Status = 'Skipped'
-          }
+          return
         }
         try {
           [__ComObject].InvokeMember($_.Name, [BindingFlags]::SetProperty, $null, $InputObject, $_.Value)
-          return [PSCustomObject]@{
-            Name   = $_.Name
-            Value  = $_.Value
-            Status = 'Success'
-          }
         } catch {
           Write-Warning -Message $_.Exception.Message
-          return [PSCustomObject]@{
-            Name   = $_.Name
-            Value  = $_.Value
-            Status = 'Failed'
-          }
         }
       }
-    } |
-    Out-Host
+    } | Out-Host
   } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
