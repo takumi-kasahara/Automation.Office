@@ -22,7 +22,7 @@
  */
 /* global ExcelScript */
 // @ts-expect-error `main` function is starting point
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function main(workbook: ExcelScript.Workbook, csvLines: string[]) {
   if (!csvLines || csvLines.length === 0) {
     return;

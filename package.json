@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "lint": "prettier --write . && markdownlint-cli2 --fix . && eslint --fix ."
+    "lint": "prettier --write . && markdownlint-cli2 --fix . && eslint --fix .",
+    "test": "tsc"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -8,7 +9,7 @@
     "markdownlint-cli2": "^0.24.0",
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
   },
   "private": true
 }

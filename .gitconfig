@@ -2,3 +2,18 @@
 [hook "lint"]
   event = pre-commit
   command = npm run lint && git update-index --again
+[hook "test"]
+  event = pre-commit
+  command = npm run test
+[hook "parse-modules"]
+  event = pre-commit
+  command = .agents/skills/powershell-5/scripts/Parse.bat -Path ./Modules -Recurse
+[hook "parse-scripts"]
+  event = pre-commit
+  command = .agents/skills/powershell-5/scripts/Parse.bat -Path ./Scripts -Recurse
+[hook "analyze-modules"]
+  event = pre-commit
+  command = .agents/skills/powershell-5/scripts/Analyze.bat -Path ./Modules -Recurse
+[hook "analyze-scripts"]
+  event = pre-commit
+  command = .agents/skills/powershell-5/scripts/Analyze.bat -Path ./Scripts -Recurse
