@@ -22,12 +22,5 @@ Run from the repository root:
 If you want to install Pester v6, run:
 
 ```powershell
-Uninstall-Module -Name Pester
 Install-Module -Name Pester -Scope CurrentUser -Force -SkipPublisherCheck
-```
-
-If you want to run tests:
-
-```powershell
-. .\.agents\skills\powershell-5\scripts\Pester.ps1 -Path 'Modules\Sources'
 ```
