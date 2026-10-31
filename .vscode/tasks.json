@@ -53,7 +53,7 @@
         "-File",
         ".agents\\skills\\office-scripts\\scripts\\Compile.OfficeScripts.ps1",
         "-LiteralPath",
-        ".\\Office Scripts"
+        "Office Scripts"
       ],
       "problemMatcher": [],
       "group": {
@@ -101,19 +101,17 @@
         "-File",
         ".agents\\skills\\office-scripts\\scripts\\Decompile.OfficeScripts.ps1",
         "-LiteralPath",
-        ".\\Office Scripts"
+        "Office Scripts"
       ],
       "problemMatcher": []
     },
     {
-      "label": "pester current file",
+      "label": "pester",
       "type": "shell",
-      "command": "powershell.exe",
+      "command": "cmd.exe",
       "args": [
-        "-NoLogo",
-        "-NoProfile",
-        "-File",
-        ".agents\\skills\\powershell-5\\scripts\\Pester.ps1",
+        "/c",
+        ".agents\\skills\\powershell-5\\scripts\\Pester.bat",
         "-Path",
         "${file}"
       ],

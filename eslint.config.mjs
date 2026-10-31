@@ -1,13 +1,14 @@
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-export default [
-  ...tseslint.configs.recommended,
-  pluginJs.configs.recommended,
+import js from '@eslint/js';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import ts from 'typescript-eslint';
+
+export default defineConfig([
+  js.configs.recommended,
+  ts.configs.strict,
+  ts.configs.stylistic,
+  globalIgnores(['apm_modules', 'node_modules']),
   {
-    ignores: ['node_modules'],
-  },
-  {
-    files: ['**/*.js', '**/*.mjs'],
+    files: ['**/*.mjs'],
     rules: {
       'consistent-return': 'error',
       eqeqeq: 'error',
@@ -19,17 +20,14 @@ export default [
   {
     files: ['**/*.ts'],
     languageOptions: {
-      parser: tseslint.parser,
+      parser: ts.parser,
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports' },
-      ],
+      '@typescript-eslint/consistent-type-imports': ['error'],
       'consistent-return': 'error',
       eqeqeq: 'error',
       'no-else-return': 'error',
@@ -37,4 +35,4 @@ export default [
       'prefer-template': 'error',
     },
   },
-];
+]);

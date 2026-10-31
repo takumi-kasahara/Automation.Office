@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 declare namespace ExcelScript {
   type CellValue = string | number | boolean | Date | null;
 
