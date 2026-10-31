@@ -20,14 +20,31 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 2. When editing `Modules/Sources/Module.psm1`, also update or create the corresponding test file `Modules/Tests/Module.Tests.ps1` and ensure tests cover your changes.
 3. When add or remove cmdlets, also update the module manifest files (`Modules/*.psd1`) to reflect the changes.
 
+#### PSScriptAnalyzer Invocation
+
+Run PSScriptAnalyzer with `Analyze.bat`:
+
+```bat
+".agents\skills\powershell-5\scripts\Analyze.bat" -Path "Modules" -Recurse
+```
+
+```powershell
+& '.agents\skills\powershell-5\scripts\Analyze.bat' -Path '.\Modules' -Recurse
+```
+
 #### Pester Invocation
 
-Run tests with `Pester.ps1`:
+Run Pester with `Pester.bat`:
 
-- `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File ".agents\skills\powershell-5\scripts\Pester.ps1" -Path ".\Module.Tests.ps1"`
-- Filter by line: add `-LineNumber 42`
+- Filter by line: add `-LineNumber`
 
-Requires PowerShell Desktop (`$PSEdition -eq 'Desktop'`).
+```bat
+".agents\skills\powershell-5\scripts/Pester.bat" -Path "Module.Tests.ps1"
+```
+
+```powershell
+& '.agents\skills\powershell-5\scripts\Pester.bat' -Path '.\Module.Tests.ps1'
+```
 
 ### VBA development cycle
 

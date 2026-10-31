@@ -19,7 +19,7 @@ type ScriptCellValue = string | number | boolean | Date | null;
  */
 /* global ExcelScript, OfficeScript */
 // @ts-expect-error `main` function is starting point
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function main(workbook: ExcelScript.Workbook) {
   const selectedRange = workbook.getSelectedRange();
   if (!selectedRange) {
