@@ -142,35 +142,35 @@ function Get-AccessTableColumn {
 
   .EXAMPLE
     ```powershell
-    Get-AccessTableColumn -Path '$env:TEMP\Database.accdb' -Table Employees
+    Get-AccessTableColumn -Path '$env:TEMP\Database.accdb' -Table 'Employees'
     ```
 
     Gets column metadata for the Employees table in the specified Access database file.
 
   .EXAMPLE
     ```powershell
-    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table Employees
+    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table 'Employees'
     ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
     ```powershell
-    '$env:TEMP\Database.accdb' | Get-AccessTableColumn -Table Employees
+    '$env:TEMP\Database.accdb' | Get-AccessTableColumn -Table 'Employees'
     ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
     ```powershell
-    Get-AccessTableColumn -Path '$env:TEMP\*.accdb' -Table Employees
+    Get-AccessTableColumn -Path '$env:TEMP\*.accdb' -Table 'Employees'
     ```
 
     Gets column metadata from all .accdb files in the specified directory using wildcards.
 
   .EXAMPLE
     ```powershell
-    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.mdb' -Table Employees
+    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.mdb' -Table 'Employees'
     ```
 
     Gets column metadata from an .mdb format database file.
@@ -178,7 +178,7 @@ function Get-AccessTableColumn {
   .EXAMPLE
     ```powershell
     $password = Read-Host -AsSecureString
-    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table Employees -Password $password
+    Get-AccessTableColumn -LiteralPath '$env:TEMP\Database.accdb' -Table 'Employees' -Password $password
     ```
 
     Gets column metadata from a password-protected database.
@@ -511,14 +511,14 @@ function Invoke-AccessQuery {
 
   .EXAMPLE
     ```powershell
-    Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table Employees
+    Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table 'Employees'
     ```
 
     Gets all rows from the Employees table in the specified Access database.
 
   .EXAMPLE
     ```powershell
-    Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table Employees -Columns Id, Name, Department
+    Invoke-AccessQuery -LiteralPath '$env:TEMP\Database.accdb' -Table 'Employees' -Columns Id, Name, Department
     ```
 
     Gets only the Id, Name, and Department columns from the Employees table.

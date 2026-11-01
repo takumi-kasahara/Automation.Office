@@ -1,4 +1,5 @@
 ﻿using module .\VBProject.psm1
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Text
 
@@ -188,6 +189,7 @@ function Import-PowerPointVBProject {
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Hidden', Justification = 'Parameter controls presentation window visibility inside the action callback')]
   param (
     [Alias('FilePath', 'FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]

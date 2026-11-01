@@ -34,6 +34,7 @@ InModuleScope 'Automation.Office' {
       [CmdletBinding()]
       [OutputType([void])]
       [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function creates a new COM object for PowerPoint application and does not change persistent state')]
+      [SuppressMessage('PSReviewUnusedParameter', 'SlideCount', Justification = 'Parameter is used inside the initializer callback')]
       param (
         [Parameter(Mandatory)]
         [string]
@@ -87,8 +88,8 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Get-PowerPointSpeakerNote' {
     BeforeEach {
-      $path = Get-TempFile
       $password = Get-Password
+      $path = Get-TempFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -187,7 +188,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointSpeakerNote.Unit' {
+  Describe 'Get-PowerPointSpeakerNote' -Tag 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -198,7 +199,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails' {
+      It 'throws when the program fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Get-PowerPointSpeakerNote -Path $path } | Should-Throw
@@ -251,14 +252,15 @@ InModuleScope 'Automation.Office' {
     Context 'SupportShouldProcess' {
       It 'does not create file when WhatIf is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
+
         Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -WhatIf
 
         Test-Path -LiteralPath $pdf | Should-BeFalse
       }
       It 'overwrites existing file when Force is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should -Not -Throw
-        { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf } | Should-Throw
+
+        Export-PowerPointAsFixedFormat -Path $path -Destination $pdf
 
         $result = Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -Force
         $result | Should-NotBeNull
@@ -266,7 +268,8 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when file exists and NoClobber is specified' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
-        Export-PowerPointAsFixedFormat -Path $path -Destination $pdf | Out-Null
+
+        Export-PowerPointAsFixedFormat -Path $path -Destination $pdf
 
         { Export-PowerPointAsFixedFormat -Path $path -Destination $pdf -NoClobber } | Should-Throw
       }

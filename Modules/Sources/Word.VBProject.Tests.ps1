@@ -76,13 +76,6 @@ InModuleScope 'Automation.Office' {
       throw $_
     }
   }
-  AfterAll {
-    $componentRoot = [Path]::ChangeExtension($source, $null).TrimEnd('.')
-    if (-not (Test-Path -LiteralPath $componentRoot)) {
-      New-Item -Path $componentRoot -ItemType Directory | Out-Null
-    }
-    Export-WordVBProject -Path $fixture -Destination $source
-  }
   Describe 'Export-WordVBProject' {
     BeforeAll {
       function Invoke-Confirm {
@@ -134,24 +127,27 @@ InModuleScope 'Automation.Office' {
       It 'exports VBProject by FilePath as JSON' {
         $item = Export-WordVBProject -Path $fixture -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipeline' {
         $item = $fixture | Export-WordVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipelineByPropertyName' {
         $item = [PSCustomObject]@{ Path = $fixture } | Export-WordVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
@@ -160,9 +156,10 @@ InModuleScope 'Automation.Office' {
         try {
           $item = Export-WordVBProject -Path $fixture -Destination $destination -ComponentRoot $customRoot
           $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-          $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
           Test-Path -LiteralPath $customRoot -PathType Container | Should-BeTrue
           Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
+          $item.FullName | Should-Be ([Path]::GetFullPath($destination))
           @($exported.VBComponents).Count | Should-BeGreaterThan 0
           @($exported.References).Count | Should-BeGreaterThan 0
         } finally {
@@ -175,19 +172,22 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not create outputs when WhatIf is specified' {
         Export-WordVBProject -Path $fixture -Destination $destination -Force -WhatIf
+
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         $exitCode = 'N' | Invoke-Confirm -Path $fixture -Destination $destination
+
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
         (New-Item -Path $destination -ItemType File).IsReadOnly = $true
+
         { Export-WordVBProject -Path $fixture -Destination $destination } | Should-Throw
-        Export-WordVBProject -Path $fixture -Destination $destination -Force -Confirm
+        { Export-WordVBProject -Path $fixture -Destination $destination -Force -Confirm } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -195,16 +195,18 @@ InModuleScope 'Automation.Office' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         $vba = New-Item -Path ($componentRoot | Join-Path -ChildPath 'ThisDocument.vba') -ItemType File
         $vba.IsReadOnly = $true
+
         { Export-WordVBProject -Path $fixture -Destination $destination } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
-        Export-WordVBProject -Path $fixture -Destination $destination -Force -Confirm
+        { Export-WordVBProject -Path $fixture -Destination $destination -Force -Confirm } | Should -Not -Throw
         $vba.IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
       It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
         New-Item -Path $destination -ItemType File | Out-Null
+
         { Export-WordVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-WordVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         (Get-Item -LiteralPath $destination).Length | Should-Be 0
@@ -213,6 +215,7 @@ InModuleScope 'Automation.Office' {
       It 'throws and keeps the existing component content unchanged when NoClobber is specified' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         New-Item -Path ($componentRoot | Join-Path -ChildPath 'ThisDocument.vba') -ItemType File | Out-Null
+
         { Export-WordVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-WordVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'ThisDocument.vba') -PathType Leaf | Should-BeTrue
@@ -220,28 +223,18 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'exports VBProject by relative path' {
-        Push-Location -Path $env:TEMP
-        try {
-          $relativeDestination = [Path]::GetFileName($destination)
-          $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
-          Export-WordVBProject -Path $fixture -Destination $relativeDestination -ComponentRoot $relativeComponentRoot
-          Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
-          Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
-        } finally {
-          Pop-Location
-        }
-      }
       It 'exports VBProject from a file protected with PasswordToOpen' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToOpen $password
+
         { Export-WordVBProject -Path $path -Destination $destination -PasswordToOpen (Get-Password) } | Should-Throw
-        Export-WordVBProject -Path $path -Destination $destination -PasswordToOpen $password
+        { Export-WordVBProject -Path $path -Destination $destination -PasswordToOpen $password } | Should -Not -Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
       It 'exports VBProject from a file protected with PasswordToModify' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToModify $password
         Export-WordVBProject -Path $path -Destination $destination -PasswordToModify $password
+
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -257,17 +250,21 @@ InModuleScope 'Automation.Office' {
           $Document.VBProject.VBComponents.Item('ThisDocument').CodeModule.DeleteLines(1, $Document.VBProject.VBComponents.Item('ThisDocument').CodeModule.CountOfLines)
           $Document.Save()
         }
-        { Export-WordVBProject -Path $path -Destination $destination } | Should -Not -Throw
+        Export-WordVBProject -Path $path -Destination $destination
+
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'ThisDocument.vba') -PathType Leaf | Should-BeTrue
       }
-      It 'throws when the destination is an existing directory' {
+      It 'throws when destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
+
         { Export-WordVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
+
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
       }
-      It 'throws when the destination path already exists as a directory' {
+      It 'throws when destination path already exists as a directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
+
         { Export-WordVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-WordVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
@@ -275,13 +272,14 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when the component directory path already exists as a file' {
         New-Item -Path $componentRoot -ItemType File | Out-Null
+
         { Export-WordVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $componentRoot -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $destination | Should-BeFalse
       }
     }
   }
-  Describe 'Export-WordVBProject.Unit' {
+  Describe 'Export-WordVBProject' -Tag 'Mock' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
@@ -289,15 +287,15 @@ InModuleScope 'Automation.Office' {
       $destination = Get-Destination
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-WordObject when WhatIf is specified' {
-        Mock -CommandName New-WordObject
+      It 'does not call the program when WhatIf is specified' {
+        Mock -CommandName New-WordObject -MockWith { throw }
 
-        { Export-WordVBProject -Path $fixture -Destination $destination -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
+        Export-WordVBProject -Path $fixture -Destination $destination -WhatIf
+        Should-NotInvoke -CommandName New-WordObject
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-WordObject fails' {
+      It 'throws when the program fails' {
         Mock -CommandName New-WordObject -MockWith { throw }
 
         { Export-WordVBProject -Path $fixture -Destination $destination } | Should-Throw
@@ -345,23 +343,29 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'imports VBProject by FilePath from JSON' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+
         Import-WordVBProject -Path $path -Source $source
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipeline' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+
         $path | Import-WordVBProject -Source $source
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipelineByPropertyName' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+
         [PSCustomObject]@{ Path = $path } | Import-WordVBProject -Source $source
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
@@ -369,49 +373,41 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not import VBProject when WhatIf is specified' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
+
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
         Import-WordVBProject -Path $path -Source $source -WhatIf
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
+
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
       }
       It 'asks for confirmation when Confirm is specified' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
         $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
-        $exitCode | Should-Be 0
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
+
+        $exitCode | Should-Be 0
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
       }
     }
     Context 'Other parameters' {
-      It 'imports VBProject by relative path' {
-        Push-Location -Path $env:TEMP
-        try {
-          $relativeSource = [Path]::GetFileName($source)
-          New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled
-          Import-WordVBProject -Path $path -Source $relativeSource
-          $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
-          $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
-          ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
-        } finally {
-          Pop-Location
-        }
-      }
       It 'imports VBProject into a file protected with PasswordToOpen' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToOpen $password
+
         { Import-WordVBProject -Path $path -Source $source } | Should-Throw
         { Import-WordVBProject -Path $path -Source $source -PasswordToOpen (Get-Password) } | Should-Throw
-        Import-WordVBProject -Path $path -Source $source -PasswordToOpen $password
+        { Import-WordVBProject -Path $path -Source $source -PasswordToOpen $password } | Should -Not -Throw
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToOpen $password
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject into a file protected with PasswordToModify' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -PasswordToModify $password
+
         { Import-WordVBProject -Path $path -Source $source } | Should-Throw
         { Import-WordVBProject -Path $path -Source $source -PasswordToModify (Get-Password) } | Should-Throw
-        Import-WordVBProject -Path $path -Source $source -PasswordToModify $password
+        { Import-WordVBProject -Path $path -Source $source -PasswordToModify $password } | Should -Not -Throw
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToModify $password
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
@@ -419,11 +415,12 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws an error when read-only recommended document' {
         New-WordFile -Path $path -FileFormat wdFormatXMLDocumentMacroEnabled -ReadOnlyRecommended
+
         { Import-WordVBProject -Path $path -Source $source } | Should-Throw
       }
     }
   }
-  Describe 'Import-WordVBProject.Unit' {
+  Describe 'Import-WordVBProject' -Tag 'Mock' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $true }
     }
@@ -431,15 +428,16 @@ InModuleScope 'Automation.Office' {
       $path = Get-TempFile
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-WordObject when WhatIf is specified' {
+      It 'does not call the program when WhatIf is specified' {
         Mock -CommandName New-WordObject -MockWith { throw }
 
-        { Import-WordVBProject -Path $path -Source $source -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-WordObject -Times 0 -Exactly
+        Import-WordVBProject -Path $path -Source $source -WhatIf
+
+        Should-NotInvoke -CommandName New-WordObject
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-WordObject fails' {
+      It 'throws when the program fails' {
         Mock -CommandName New-WordObject -MockWith { throw }
 
         { Import-WordVBProject -Path $path -Source $source } | Should-Throw

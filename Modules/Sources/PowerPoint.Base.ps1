@@ -450,6 +450,9 @@ function Get-PowerPointFileProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Recurse', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Depth', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [SupportsWildcards()]
@@ -603,6 +606,7 @@ function Set-PowerPointFileProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'ValuePathSet', SupportsShouldProcess)]
   [OutputType([PSCustomObject], [void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'PassThru', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'ValuePathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [Parameter(Mandatory, ParameterSetName = 'PSObjectPathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -674,6 +678,7 @@ function Set-PowerPointFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
+        $parameterSetName = $PSCmdlet.ParameterSetName
         Open-PowerPointFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Parameter(Mandatory)]
@@ -689,16 +694,14 @@ function Set-PowerPointFileProperty {
               $Presentation.Save()
             }
             if ($PassThru) {
-              $updated = Get-ObjectProperty -InputObject $Presentation
-              $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+              switch -Exact -CaseSensitive ($parameterSetName) {
                 { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                  $Name
+                  return Get-ObjectProperty -InputObject $Presentation -Name $Name
                 }
                 { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                  $InputObject.PSObject.Properties.Name
+                  return Get-ObjectProperty -InputObject $Presentation -Name $InputObject.PSObject.Properties.Name
                 }
               }
-              return $updated | Select-Object -Property $propertyNames
             }
           } finally {
             $Presentation.Close()

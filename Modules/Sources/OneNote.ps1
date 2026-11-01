@@ -2,6 +2,7 @@
 using namespace Microsoft.Office.Interop.OneNote
 using namespace System.IO
 using namespace System.Runtime.InteropServices
+using namespace System.Xml
 
 [Type]::GetTypeFromProgID('OneNote.Application').Assembly.GetType('Microsoft.Office.Interop.OneNote.XMLSchema')
 Set-StrictMode -Version Latest
@@ -961,8 +962,11 @@ function Export-OneNotePageAsDocument {
     New-Item -Path $Destination -ItemType Directory -Force:$Force -WhatIf:$WhatIfPreference -Confirm:$false | Out-Null
   }
   $isReadOnly = (Test-Path -LiteralPath $resolved -PathType Leaf) -and (Get-Item -LiteralPath $resolved -Force).IsReadOnly
+  $backup = $null
   if ($isReadOnly -and $Force) {
     (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $false
+    $backup = "$resolved.$(Get-Date -Format 'yyyyMMddHHmmss').bak"
+    Move-Item -LiteralPath $resolved -Destination $backup -Force
   }
   $app = Get-OneNoteApplication
   try {
@@ -976,8 +980,26 @@ function Export-OneNotePageAsDocument {
     if ($isReadOnly -and $Force) {
       (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $true
     }
+    if ($backup) {
+      Remove-Item -LiteralPath $backup -Force
+      $backup = $null
+    }
     return Get-Item -LiteralPath $resolved -Force
+  } catch {
+    if ($backup -and (Test-Path -LiteralPath $backup -PathType Leaf)) {
+      if (Test-Path -LiteralPath $resolved) {
+        Remove-Item -LiteralPath $resolved -Force
+      }
+      Move-Item -LiteralPath $backup -Destination $resolved -Force
+      if ($isReadOnly) {
+        (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $true
+      }
+    }
+    throw
   } finally {
+    if ((Test-Path -LiteralPath $backup -PathType Leaf)) {
+      Remove-Item -LiteralPath $backup -Force
+    }
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -1105,9 +1127,9 @@ function Export-OneNoteBinaryObject {
         if (-not (Test-Path -LiteralPath $directory)) {
           New-Item -Path $directory -ItemType Directory -Force:$Force -WhatIf:$WhatIfPreference -Confirm:$false | Out-Null
         }
-        $isReadOnly = (Test-Path -LiteralPath $resolved -PathType Leaf) -and (Get-Item -LiteralPath $resolved -Force).IsReadOnly
+        $isReadOnly = (Test-Path -LiteralPath $file -PathType Leaf) -and (Get-Item -LiteralPath $file -Force).IsReadOnly
         if ($isReadOnly -and $Force) {
-          (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $false
+          (Get-Item -LiteralPath $file -Force).IsReadOnly = $false
         }
         [File]::WriteAllBytes($file, $bytes)
         $oe = $_.SelectSingleNode('ancestor::one:OE[1]', $ns)
