@@ -1,6 +1,7 @@
 ﻿using module .\DocumentProperty.psm1
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace Microsoft.Office.Core
+using namespace System.Diagnostics.CodeAnalysis
 
 Set-StrictMode -Version Latest
 
@@ -71,6 +72,8 @@ function Get-PowerPointDocumentProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Custom', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [SupportsWildcards()]
@@ -308,6 +311,8 @@ function Set-PowerPointDocumentProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'ValuePathSet', SupportsShouldProcess)]
   [OutputType([PSCustomObject], [void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Custom', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'PassThru', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'ValuePathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [Parameter(Mandatory, ParameterSetName = 'PSObjectPathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]

@@ -11,6 +11,7 @@ Set-StrictMode -Version Latest
 function Get-ObjectProperty {
   [CmdletBinding()]
   [OutputType([PSCustomObject])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used by the nested recursive helper, which PSScriptAnalyzer does not track')]
   param (
     [Parameter(Mandatory)]
     [__ComObject]
@@ -101,6 +102,7 @@ function Get-ObjectProperty {
         $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -Recursive:$Recursive
         if (@($child.PSObject.Properties).Count -gt 0) {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
+          return
         }
       }
       return $properties

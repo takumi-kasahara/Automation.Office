@@ -185,7 +185,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'Get-OneNoteHierarchy.Unit' {
+  Describe 'Get-OneNoteHierarchy' -Tag 'Mock' {
     BeforeAll {
       if (-not ('XMLSchema' -as [type])) {
         Add-Type -TypeDefinition @'
@@ -198,6 +198,7 @@ public enum XMLSchema
       function New-OneNoteHierarchyReaderMockApplication {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
+        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function only constructs an in-memory mock application and does not change system state')]
         param ()
         $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetHierarchy -Value {
@@ -274,7 +275,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Get-OneNotePageContent.Unit' {
+  Describe 'Get-OneNotePageContent' -Tag 'Mock' {
     BeforeAll {
       if (-not ('XMLSchema' -as [type])) {
         Add-Type -TypeDefinition @'
@@ -287,6 +288,7 @@ public enum XMLSchema
       function New-OneNotePageContentReaderMockApplication {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
+        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function only constructs an in-memory mock application and does not change system state')]
         param ()
         $app = [PSCustomObject]@{ Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetPageContent -Value {
@@ -369,12 +371,14 @@ public enum XMLSchema
       It 'overwrites read-only output when Force is specified' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath
         (Get-Item -LiteralPath $destination -Force).IsReadOnly = $true
-        { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -Force } | Should -Not -Throw
+
+        { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -Force -Confirm } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
       It 'throws with -NoClobber when output exists' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath
+
         { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -NoClobber } | Should-Throw
         { Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -Force -NoClobber } | Should-Throw
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
@@ -383,6 +387,7 @@ public enum XMLSchema
     Context 'Other parameters' {
       It 'exports the hierarchy as XML with HierarchyScope' {
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -HierarchyScope hsPages
+
         Test-Path -LiteralPath $destination | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -390,6 +395,7 @@ public enum XMLSchema
         $notebookName = Split-Path -Path $notebookPath -Leaf
         $destinationByName = $notebookPath | Join-Path -ChildPath "$notebookName.hierarchy.xml"
         Export-OneNoteHierarchy -Id $notebookId -Destination $notebookPath -UseName
+
         Test-Path -LiteralPath $destinationByName | Should-BeTrue
         { Close-OneNoteNotebook -NotebookId $notebookId } | Should -Not -Throw
       }
@@ -397,7 +403,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNoteHierarchy.Unit' {
+  Describe 'Export-OneNoteHierarchy' -Tag 'Mock' {
     BeforeAll {
       function Get-OneNoteHierarchyExportXml {
         [CmdletBinding()]
@@ -451,7 +457,7 @@ public enum XMLSchema
       }
     }
     Context 'Edge cases' {
-      It 'throws with NoClobber when output file already exists' {
+      It 'throws with NoClobber when the output file already exists' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyExportXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
@@ -526,7 +532,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNotePageContent.Unit' {
+  Describe 'Export-OneNotePageContent' -Tag 'Mock' {
     BeforeAll {
       function Get-OneNotePageContentExportXml {
         [CmdletBinding()]
@@ -580,7 +586,7 @@ public enum XMLSchema
       }
     }
     Context 'Edge cases' {
-      It 'throws with NoClobber when output file already exists' {
+      It 'throws with NoClobber when the output file already exists' {
         Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentExportXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.content.xml'
@@ -653,7 +659,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNotePageAsDocument.Unit' {
+  Describe 'Export-OneNotePageAsDocument' -Tag 'Mock' {
     BeforeAll {
       function Get-OneNoteHierarchyXml {
         [CmdletBinding()]
@@ -712,7 +718,7 @@ public enum XMLSchema
         New-Item -Path $conflictDirectory -ItemType Directory -Force | Out-Null
         { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination } | Should-Throw
       }
-      It 'throws with NoClobber when output file already exists' {
+      It 'throws with NoClobber when the output file already exists' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { Get-OneNoteHierarchyXml }
 
         $existingFile = $destination | Join-Path -ChildPath 'page-id.one'
@@ -756,7 +762,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNoteBinaryObject.Unit' {
+  Describe 'Export-OneNoteBinaryObject' -Tag 'Mock' {
     BeforeAll {
       function Get-OneNotePageContentXml {
         [CmdletBinding()]
@@ -775,11 +781,12 @@ public enum XMLSchema
       function New-OneNoteMockApplication {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
+        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function only constructs an in-memory mock application and does not change system state')]
         param (
           [string]
           $Base64 = [Convert]::ToBase64String([byte[]]@(0x50, 0x4B, 0x03, 0x04))
         )
-        $app = [PSCustomObject]@{ Base64 = $Base64 }
+        $app = [PSCustomObject]@{ Base64 = $Base64; Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name GetBinaryPageContent -Value {
           param (
             [string]
@@ -789,6 +796,10 @@ public enum XMLSchema
             [ref]
             $Binary
           )
+          [void]$this.Calls.Add([PSCustomObject]@{
+              Id         = $Id
+              CallbackId = $CallbackId
+            })
           $Binary.Value = $this.Base64
         }
         return $app
@@ -839,7 +850,7 @@ public enum XMLSchema
         New-Item -Path $filePath -ItemType File -Force | Out-Null
         { Export-OneNoteBinaryObject -Id 'page-id' -Destination $filePath } | Should-Throw
       }
-      It 'throws with NoClobber when output file already exists' {
+      It 'throws with NoClobber when the output file already exists' {
         Mock -CommandName Get-OneNotePageContent -MockWith { Get-OneNotePageContentXml }
         Mock -CommandName Get-OneNoteApplication -MockWith { New-OneNoteMockApplication }
 
@@ -910,13 +921,14 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Import-OneNoteHierarchy.Unit' {
+  Describe 'Import-OneNoteHierarchy' -Tag 'Mock' {
     BeforeAll {
       function New-OneNoteHierarchyImportMockApplication {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
+        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function only constructs an in-memory mock application and does not change system state')]
         param ()
-        $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
+        $app = [PSCustomObject]@{ Updates = [List[string]]::new(); Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdateHierarchy -Value {
           param (
             [string]
@@ -925,6 +937,10 @@ public enum XMLSchema
             $Schema
           )
           [void]$this.Updates.Add($Content)
+          [void]$this.Calls.Add([PSCustomObject]@{
+              Content = $Content
+              Schema  = $Schema
+            })
         }
         return $app
       }
@@ -1013,13 +1029,14 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Import-OneNotePageContent.Unit' {
+  Describe 'Import-OneNotePageContent' -Tag 'Mock' {
     BeforeAll {
       function New-OneNotePageContentImportMockApplication {
         [CmdletBinding()]
         [OutputType([PSCustomObject])]
+        [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function only constructs an in-memory mock application and does not change system state')]
         param ()
-        $app = [PSCustomObject]@{ Updates = [List[string]]::new() }
+        $app = [PSCustomObject]@{ Updates = [List[string]]::new(); Calls = [List[object]]::new() }
         $app | Add-Member -MemberType ScriptMethod -Name UpdatePageContent -Value {
           param (
             [string]
@@ -1032,6 +1049,12 @@ public enum XMLSchema
             $Force
           )
           [void]$this.Updates.Add($Content)
+          [void]$this.Calls.Add([PSCustomObject]@{
+              Content              = $Content
+              ExpectedLastModified = $ExpectedLastModified
+              Schema               = $Schema
+              Force                = $Force
+            })
         }
         return $app
       }

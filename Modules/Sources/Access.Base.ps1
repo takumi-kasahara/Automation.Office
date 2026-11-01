@@ -127,14 +127,14 @@ function New-AccessFile {
     New-AccessFile -Path "$env:TEMP\Database.accdb" -Password $password
     ```
 
-    Creates a database protected with an open password.
+    Creates a file protected with an open password.
 
   .EXAMPLE
     ```powershell
     New-AccessFile -Path "$env:TEMP\Database.accdb" -RemovePersonalInformation
     ```
 
-    Creates a new database and removes personal information from the file.
+    Creates a new database and removes personal information from a file.
 
   .EXAMPLE
     ```powershell
@@ -448,7 +448,7 @@ function Get-AccessFileProperty {
     Get-AccessFileProperty -LiteralPath "$env:TEMP\Database.accdb" -Password $password -Name RemovePersonalInformation
     ```
 
-    Gets file properties from a database protected with a password.
+    Gets file properties from a file protected with a password.
 
   .OUTPUTS
     PSCustomObject
@@ -672,20 +672,19 @@ function Set-AccessFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
+        $parameterSetName = $PSCmdlet.ParameterSetName
         Open-AccessFile -Application $app -Path $item.FullName -Password $Password
         try {
           Set-ObjectProperty -InputObject $app.CurrentProject -Properties $properties
           if ($PassThru) {
-            $updated = Get-ObjectProperty -InputObject $app.CurrentProject
-            $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+            switch -Exact -CaseSensitive ($parameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                $Name
+                return Get-ObjectProperty -InputObject $app.CurrentProject -Name $Name
               }
               { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                $InputObject.PSObject.Properties.Name
+                return Get-ObjectProperty -InputObject $app.CurrentProject -Name $InputObject.PSObject.Properties.Name
               }
             }
-            return $updated | Select-Object -Property $propertyNames
           }
         } finally {
           $app.CloseCurrentDatabase()
@@ -929,7 +928,11 @@ function Export-AccessDatabase {
               , $TableName                                                    # TableName
               , $resolvedDestination                                          # FileName
               , $true                                                         # HasFieldNames
-              , $(if ($Range) { $Range } else { [type]::Missing })            # Range
+              , $(if ($Range) {
+                  $Range
+                } else {
+                  [type]::Missing
+                })            # Range
             )
             return Get-Item -LiteralPath $resolvedDestination -Force
           }
@@ -1125,7 +1128,11 @@ function Import-AccessDatabase {
               , $TableName                                                    # TableName
               , $resolvedSource                                               # FileName
               , $true                                                         # HasFieldNames
-              , $(if ($Range) { $Range } else { [type]::Missing })            # Range
+              , $(if ($Range) {
+                  $Range
+                } else {
+                  [type]::Missing
+                })            # Range
             )
           }
         }

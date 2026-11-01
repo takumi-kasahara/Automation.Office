@@ -633,6 +633,14 @@ function Export-VBProject {
     }
     $metadata |
     ConvertTo-Json |
+    ForEach-Object {
+      # https://stackoverflow.com/a/47779605
+      [Regex]::Replace(
+        $_,
+        '\\u(?<Value>[a-zA-Z0-9]{4})',
+        { param($m) ([char]([int]::Parse($m.Groups['Value'].Value, [NumberStyles]::HexNumber))).ToString() }
+      )
+    } |
     Out-File -LiteralPath $resolvedDestination -Encoding utf8 -Force:$Force
     return Get-Item -LiteralPath $resolvedDestination -Force
   } finally {

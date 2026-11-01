@@ -2,6 +2,7 @@
 using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.PowerPoint
 using namespace System.Collections.Generic
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Runtime.InteropServices
@@ -107,6 +108,7 @@ function Get-PowerPointSpeakerNote {
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([SpeakerNotes])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Force', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [SupportsWildcards()]
@@ -236,6 +238,12 @@ function Get-PowerPointSpeakerNote {
 function Export-PowerPointAsFixedFormat {
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([System.IO.FileInfo])]
+  [SuppressMessage('PSReviewUnusedParameter', 'FixedFormatType', Justification = 'Parameter is passed to the COM call inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'FixedFormatIntent', Justification = 'Parameter is passed to the COM call inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'HandoutOrder', Justification = 'Parameter is passed to the COM call inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'OutputType', Justification = 'Parameter is passed to the COM call inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'PrintRangeType', Justification = 'Parameter is passed to the COM call inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'IncludeDocumentProperties', Justification = 'Parameter is passed to the COM call inside the action callback')]
   param (
     [Alias('FilePath', 'FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]

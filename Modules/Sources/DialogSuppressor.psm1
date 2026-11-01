@@ -4,6 +4,7 @@ function Start-DialogSuppressor {
   [CmdletBinding()]
   [OutputType([System.Management.Automation.Job])]
   [SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'Function starts a background job to suppress dialogs and does not require user confirmation')]
+  [SuppressMessage('PSReviewUnusedParameter', 'TargetExe', Justification = 'Parameter is passed into the background job through its using scope')]
   param (
     [Parameter(Mandatory)]
     [ValidateNotNullOrEmpty()]

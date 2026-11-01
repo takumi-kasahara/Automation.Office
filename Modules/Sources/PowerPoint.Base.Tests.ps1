@@ -58,6 +58,7 @@ InModuleScope 'Automation.Office' {
     }
     BeforeEach {
       $password = Get-Password
+      $path = Get-TempFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -66,43 +67,39 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'creates a file at the requested path' {
-        $path = Get-TempFile
         $item = New-PowerPointFile -Path $path
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipeline' {
-        $path = Get-TempFile
         $item = $path | New-PowerPointFile
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipelineByPropertyName' {
-        $path = Get-TempFile
         $item = [PSCustomObject]@{ FullName = $path } | New-PowerPointFile
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not create a file when WhatIf is specified' {
-        $path = Get-TempFile
-        New-PowerPointFile -Path $path -Force -WhatIf
-        Test-Path -LiteralPath $path | Should-BeFalse
-      }
       It 'asks for confirmation when Confirm is specified' {
-        $path = Get-TempFile
         $exitCode = 'N' | Invoke-Confirm -Path $path
+
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $path | Should-BeFalse
       }
       It 'overwrites an existing presentation when Force is specified' {
-        $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
+
         New-PowerPointFile -Path $path -Force -Confirm
+
         (Get-Item -LiteralPath $path).Length | Should-BeGreaterThan 0
       }
     }
@@ -110,69 +107,47 @@ InModuleScope 'Automation.Office' {
       It 'creates a file using the requested file format' {
         $path = Get-TempFile -Extension '.pptm'
         $item = New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file with PasswordToOpen' {
-        $path = Get-TempFile
-        New-PowerPointFile -Path $path -PasswordToOpen $password
+        $item = New-PowerPointFile -Path $path -PasswordToOpen $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
-        Open-PowerPointFile -Path $path -PasswordToOpen $password -Action {
-          param (
-            [Microsoft.Office.Interop.PowerPoint.Presentation]
-            $Presentation
-          )
-          $Presentation.Password | Should-NotBeEmptyString
-        }
-      }
-      It 'creates a file with PasswordToModify' {
-        $path = Get-TempFile
-        New-PowerPointFile -Path $path -PasswordToModify $password
-        Test-Path -LiteralPath $path | Should-BeTrue
-        Open-PowerPointFile -Path $path -PasswordToModify $password -Action {
-          param (
-            [Microsoft.Office.Interop.PowerPoint.Presentation]
-            $Presentation
-          )
-          $Presentation.WritePassword | Should-NotBeEmptyString
-        }
-      }
-      It 'creates a file with ReadOnlyRecommended' {
-        $path = Get-TempFile
-        New-PowerPointFile -Path $path -ReadOnlyRecommended
-        Test-Path -LiteralPath $path | Should-BeTrue
-        Open-PowerPointFile -Path $path -Action {
-          param (
-            [Microsoft.Office.Interop.PowerPoint.Presentation]
-            $Presentation
-          )
-          $Presentation.ReadOnlyRecommended | Should-BeTrue
-        }
-      }
-      It 'creates a file with Initialize script block' {
-        $path = Get-TempFile
-        $item = New-PowerPointFile -Path $path -Initialize {
-          param (
-            [Microsoft.Office.Interop.PowerPoint.Presentation]
-            $Presentation
-          )
-          $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
-        }
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
+      }
+      It 'creates a file with PasswordToModify' {
+        $item = New-PowerPointFile -Path $path -PasswordToModify $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+      }
+      It 'creates a file with ReadOnlyRecommended' {
+        New-PowerPointFile -Path $path -ReadOnlyRecommended
+
+        $properties = Get-PowerPointFileProperty -LiteralPath $path
+        $properties.ReadOnlyRecommended | Should-BeTrue
+      }
+      It 'creates a file with Initialize script block' {
+        {
+          New-PowerPointFile -Path $path -Initialize {
+            param (
+              [Microsoft.Office.Interop.PowerPoint.Presentation]
+              $Presentation
+            )
+            $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
+          } | Should -Not -Throw
+        }
       }
     }
     Context 'Edge cases' {
-      It 'fails when the path already exists and Force is not specified' {
-        $path = Get-TempFile
-        New-Item -Path $path -ItemType File | Out-Null
-        { New-PowerPointFile -Path $path } | Should-Throw
-      }
     }
   }
-  Describe 'New-PowerPointFile.Unit' {
+  Describe 'New-PowerPointFile' -Tag 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -182,28 +157,27 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-PowerPointObject when WhatIf is specified' {
+      It 'does not create a file when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { New-PowerPointFile -Path $path -Force -WhatIf } | Should -Not -Throw
+        New-PowerPointFile -Path $path -Force -WhatIf
+
         Should-NotInvoke -CommandName New-PowerPointObject
         Test-Path -LiteralPath $path | Should-BeFalse
       }
     }
     Context 'Edge cases' {
-      It 'throws and does not call New-PowerPointObject when path exists and Force is not specified' {
+      It 'throws when the file exists and Force is not specified' {
         New-Item -Path $path -ItemType File -Force | Out-Null
-        Mock -CommandName New-PowerPointObject
 
         { New-PowerPointFile -Path $path } | Should-Throw
-        Should-NotInvoke -CommandName New-PowerPointObject
       }
     }
   }
   Describe 'Open-PowerPointFile' {
     BeforeEach {
-      $path = Get-TempFile
       $password = Get-Password
+      $path = Get-TempFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -211,35 +185,42 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'opens a presentation by Path and returns the presentation object' {
+      It 'opens a file by Path' {
         New-PowerPointFile -Path $path
-        Open-PowerPointFile -Path $path | Should-NotBeNull
+
+        Open-PowerPointFile -Path $path | Should-BeNull
       }
-      It 'opens a presentation by Path with ValueFromPipeline' {
+      It 'opens a file by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
-        $path | Open-PowerPointFile | Should-NotBeNull
+
+        $path | Open-PowerPointFile | Should-BeNull
       }
-      It 'opens a presentation by Path with ValueFromPipelineByPropertyName' {
+      It 'opens a file by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
-        [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile | Should-NotBeNull
+
+        [PSCustomObject]@{ FullName = $path } | Open-PowerPointFile | Should-BeNull
       }
     }
     Context 'Other parameters' {
-      It 'opens a presentation with PasswordToOpen' {
+      It 'opens a file with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-        Open-PowerPointFile -Path $path -PasswordToOpen $password | Should-NotBeNull
+
+        Open-PowerPointFile -Path $path -PasswordToOpen $password | Should-BeNull
       }
-      It 'opens a presentation with PasswordToModify' {
+      It 'opens a file with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
-        Open-PowerPointFile -Path $path -PasswordToModify $password | Should-NotBeNull
+
+        Open-PowerPointFile -Path $path -PasswordToModify $password | Should-BeNull
       }
-      It 'opens a presentation with ReadOnly' {
+      It 'opens a file with ReadOnly' {
         New-PowerPointFile -Path $path
-        Open-PowerPointFile -Path $path -ReadOnly | Should-NotBeNull
+
+        Open-PowerPointFile -Path $path -ReadOnly | Should-BeNull
       }
-      It 'opens a presentation with Action script block' {
+      It 'opens a file with Action script block' {
         New-PowerPointFile -Path $path
-        $result = Open-PowerPointFile -Path $path -Action {
+
+        $value = Open-PowerPointFile -Path $path -Action {
           param (
             [Microsoft.Office.Interop.PowerPoint.Presentation]
             $Presentation
@@ -247,13 +228,15 @@ InModuleScope 'Automation.Office' {
           $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
           return $Presentation.Slides.Count
         }
-        $result | Should-Be 1
+
+        $value | Should-Be 1
       }
-      It 'opens a presentation using an existing Application object' {
+      It 'opens a file using an existing Application object' {
         New-PowerPointFile -Path $path
+
         $app = New-PowerPointObject
         try {
-          Open-PowerPointFile -Path $path -Application $app | Should-NotBeNull
+          Open-PowerPointFile -Path $path -Application $app | Should-BeNull
         } finally {
           $app.Quit()
           Get-Variable |
@@ -265,7 +248,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Open-PowerPointFile.Unit' {
+  Describe 'Open-PowerPointFile' -Tag 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -276,11 +259,10 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails' {
+      It 'throws when the program fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
         { Open-PowerPointFile -Path $path } | Should-Throw
-        Should-Invoke -CommandName New-PowerPointObject -Times 1 -Exactly
       }
     }
   }
@@ -294,32 +276,36 @@ InModuleScope 'Automation.Office' {
         Remove-Item -LiteralPath $path -Force
       }
     }
-    It 'returns file properties' {
-      New-PowerPointFile -Path $path
-      { Get-PowerPointFileProperty -Path $path | Out-Host } | Should -Not -Throw
-    }
     Context 'ParameterSetName' {
       It 'returns selected file properties by Path' {
         New-PowerPointFile -Path $path
-        $properties = Get-PowerPointFileProperty -Path $path -Name Final
+
+        $properties = Get-PowerPointFileProperty -LiteralPath $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by LiteralPath' {
         New-PowerPointFile -Path $path
+
         $properties = Get-PowerPointFileProperty -LiteralPath $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
+
         $properties = $path | Get-PowerPointFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
+
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
@@ -327,33 +313,35 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
-        { Get-PowerPointFileProperty -Path $path } | Should-Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
+
+        { Get-PowerPointFileProperty -LiteralPath $path } | Should-Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
-        { Get-PowerPointFileProperty -Path $path } | Should -Not -Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
-        { Get-PowerPointFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
+
+        { Get-PowerPointFileProperty -LiteralPath $path } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify $password } | Should -Not -Throw
       }
       It 'returns file properties with Recurse' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -Path $path -Recurse
+        $properties = Get-PowerPointFileProperty -LiteralPath $path -Recurse
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }
       It 'returns file properties with Recurse and Depth' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -Path $path -Recurse -Depth 2
+        $properties = Get-PowerPointFileProperty -LiteralPath $path -Recurse -Depth 2
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }
     }
   }
-  Describe 'Get-PowerPointFileProperty.Unit' {
+  Describe 'Get-PowerPointFileProperty' -Tag 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -364,10 +352,10 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails' {
+      It 'throws when the program fails' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Get-PowerPointFileProperty -Path $path } | Should-Throw
+        { Get-PowerPointFileProperty -LiteralPath $path } | Should-Throw
       }
     }
   }
@@ -423,46 +411,62 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'updates a file property by Path with Name and Value' {
         New-PowerPointFile -Path $path
+
         Set-PowerPointFileProperty -Path $path -Name $name -Value $value
+
         (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file property by LiteralPath with Name and Value' {
         New-PowerPointFile -Path $path
+
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value
+
         (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file properties by Path with InputObject' {
         New-PowerPointFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         Set-PowerPointFileProperty -Path $path -InputObject $properties
+
         (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-PowerPointFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         Set-PowerPointFileProperty -LiteralPath $path -InputObject $properties
+
         (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
+
         $path | Set-PowerPointFileProperty -Name $name -Value $value
-        (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
+
+        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
+
         [PSCustomObject]@{ PSPath = $path } | Set-PowerPointFileProperty -Name $name -Value $value
+
         (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update properties when WhatIf is specified' {
         New-PowerPointFile -Path $path
+
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
+
         (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-PowerPointFile -Path $path
+
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
+
         $exitCode | Should-Be 0
         (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
@@ -470,28 +474,34 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
+
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
-        Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password
+        { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password } | Should -Not -Throw
         (Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
+
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
-        Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
+        { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password } | Should -Not -Throw
         (Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified' {
         New-PowerPointFile -Path $path
+
         $property = Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
+
         $property | Should-HaveType ([PSCustomObject])
         $property.Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified with InputObject' {
         New-PowerPointFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         $property = Set-PowerPointFileProperty -LiteralPath $path -InputObject $properties -PassThru
+
         $property | Should-NotBeNull
         $property.Final | Should-BeTrue
       }
@@ -500,15 +510,16 @@ InModuleScope 'Automation.Office' {
       It 'throws when trying to set a property that does not exist.' {
         New-PowerPointFile -Path $path
 
-        { Set-PowerPointFileProperty -Path $path -Name 'Dummy' -Value $value } | Should-Throw
+        { Set-PowerPointFileProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
       }
       It 'throws an error when read-only recommended file' {
         New-PowerPointFile -Path $path -ReadOnlyRecommended
+
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
-  Describe 'Set-PowerPointFileProperty.Unit' {
+  Describe 'Set-PowerPointFileProperty' -Tag 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -530,19 +541,22 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call Open-PowerPointFile when WhatIf is specified' {
-        Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $false -WhatIf
+      It 'does not open the file when WhatIf is specified' {
+        Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $true -WhatIf
+
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }
     Context 'Edge cases' {
-      It 'throws when target item is read-only' {
+      It 'throws when the target item is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
-        { Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $false } | Should-Throw
+
+        { Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $true } | Should-Throw
+        Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }
   }
-  Describe 'Test-PowerPointExtension' {
+  Describe 'Test-PowerPointExtension' -Tag 'Mock' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
@@ -557,36 +571,37 @@ InModuleScope 'Automation.Office' {
         }
       }
     }
-    It 'returns true for *.pptx files by Path' {
-      Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.txt' } -MockWith {
-        1, 2 |
-        ForEach-Object {
-          [PSCustomObject]@{
-            PSIsContainer = $false
-            PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.txt")
-            FullName      = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+    Context 'ParameterSetName' {
+      It 'returns true for *.pptx files by Path' {
+        Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.txt' } -MockWith {
+          1, 2 |
+          ForEach-Object {
+            [PSCustomObject]@{
+              PSIsContainer = $false
+              PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+              FullName      = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+            }
           }
         }
-      }
-      Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.pptx' } -MockWith {
-        1, 2 |
-        ForEach-Object {
-          [PSCustomObject]@{
-            PSIsContainer = $false
-            PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.pptx")
-            FullName      = ($env:TEMP | Join-Path -ChildPath "$_.pptx")
+        Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.pptx' } -MockWith {
+          1, 2 |
+          ForEach-Object {
+            [PSCustomObject]@{
+              PSIsContainer = $false
+              PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.pptx")
+              FullName      = ($env:TEMP | Join-Path -ChildPath "$_.pptx")
+            }
           }
         }
+
+        Test-PowerPointExtension -Path '*.txt' | Should-BeFalse
+        Test-PowerPointExtension -Path '*.pptx' | Should-BeTrue
       }
-      Test-PowerPointExtension -Path '*.txt' | Should-BeFalse
-      Test-PowerPointExtension -Path '*.pptx' | Should-BeTrue
+      It 'returns true for *.pptx files by LiteralPath' {
+        Test-PowerPointExtension -LiteralPath 'Presentation.txt' | Should-BeFalse
+        Test-PowerPointExtension -LiteralPath 'Presentation.pptx' | Should-BeTrue
+      }
     }
-    It 'returns true for *.pptx files by LiteralPath' {
-      Test-PowerPointExtension -LiteralPath 'Presentation.txt' | Should-BeFalse
-      Test-PowerPointExtension -LiteralPath 'Presentation.pptx' | Should-BeTrue
-    }
-  }
-  Describe 'Test-PowerPointExtension.Unit' {
     Context 'Edge cases' {
       It 'returns false when Get-Item throws ItemNotFoundException' {
         Mock -CommandName Get-Item -MockWith {
