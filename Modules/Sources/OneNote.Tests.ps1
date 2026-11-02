@@ -63,7 +63,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-OneNoteNotebook' -Tag 'Mock' {
+  Describe 'New-OneNoteNotebook' -Tag 'CI', 'Mock' {
     BeforeAll {
       Mock -CommandName Get-OneNoteApplication -MockWith { throw }
     }
@@ -114,7 +114,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-OneNoteSection' -Tag 'Mock' {
+  Describe 'New-OneNoteSection' -Tag 'CI', 'Mock' {
     BeforeAll {
       Mock -CommandName Get-OneNoteApplication -MockWith { throw }
     }
@@ -212,7 +212,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-OneNotePage' -Tag 'Mock' {
+  Describe 'New-OneNotePage' -Tag 'CI', 'Mock' {
     BeforeAll {
       Mock -CommandName Get-OneNoteApplication -MockWith { throw }
     }
@@ -258,7 +258,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'Get-OneNoteHierarchy' -Tag 'Mock' {
+  Describe 'Get-OneNoteHierarchy' -Tag 'CI', 'Mock' {
     BeforeAll {
       if (-not ('XMLSchema' -as [type])) {
         Add-Type -TypeDefinition @'
@@ -352,7 +352,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Get-OneNotePageContent' -Tag 'Mock' {
+  Describe 'Get-OneNotePageContent' -Tag 'CI', 'Mock' {
     BeforeAll {
       if (-not ('XMLSchema' -as [type])) {
         Add-Type -TypeDefinition @'
@@ -479,7 +479,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNoteHierarchy' -Tag 'Mock' {
+  Describe 'Export-OneNoteHierarchy' -Tag 'CI', 'Mock' {
     BeforeAll {
       $xml = [xml]@'
 <one:Notebook xmlns:one="http://schemas.microsoft.com/office/onenote/2013/onenote" name="Sample:Hierarchy?Name" dateTime="2026-05-23T00:00:00.0000000" lastModifiedTime="2026-05-23T00:00:00.0000000" />
@@ -604,7 +604,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNotePageContent' -Tag 'Mock' {
+  Describe 'Export-OneNotePageContent' -Tag 'CI', 'Mock' {
     BeforeAll {
       $xml = [xml]@'
 <one:Page xmlns:one="http://schemas.microsoft.com/office/onenote/2013/onenote" name="Sample:Content?Name" dateTime="2026-05-23T00:00:00.0000000" lastModifiedTime="2026-05-23T00:00:00.0000000" />
@@ -726,7 +726,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNotePageAsDocument' -Tag 'Mock' {
+  Describe 'Export-OneNotePageAsDocument' -Tag 'CI', 'Mock' {
     BeforeAll {
       $xml = [xml]@'
 <one:Page xmlns:one="http://schemas.microsoft.com/office/onenote/2013/onenote" name="Sample:Page?Name" />
@@ -829,7 +829,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-OneNoteBinaryObject' -Tag 'Mock' {
+  Describe 'Export-OneNoteBinaryObject' -Tag 'CI', 'Mock' {
     BeforeAll {
       $xml = [xml]@'
 <one:Page xmlns:one="http://schemas.microsoft.com/office/onenote/2013/onenote" name="Sample:Page?Name">
@@ -983,7 +983,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Import-OneNoteHierarchy' -Tag 'Mock' {
+  Describe 'Import-OneNoteHierarchy' -Tag 'CI', 'Mock' {
     BeforeAll {
       function New-OneNoteHierarchyImportMockApplication {
         [CmdletBinding()]
@@ -1083,7 +1083,7 @@ public enum XMLSchema
     Context 'Edge cases' {
     }
   }
-  Describe 'Import-OneNotePageContent' -Tag 'Mock' {
+  Describe 'Import-OneNotePageContent' -Tag 'CI', 'Mock' {
     BeforeAll {
       function New-OneNotePageContentImportMockApplication {
         [CmdletBinding()]

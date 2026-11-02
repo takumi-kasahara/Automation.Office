@@ -188,7 +188,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointSpeakerNote' -Tag 'Mock' {
+  Describe 'Get-PowerPointSpeakerNote' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null

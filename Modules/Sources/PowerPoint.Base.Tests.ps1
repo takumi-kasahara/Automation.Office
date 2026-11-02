@@ -147,7 +147,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-PowerPointFile' -Tag 'Mock' {
+  Describe 'New-PowerPointFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -248,7 +248,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Open-PowerPointFile' -Tag 'Mock' {
+  Describe 'Open-PowerPointFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -341,7 +341,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointFileProperty' -Tag 'Mock' {
+  Describe 'Get-PowerPointFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -519,7 +519,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-PowerPointFileProperty' -Tag 'Mock' {
+  Describe 'Set-PowerPointFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -556,7 +556,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Test-PowerPointExtension' -Tag 'Mock' {
+  Describe 'Test-PowerPointExtension' -Tag 'CI', 'Mock' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {

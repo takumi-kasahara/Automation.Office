@@ -129,7 +129,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-ExcelDocumentProperty' -Tag 'Mock' {
+  Describe 'Get-ExcelDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -147,7 +147,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-ExcelDocumentPropertyValue' -Tag 'Mock' {
+  Describe 'Get-ExcelDocumentPropertyValue' -Tag 'CI', 'Mock' {
     BeforeAll {
       $name = 'Title'
       Mock -CommandName Test-Path -MockWith { $true }
@@ -388,7 +388,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-ExcelDocumentProperty' -Tag 'Mock' {
+  Describe 'Set-ExcelDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $name = 'Title'
       $value = [guid]::NewGuid().ToString('N')
@@ -570,7 +570,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Remove-ExcelDocumentProperty' -Tag 'Mock' {
+  Describe 'Remove-ExcelDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null

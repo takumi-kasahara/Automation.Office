@@ -153,7 +153,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-ExcelFile' -Tag 'Mock' {
+  Describe 'New-ExcelFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -259,7 +259,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Open-ExcelFile' -Tag 'Mock' {
+  Describe 'Open-ExcelFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -352,7 +352,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-ExcelFileProperty' -Tag 'Mock' {
+  Describe 'Get-ExcelFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -537,7 +537,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-ExcelFileProperty' -Tag 'Mock' {
+  Describe 'Set-ExcelFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -574,7 +574,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Test-ExcelExtension' -Tag 'Mock' {
+  Describe 'Test-ExcelExtension' -Tag 'CI', 'Mock' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
