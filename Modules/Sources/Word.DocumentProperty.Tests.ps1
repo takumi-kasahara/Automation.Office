@@ -129,7 +129,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-WordDocumentProperty' -Tag 'Mock' {
+  Describe 'Get-WordDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -147,7 +147,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-WordDocumentPropertyValue' -Tag 'Mock' {
+  Describe 'Get-WordDocumentPropertyValue' -Tag 'CI', 'Mock' {
     BeforeAll {
       $name = 'Title'
       Mock -CommandName Test-Path -MockWith { $true }
@@ -381,7 +381,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-WordDocumentProperty' -Tag 'Mock' {
+  Describe 'Set-WordDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $name = 'Title'
       $value = [guid]::NewGuid().ToString('N')
@@ -555,7 +555,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Remove-WordDocumentProperty' -Tag 'Mock' {
+  Describe 'Remove-WordDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null

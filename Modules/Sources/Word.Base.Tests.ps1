@@ -152,7 +152,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-WordFile' -Tag 'Mock' {
+  Describe 'New-WordFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -253,7 +253,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Open-WordFile' -Tag 'Mock' {
+  Describe 'Open-WordFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -346,7 +346,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-WordFileProperty' -Tag 'Mock' {
+  Describe 'Get-WordFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -524,7 +524,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-WordFileProperty' -Tag 'Mock' {
+  Describe 'Set-WordFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -561,7 +561,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Test-WordExtension' -Tag 'Mock' {
+  Describe 'Test-WordExtension' -Tag 'CI', 'Mock' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {

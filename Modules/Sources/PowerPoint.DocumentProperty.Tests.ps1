@@ -129,7 +129,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointDocumentProperty' -Tag 'Mock' {
+  Describe 'Get-PowerPointDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -147,7 +147,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-PowerPointDocumentPropertyValue' -Tag 'Mock' {
+  Describe 'Get-PowerPointDocumentPropertyValue' -Tag 'CI', 'Mock' {
     BeforeAll {
       $name = 'Title'
       Mock -CommandName Test-Path -MockWith { $true }
@@ -381,7 +381,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-PowerPointDocumentProperty' -Tag 'Mock' {
+  Describe 'Set-PowerPointDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $name = 'Title'
       $value = [guid]::NewGuid().ToString('N')
@@ -555,7 +555,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Remove-PowerPointDocumentProperty' -Tag 'Mock' {
+  Describe 'Remove-PowerPointDocumentProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null

@@ -434,7 +434,7 @@ InModuleScope 'Automation.Office' {
         { Invoke-AccessQuery -LiteralPath $path -Table 'Employees' -Password $password } | Should -Not -Throw
       }
     }
-    Context 'Edge cases' -Tag 'Mock' {
+    Context 'Edge cases' -Tag 'CI', 'Mock' {
       It 'throws when Query is used with Columns' {
         { Invoke-AccessQuery -LiteralPath $path -Query 'SELECT * FROM Employees' -Columns Id } | Should-Throw
       }

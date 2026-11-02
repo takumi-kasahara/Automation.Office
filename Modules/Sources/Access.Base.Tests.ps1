@@ -169,7 +169,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'New-AccessFile' -Tag 'Mock' {
+  Describe 'New-AccessFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -338,7 +338,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Get-AccessFileProperty' -Tag 'Mock' {
+  Describe 'Get-AccessFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -458,7 +458,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Set-AccessFileProperty' -Tag 'Mock' {
+  Describe 'Set-AccessFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -671,7 +671,7 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
     }
   }
-  Describe 'Export-AccessDatabase' -Tag 'Mock' {
+  Describe 'Export-AccessDatabase' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -935,7 +935,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Import-AccessDatabase' -Tag 'Mock' {
+  Describe 'Import-AccessDatabase' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null

@@ -19,4 +19,4 @@
   command = .agents/skills/powershell-5/scripts/Analyze.bat -Path ./Scripts -Recurse && git update-index --again
 [hook "pester"]
   event = pre-commit
-  command = .agents/skills/powershell-5/scripts/Pester.bat -Path ./Modules/Sources -TagFilter Mock
+  command = .agents/skills/powershell-5/scripts/Pester.bat -Path ./Modules/Sources -TagFilter CI
