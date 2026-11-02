@@ -171,13 +171,6 @@ function Import-WordVBProject {
 
   .EXAMPLE
     ```powershell
-    Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -WhatIf
-    ```
-
-    Shows what would happen if the command were executed without actually importing the VBA project.
-
-  .EXAMPLE
-    ```powershell
     Import-WordVBProject -Path "$env:TEMP\Document.docm" -Source "$env:TEMP\VBProject.json" -Hidden
     ```
 
