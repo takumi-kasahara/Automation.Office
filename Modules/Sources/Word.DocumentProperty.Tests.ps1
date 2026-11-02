@@ -108,7 +108,7 @@ InModuleScope 'Automation.Office' {
       It 'reads properties from a file protected with PasswordToModify' {
         New-WordFile -Path $path -PasswordToModify (Get-Password)
 
-        { Get-WordDocumentProperty -LiteralPath $path } | Should-Throw
+        { Get-WordDocumentProperty -LiteralPath $path } | Should -Not -Throw
         { Get-WordDocumentProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
       }
     }
