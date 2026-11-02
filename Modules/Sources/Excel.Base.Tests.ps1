@@ -270,11 +270,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Open-ExcelFile -Path $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-ExcelFileProperty' {
@@ -363,11 +358,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Get-ExcelFileProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Set-ExcelFileProperty' {

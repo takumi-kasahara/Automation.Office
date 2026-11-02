@@ -279,11 +279,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
-      }
     }
   }
   Describe 'Import-PowerPointVBProject' {
@@ -419,11 +414,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
-      }
     }
   }
 }

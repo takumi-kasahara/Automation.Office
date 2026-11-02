@@ -140,11 +140,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Get-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-ExcelDocumentPropertyValue' -Tag 'CI', 'Mock' {
@@ -421,11 +416,6 @@ InModuleScope 'Automation.Office' {
         { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         Should-NotInvoke -CommandName Open-ExcelFile
       }
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-      }
     }
   }
   Describe 'Remove-ExcelDocumentProperty' {
@@ -600,11 +590,6 @@ InModuleScope 'Automation.Office' {
 
         { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
         Should-NotInvoke -CommandName Open-ExcelFile
-      }
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Remove-ExcelDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }

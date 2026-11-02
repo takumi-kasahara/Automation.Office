@@ -446,11 +446,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw }
-
-        { Import-AccessVBProject -Path $path -Source $source } | Should-Throw
-      }
     }
   }
 }

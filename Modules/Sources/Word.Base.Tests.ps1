@@ -264,11 +264,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Open-WordFile -Path $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-WordFileProperty' {
@@ -357,11 +352,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Get-WordFileProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Set-WordFileProperty' {

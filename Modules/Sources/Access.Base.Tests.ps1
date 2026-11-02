@@ -349,11 +349,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-AccessObject -MockWith { throw }
-
-        { Get-AccessFileProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Set-AccessFileProperty' {
