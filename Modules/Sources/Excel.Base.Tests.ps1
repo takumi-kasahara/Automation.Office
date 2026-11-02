@@ -566,7 +566,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the target item is read-only' {
+      It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-ExcelFileProperty -LiteralPath $path -Name Final -Value $false } | Should-Throw

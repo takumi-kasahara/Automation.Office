@@ -408,7 +408,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the target item is read-only' {
+      It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
@@ -580,7 +580,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the target item is read-only' {
+      It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
