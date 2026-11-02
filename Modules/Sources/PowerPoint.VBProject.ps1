@@ -148,9 +148,6 @@ function Import-PowerPointVBProject {
   .PARAMETER Source
     Specifies the source file path for `VBProject.json`.
 
-  .PARAMETER Force
-    Forces import processing when a file is marked as read-only recommended.
-
   .PARAMETER Hidden
     Imports while keeping the presentation window hidden.
 
@@ -176,13 +173,6 @@ function Import-PowerPointVBProject {
     ```
 
     Imports into presentation protected with a modify password.
-
-  .EXAMPLE
-    ```powershell
-    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -WhatIf
-    ```
-
-    Shows what would happen if the command were executed without actually importing the VBA project.
 
   .OUTPUTS
     None.
