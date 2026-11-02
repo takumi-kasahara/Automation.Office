@@ -362,14 +362,10 @@ function Open-WordFile {
         )
         try {
           if ($Action) {
-            & $Action $file
-          } else {
-            return $file
+            return & $Action $file
           }
         } finally {
-          if ($Action -and $file) {
-            $file.Close()
-          }
+          $file.Close()
         }
       } finally {
         try {
