@@ -487,7 +487,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the target item is read-only' {
+      It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true } | Should-Throw
@@ -967,7 +967,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws and does not call the program when the target item is read-only' {
+      It 'throws and does not call the program when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
         { Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' } | Should-Throw
