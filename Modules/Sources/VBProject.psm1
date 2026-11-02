@@ -1,6 +1,7 @@
 ﻿using assembly Microsoft.Office.Interop.Access
 using assembly Microsoft.Vbe.Interop
 using module .\DialogSuppressor.psm1
+using module .\Json.psm1
 using namespace Microsoft.Office.Interop.Access
 using namespace Microsoft.Office.Interop.Access.Dao
 using namespace Microsoft.Vbe.Interop
@@ -632,15 +633,7 @@ function Export-VBProject {
       References   = @($references)
     }
     $metadata |
-    ConvertTo-Json |
-    ForEach-Object {
-      # https://stackoverflow.com/a/47779605
-      [Regex]::Replace(
-        $_,
-        '\\u(?<Value>[a-zA-Z0-9]{4})',
-        { param($m) ([char]([int]::Parse($m.Groups['Value'].Value, [NumberStyles]::HexNumber))).ToString() }
-      )
-    } |
+    ConvertTo-UnescapedJson |
     Out-File -LiteralPath $resolvedDestination -Encoding utf8 -Force:$Force
     return Get-Item -LiteralPath $resolvedDestination -Force
   } finally {
