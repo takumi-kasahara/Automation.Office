@@ -206,14 +206,11 @@ function New-OneNoteNotebook {
     [string]
     $Path
   )
+  if (-not $PSCmdlet.ShouldProcess($Path, 'New Notebook')) {
+    return
+  }
   $app = Get-OneNoteApplication
   try {
-    if (-not $PSCmdlet.ShouldProcess($Path, 'New Notebook')) {
-      return
-    }
-    if (-not (Test-Path -LiteralPath $Path)) {
-      New-Item -Path $Path -ItemType Directory -WhatIf:$WhatIfPreference -Confirm:$false | Out-Null
-    }
     $objectId = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
@@ -296,6 +293,9 @@ function New-OneNoteSection {
     [string]
     $ParentId
   )
+  if (-not $PSCmdlet.ShouldProcess($Path, 'New Section')) {
+    return
+  }
   $app = Get-OneNoteApplication
   try {
     switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
@@ -307,9 +307,6 @@ function New-OneNoteSection {
         $resolved = [Path]::GetFileName($Path)
         $relativeToObjectId = $ParentId
       }
-    }
-    if (-not $PSCmdlet.ShouldProcess($Path, 'New Section')) {
-      return
     }
     $objectId = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
@@ -390,6 +387,9 @@ function New-OneNoteSectionGroup {
     [string]
     $ParentId
   )
+  if (-not $PSCmdlet.ShouldProcess($Path, 'New SectionGroup')) {
+    return
+  }
   $app = Get-OneNoteApplication
   try {
     switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
@@ -401,9 +401,6 @@ function New-OneNoteSectionGroup {
         $resolved = [Path]::GetFileName($Path)
         $relativeToObjectId = $ParentId
       }
-    }
-    if (-not $PSCmdlet.ShouldProcess($Path, 'New SectionGroup')) {
-      return
     }
     $objectId = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#openhierarchy-method
@@ -462,11 +459,11 @@ function New-OneNotePage {
     [string]
     $SectionId
   )
+  if (-not $PSCmdlet.ShouldProcess($SectionId, 'New Page')) {
+    return
+  }
   $app = Get-OneNoteApplication
   try {
-    if (-not $PSCmdlet.ShouldProcess($SectionId, 'New Page')) {
-      return
-    }
     $pageId = $null
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/application-interface-onenote#createnewpage-method
     # https://learn.microsoft.com/en-us/office/client-developer/onenote/enumerations-onenote-developer-reference#createfiletype
@@ -719,7 +716,7 @@ function Export-OneNoteHierarchy {
   if ((Test-Path -LiteralPath $resolved) -and $NoClobber) {
     $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'ItemAlreadyExists' -TargetObject $resolved))
   }
-  if (-not $PSCmdlet.ShouldProcess($resolved, 'Export OneNoteHierarchy')) {
+  if (-not (($Force -and -not $WhatIfPreference) -or $PSCmdlet.ShouldProcess($resolved, 'Export OneNoteHierarchy'))) {
     return
   }
   if (-not (Test-Path -LiteralPath $Destination)) {
@@ -888,9 +885,6 @@ function Export-OneNotePageAsDocument {
   .PARAMETER UseName
     When specified, the output file is named using the page's display name instead of its object ID.
 
-  .PARAMETER Force
-    Overwrites read-only output files when present.
-
   .PARAMETER NoClobber
     Throws an error if the output file already exists.
 
@@ -931,8 +925,6 @@ function Export-OneNotePageAsDocument {
     [Microsoft.Office.Interop.OneNote.PublishFormat]
     $PublishFormat = [Microsoft.Office.Interop.OneNote.PublishFormat]::pfOneNote,
     [switch]
-    $Force,
-    [switch]
     $NoClobber,
     [switch]
     $UseName
@@ -959,14 +951,7 @@ function Export-OneNotePageAsDocument {
     return
   }
   if (-not (Test-Path -LiteralPath $Destination)) {
-    New-Item -Path $Destination -ItemType Directory -Force:$Force -WhatIf:$WhatIfPreference -Confirm:$false | Out-Null
-  }
-  $isReadOnly = (Test-Path -LiteralPath $resolved -PathType Leaf) -and (Get-Item -LiteralPath $resolved -Force).IsReadOnly
-  $backup = $null
-  if ($isReadOnly -and $Force) {
-    (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $false
-    $backup = "$resolved.$(Get-Date -Format 'yyyyMMddHHmmss').bak"
-    Move-Item -LiteralPath $resolved -Destination $backup -Force
+    New-Item -Path $Destination -ItemType Directory -Force -WhatIf:$WhatIfPreference -Confirm:$false | Out-Null
   }
   $app = Get-OneNoteApplication
   try {
@@ -977,29 +962,8 @@ function Export-OneNotePageAsDocument {
       , $PublishFormat  # PublishFormat pfPublishFormat
       , $null           # BSTR          bstrCLSIDofExporter
     )
-    if ($isReadOnly -and $Force) {
-      (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $true
-    }
-    if ($backup) {
-      Remove-Item -LiteralPath $backup -Force
-      $backup = $null
-    }
     return Get-Item -LiteralPath $resolved -Force
-  } catch {
-    if ($backup -and (Test-Path -LiteralPath $backup -PathType Leaf)) {
-      if (Test-Path -LiteralPath $resolved) {
-        Remove-Item -LiteralPath $resolved -Force
-      }
-      Move-Item -LiteralPath $backup -Destination $resolved -Force
-      if ($isReadOnly) {
-        (Get-Item -LiteralPath $resolved -Force).IsReadOnly = $true
-      }
-    }
-    throw
   } finally {
-    if ((Test-Path -LiteralPath $backup -PathType Leaf)) {
-      Remove-Item -LiteralPath $backup -Force
-    }
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
@@ -1131,20 +1095,24 @@ function Export-OneNoteBinaryObject {
         if ($isReadOnly -and $Force) {
           (Get-Item -LiteralPath $file -Force).IsReadOnly = $false
         }
-        [File]::WriteAllBytes($file, $bytes)
-        $oe = $_.SelectSingleNode('ancestor::one:OE[1]', $ns)
-        if ($oe -and $oe.HasAttributes) {
-          $creationTime = $oe.Attributes['creationTime']
-          if ($creationTime) {
-            Set-ItemProperty -LiteralPath $file -Name 'CreationTime' -Value ([datetime]::Parse($creationTime.Value)) -WhatIf:$WhatIfPreference -Confirm:$false
-          }
-          $lastModifiedTime = $oe.Attributes['lastModifiedTime']
-          if ($lastModifiedTime) {
-            Set-ItemProperty -LiteralPath $file -Name 'LastWriteTime' -Value ([datetime]::Parse($lastModifiedTime.Value)) -WhatIf:$WhatIfPreference -Confirm:$false
+        try {
+          [File]::WriteAllBytes($file, $bytes)
+          $oe = $_.SelectSingleNode('ancestor::one:OE[1]', $ns)
+          if ($oe -and $oe.HasAttributes) {
+            $creationTime = $oe.Attributes['creationTime']
+            if ($creationTime) {
+              Set-ItemProperty -LiteralPath $file -Name 'CreationTime' -Value ([datetime]::Parse($creationTime.Value)) -WhatIf:$WhatIfPreference -Confirm:$false
+            }
+            $lastModifiedTime = $oe.Attributes['lastModifiedTime']
+            if ($lastModifiedTime) {
+              Set-ItemProperty -LiteralPath $file -Name 'LastWriteTime' -Value ([datetime]::Parse($lastModifiedTime.Value)) -WhatIf:$WhatIfPreference -Confirm:$false
+            }
           }
         }
-        if ($isReadOnly -and $Force) {
-          (Get-Item -LiteralPath $file -Force).IsReadOnly = $true
+        finally {
+          if ($isReadOnly -and $Force) {
+            (Get-Item -LiteralPath $file -Force).IsReadOnly = $true
+          }
         }
         return Get-Item -LiteralPath $file -Force
       }
