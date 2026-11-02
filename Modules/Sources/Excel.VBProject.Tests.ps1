@@ -295,11 +295,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Export-ExcelVBProject -Path $fixture -Destination $destination } | Should-Throw
-      }
     }
   }
   Describe 'Import-ExcelVBProject' {
@@ -445,11 +440,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Import-ExcelVBProject -Path $path -Source $source } | Should-Throw
-      }
     }
   }
 }

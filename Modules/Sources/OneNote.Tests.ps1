@@ -516,7 +516,7 @@ public enum XMLSchema
       It 'uses sanitized hierarchy name when UseName is specified' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $xml }
 
-        { Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
+        Export-OneNoteHierarchy -Id 'notebook-id' -Destination $destination -UseName -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'notebook-id.hierarchy.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
@@ -578,7 +578,7 @@ public enum XMLSchema
         Export-OneNotePageContent -Id $pageId -Destination $notebookPath
         (Get-Item -LiteralPath $destination -Force).IsReadOnly = $true
 
-        { Export-OneNotePageContent -Id $pageId -Destination $notebookPath -Force } | Should -Not -Throw
+        Export-OneNotePageContent -Id $pageId -Destination $notebookPath -Force
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
       }
       It 'throws with -NoClobber when output exists' {
@@ -631,7 +631,7 @@ public enum XMLSchema
       It 'does not create output when WhatIf is specified' {
         Mock -CommandName Get-OneNotePageContent -MockWith { $xml }
 
-        { Export-OneNotePageContent -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
+        Export-OneNotePageContent -Id 'page-id' -Destination $destination -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'page-id.content.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
@@ -640,7 +640,7 @@ public enum XMLSchema
       It 'uses sanitized page name when UseName is specified' {
         Mock -CommandName Get-OneNotePageContent -MockWith { $xml }
 
-        { Export-OneNotePageContent -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
+        Export-OneNotePageContent -Id 'page-id' -Destination $destination -UseName -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'page-id.content.xml'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
@@ -745,7 +745,7 @@ public enum XMLSchema
       It 'does not create output when WhatIf is specified' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $xml }
 
-        { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
+        Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'page-id.one'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
@@ -754,14 +754,14 @@ public enum XMLSchema
       It 'uses sanitized page name with UseName when WhatIf is specified' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $xml }
 
-        { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
+        Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -UseName -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'SamplePageName.one'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
       It 'uses docx extension when PublishFormat is pfWord and WhatIf is specified' {
         Mock -CommandName Get-OneNoteHierarchy -MockWith { $xml }
 
-        { Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -PublishFormat pfWord -WhatIf } | Should -Not -Throw
+        Export-OneNotePageAsDocument -Id 'page-id' -Destination $destination -PublishFormat pfWord -WhatIf
         $outputPath = $destination | Join-Path -ChildPath 'page-id.docx'
         Test-Path -LiteralPath $outputPath | Should-BeFalse
       }
@@ -882,7 +882,7 @@ public enum XMLSchema
       It 'does not create output when WhatIf is specified' {
         Mock -CommandName Get-OneNotePageContent -MockWith { $xml }
 
-        { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -WhatIf } | Should -Not -Throw
+        Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -WhatIf
         $directory = $destination | Join-Path -ChildPath 'page-id'
         Test-Path -LiteralPath $directory | Should-BeFalse
       }
@@ -891,10 +891,10 @@ public enum XMLSchema
       It 'uses sanitized page name as output directory when UseName is specified' {
         Mock -CommandName Get-OneNotePageContent -MockWith { $xml }
 
-        { Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -UseName -WhatIf } | Should -Not -Throw
-        $safeDirectory = $destination | Join-Path -ChildPath 'SamplePageName'
+        Export-OneNoteBinaryObject -Id 'page-id' -Destination $destination -UseName -WhatIf
+        $directory = $destination | Join-Path -ChildPath 'SamplePageName'
 
-        Test-Path -LiteralPath $safeDirectory | Should-BeFalse
+        Test-Path -LiteralPath $directory | Should-BeFalse
       }
       It 'returns no output when page content is null' {
         Mock -CommandName Get-OneNotePageContent -MockWith { $null }

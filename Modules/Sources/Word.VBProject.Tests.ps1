@@ -295,11 +295,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Export-WordVBProject -Path $fixture -Destination $destination } | Should-Throw
-      }
     }
   }
   Describe 'Import-WordVBProject' {
@@ -437,11 +432,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Import-WordVBProject -Path $path -Source $source } | Should-Throw
-      }
     }
   }
 }

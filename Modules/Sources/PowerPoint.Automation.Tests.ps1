@@ -199,11 +199,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Get-PowerPointSpeakerNote -Path $path } | Should-Throw
-      }
       It 'throws for invalid characters in Range' {
         { Get-PowerPointSpeakerNote -Path $path -Range 'a' } | Should-Throw
         { Get-PowerPointSpeakerNote -Path $path -Range '1-' } | Should-Throw

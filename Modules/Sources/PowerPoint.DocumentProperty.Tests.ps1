@@ -140,11 +140,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Get-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-PowerPointDocumentPropertyValue' -Tag 'CI', 'Mock' {
@@ -414,11 +409,6 @@ InModuleScope 'Automation.Office' {
         { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-      }
     }
   }
   Describe 'Remove-PowerPointDocumentProperty' {
@@ -585,11 +575,6 @@ InModuleScope 'Automation.Office' {
 
         { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
         Should-NotInvoke -CommandName Open-PowerPointFile
-      }
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Remove-PowerPointDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }

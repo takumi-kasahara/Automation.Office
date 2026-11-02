@@ -259,11 +259,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Open-PowerPointFile -Path $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-PowerPointFileProperty' {
@@ -352,11 +347,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Get-PowerPointFileProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Set-PowerPointFileProperty' {

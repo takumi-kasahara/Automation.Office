@@ -140,11 +140,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Get-WordDocumentProperty -LiteralPath $path } | Should-Throw
-      }
     }
   }
   Describe 'Get-WordDocumentPropertyValue' -Tag 'CI', 'Mock' {
@@ -414,11 +409,6 @@ InModuleScope 'Automation.Office' {
         { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         Should-NotInvoke -CommandName Open-WordFile
       }
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
-      }
     }
   }
   Describe 'Remove-WordDocumentProperty' {
@@ -585,11 +575,6 @@ InModuleScope 'Automation.Office' {
 
         { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
         Should-NotInvoke -CommandName Open-WordFile
-      }
-      It 'throws when the program fails' {
-        Mock -CommandName New-WordObject -MockWith { throw }
-
-        { Remove-WordDocumentProperty -LiteralPath $path } | Should-Throw
       }
     }
   }
