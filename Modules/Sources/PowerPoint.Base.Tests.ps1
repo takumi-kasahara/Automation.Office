@@ -140,8 +140,8 @@ InModuleScope 'Automation.Office' {
               $Presentation
             )
             $Presentation.Slides.Add(1, [Microsoft.Office.Interop.PowerPoint.PpSlideLayout]::ppLayoutTitleOnly) | Out-Null
-          } | Should -Not -Throw
-        }
+          }
+        } | Should -Not -Throw
       }
     }
     Context 'Edge cases' {
