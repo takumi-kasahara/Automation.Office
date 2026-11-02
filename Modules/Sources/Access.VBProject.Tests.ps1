@@ -144,7 +144,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'exports VBProject by FilePath as JSON' {
+      It 'exports VBProject by Path as JSON' {
         $item = Export-AccessVBProject -Path $fixture -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
 
@@ -362,7 +362,7 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'imports VBProject by FilePath from JSON' {
+      It 'imports VBProject by Path from JSON' {
         New-AccessFile -Path $path -RemovePersonalInformation
 
         Import-AccessVBProject -Path $path -Source $source
