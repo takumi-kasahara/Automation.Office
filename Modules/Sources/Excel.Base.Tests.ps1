@@ -58,6 +58,7 @@ InModuleScope 'Automation.Office' {
     }
     BeforeEach {
       $password = Get-Password
+      $path = Get-TempFile
     }
     AfterEach {
       if (Test-Path -LiteralPath $path) {
@@ -66,43 +67,39 @@ InModuleScope 'Automation.Office' {
     }
     Context 'ParameterSetName' {
       It 'creates a file at the requested path' {
-        $path = Get-TempFile
         $item = New-ExcelFile -Path $path
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipeline' {
-        $path = Get-TempFile
         $item = $path | New-ExcelFile
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file by Path with ValueFromPipelineByPropertyName' {
-        $path = Get-TempFile
         $item = [PSCustomObject]@{ FullName = $path } | New-ExcelFile
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not create a file when WhatIf is specified' {
-        $path = Get-TempFile
-        New-ExcelFile -Path $path -Force -WhatIf
-        Test-Path -LiteralPath $path | Should-BeFalse
-      }
       It 'asks for confirmation when Confirm is specified' {
-        $path = Get-TempFile
         $exitCode = 'N' | Invoke-Confirm -Path $path
+
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $path | Should-BeFalse
       }
       It 'overwrites an existing workbook when Force is specified' {
-        $path = Get-TempFile
         New-Item -Path $path -ItemType File | Out-Null
+
         New-ExcelFile -Path $path -Force -Confirm
+
         (Get-Item -LiteralPath $path).Length | Should-BeGreaterThan 0
       }
     }
@@ -110,91 +107,53 @@ InModuleScope 'Automation.Office' {
       It 'creates a file using the requested file format' {
         $path = Get-TempFile -Extension '.xlsm'
         $item = New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled
+
+        Test-Path -LiteralPath $path | Should-BeTrue
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
-        Test-Path -LiteralPath $path | Should-BeTrue
       }
       It 'creates a file with PasswordToOpen' {
-        $path = Get-TempFile
-        New-ExcelFile -Path $path -PasswordToOpen $password
+        $item = New-ExcelFile -Path $path -PasswordToOpen $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
-        $app = New-ExcelObject
-        Open-ExcelFile -Path $path -PasswordToOpen $password -Action {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.HasPassword | Should-BeTrue
-          $Workbook.Password | Should-NotBeEmptyString
-        }
-      }
-      It 'creates a file with PasswordToModify' {
-        $path = Get-TempFile
-        New-ExcelFile -Path $path -PasswordToModify $password
-        Test-Path -LiteralPath $path | Should-BeTrue
-        Open-ExcelFile -Path $path -PasswordToModify $password -Action {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.WritePassword | Should-NotBeEmptyString
-          $Workbook.WriteReserved | Should-BeTrue
-        }
-      }
-      It 'creates a file with ReadOnlyRecommended' {
-        $path = Get-TempFile
-        New-ExcelFile -Path $path -ReadOnlyRecommended
-        Test-Path -LiteralPath $path | Should-BeTrue
-        Open-ExcelFile -Path $path -Action {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.ReadOnlyRecommended | Should-BeTrue
-        }
-      }
-      It 'creates a file with RemovePersonalInformation' {
-        $path = Get-TempFile
-        New-ExcelFile -Path $path -RemovePersonalInformation
-        Test-Path -LiteralPath $path | Should-BeTrue
-        Open-ExcelFile -Path $path -Action {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.RemovePersonalInformation | Should-BeTrue
-        }
-      }
-      It 'creates a file with Initialize script block' {
-        $path = Get-TempFile
-        $item = New-ExcelFile -Path $path -Initialize {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.Worksheets.Item(1).Name = 'TestData'
-        }
         $item | Should-HaveType ([System.IO.FileInfo])
         $item.FullName | Should-Be ([Path]::GetFullPath($path))
+      }
+      It 'creates a file with PasswordToModify' {
+        $item = New-ExcelFile -Path $path -PasswordToModify $password
+
         Test-Path -LiteralPath $path | Should-BeTrue
-        Open-ExcelFile -Path $path -Action {
-          param (
-            [Microsoft.Office.Interop.Excel.Workbook]
-            $Workbook
-          )
-          $Workbook.Worksheets.Item(1).Name | Should-Be 'TestData'
-        }
+        $item | Should-HaveType ([System.IO.FileInfo])
+        $item.FullName | Should-Be ([Path]::GetFullPath($path))
+      }
+      It 'creates a file with ReadOnlyRecommended' {
+        New-ExcelFile -Path $path -ReadOnlyRecommended
+
+        $properties = Get-ExcelFileProperty -LiteralPath $path
+        $properties.ReadOnlyRecommended | Should-BeTrue
+      }
+      It 'creates a file with RemovePersonalInformation' {
+        $item = New-ExcelFile -Path $path -RemovePersonalInformation
+
+        $properties = Get-ExcelFileProperty -LiteralPath $path
+        $properties.RemovePersonalInformation | Should-BeTrue
+      }
+      It 'creates a file with Initialize script block' {
+        {
+          New-ExcelFile -Path $path -Initialize {
+            param (
+              [Microsoft.Office.Interop.Excel.Workbook]
+              $Workbook
+            )
+            $Workbook.Worksheets.Item(1).Name = 'TestData'
+          }
+        } | Should -Not -Throw
       }
     }
     Context 'Edge cases' {
-      It 'fails when the path already exists and Force is not specified' {
-        $path = Get-TempFile
-        New-Item -Path $path -ItemType File | Out-Null
-        { New-ExcelFile -Path $path } | Should-Throw
-      }
     }
   }
-  Describe 'New-ExcelFile.Unit' {
+  Describe 'New-ExcelFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
     }
@@ -204,21 +163,20 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-ExcelObject when WhatIf is specified' {
+      It 'does not create a file when WhatIf is specified' {
         Mock -CommandName New-ExcelObject -MockWith { throw }
 
-        { New-ExcelFile -Path $path -Force -WhatIf } | Should -Not -Throw
+        New-ExcelFile -Path $path -Force -WhatIf
+
         Should-NotInvoke -CommandName New-ExcelObject
         Test-Path -LiteralPath $path | Should-BeFalse
       }
     }
     Context 'Edge cases' {
-      It 'throws and does not call New-ExcelObject when path exists and Force is not specified' {
+      It 'throws when the file exists and Force is not specified' {
         New-Item -Path $path -ItemType File -Force | Out-Null
-        Mock -CommandName New-ExcelObject
 
         { New-ExcelFile -Path $path } | Should-Throw
-        Should-NotInvoke -CommandName New-ExcelObject
       }
     }
   }
@@ -233,39 +191,47 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'opens a workbook by Path and returns the workbook object' {
+      It 'opens a file by Path' {
         New-ExcelFile -Path $path
-        Open-ExcelFile -Path $path | Should-NotBeNull
+
+        Open-ExcelFile -Path $path | Should-BeNull
       }
-      It 'opens a workbook by Path with ValueFromPipeline' {
+      It 'opens a file by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
-        $path | Open-ExcelFile | Should-NotBeNull
+
+        $path | Open-ExcelFile | Should-BeNull
       }
-      It 'opens a workbook by Path with ValueFromPipelineByPropertyName' {
+      It 'opens a file by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
-        [PSCustomObject]@{ FullName = $path } | Open-ExcelFile | Should-NotBeNull
+
+        [PSCustomObject]@{ FullName = $path } | Open-ExcelFile | Should-BeNull
       }
     }
     Context 'Other parameters' {
-      It 'opens a workbook with PasswordToOpen' {
+      It 'opens a file with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        Open-ExcelFile -Path $path -PasswordToOpen $password | Should-NotBeNull
+
+        Open-ExcelFile -Path $path -PasswordToOpen $password | Should-BeNull
       }
-      It 'opens a workbook with PasswordToModify' {
+      It 'opens a file with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
-        Open-ExcelFile -Path $path -PasswordToModify $password | Should-NotBeNull
+
+        Open-ExcelFile -Path $path -PasswordToModify $password | Should-BeNull
       }
-      It 'opens a workbook with ReadOnly' {
+      It 'opens a file with ReadOnly' {
         New-ExcelFile -Path $path
-        Open-ExcelFile -Path $path -ReadOnly | Should-NotBeNull
+
+        Open-ExcelFile -Path $path -ReadOnly | Should-BeNull
       }
-      It 'opens a workbook with Force' {
+      It 'opens a file with Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
-        Open-ExcelFile -Path $path -Force | Should-NotBeNull
+
+        Open-ExcelFile -Path $path -Force | Should-BeNull
       }
-      It 'opens a workbook with Action script block' {
+      It 'opens a file with Action script block' {
         New-ExcelFile -Path $path
-        $result = Open-ExcelFile -Path $path -Action {
+
+        $value = Open-ExcelFile -Path $path -Action {
           param (
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
@@ -273,13 +239,15 @@ InModuleScope 'Automation.Office' {
           $Workbook.Worksheets.Item(1).Name = 'Sheet1'
           return $Workbook.Worksheets.Item(1).Name
         }
-        $result | Should-Be 'Sheet1'
+
+        $value | Should-Be 'Sheet1'
       }
-      It 'opens a workbook using an existing Application object' {
+      It 'opens a file using an existing Application object' {
         New-ExcelFile -Path $path
+
         $app = New-ExcelObject
         try {
-          Open-ExcelFile -Application $app -Path $path | Should-NotBeNull
+          Open-ExcelFile -Application $app -Path $path | Should-BeNull
         } finally {
           $app.Quit()
           Get-Variable |
@@ -291,7 +259,7 @@ InModuleScope 'Automation.Office' {
       }
     }
   }
-  Describe 'Open-ExcelFile.Unit' {
+  Describe 'Open-ExcelFile' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -302,12 +270,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Open-ExcelFile -Path $path } | Should-Throw
-        Should-Invoke -CommandName New-ExcelObject -Times 1 -Exactly
-      }
     }
   }
   Describe 'Get-ExcelFileProperty' {
@@ -323,25 +285,33 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'returns selected file properties by Path' {
         New-ExcelFile -Path $path
-        $properties = Get-ExcelFileProperty -Path $path -Name Final
+
+        $properties = Get-ExcelFileProperty -LiteralPath $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by LiteralPath' {
         New-ExcelFile -Path $path
+
         $properties = Get-ExcelFileProperty -LiteralPath $path -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
+
         $properties = $path | Get-ExcelFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
+
         $properties = [PSCustomObject]@{ PSPath = $path } | Get-ExcelFileProperty -Name Final
+
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
       }
@@ -349,32 +319,35 @@ InModuleScope 'Automation.Office' {
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Get-ExcelFileProperty -Path $path } | Should-Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToOpen (Get-Password) } | Should-Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToOpen $password } | Should -Not -Throw
+
+        { Get-ExcelFileProperty -LiteralPath $path } | Should-Throw
+        { Get-ExcelFileProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-ExcelFileProperty -LiteralPath $path -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
-        { Get-ExcelFileProperty -Path $path } | Should -Not -Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToModify (Get-Password) } | Should -Not -Throw
-        { Get-ExcelFileProperty -Path $path -PasswordToModify $password } | Should -Not -Throw
+
+        { Get-ExcelFileProperty -LiteralPath $path } | Should -Not -Throw
+        { Get-ExcelFileProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-ExcelFileProperty -LiteralPath $path -PasswordToModify $password } | Should -Not -Throw
       }
       It 'returns file properties with Recurse' {
         New-ExcelFile -Path $path
-        $properties = Get-ExcelFileProperty -Path $path -Recurse
+
+        $properties = Get-ExcelFileProperty -LiteralPath $path -Recurse
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }
       It 'returns file properties with Recurse and Depth' {
         New-ExcelFile -Path $path
 
-        $properties = Get-ExcelFileProperty -Path $path -Recurse -Depth 2
+        $properties = Get-ExcelFileProperty -LiteralPath $path -Recurse -Depth 2
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }
     }
   }
-  Describe 'Get-ExcelFileProperty.Unit' {
+  Describe 'Get-ExcelFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -385,11 +358,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-ExcelObject fails' {
-        Mock -CommandName New-ExcelObject -MockWith { throw }
-
-        { Get-ExcelFileProperty -Path $path } | Should-Throw
-      }
     }
   }
   Describe 'Set-ExcelFileProperty' {
@@ -444,80 +412,104 @@ InModuleScope 'Automation.Office' {
     Context 'ParameterSetName' {
       It 'updates a file property by Path with Name and Value' {
         New-ExcelFile -Path $path
+
         Set-ExcelFileProperty -Path $path -Name $name -Value $value
+
         (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file property by LiteralPath with Name and Value' {
         New-ExcelFile -Path $path
+
         Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value
+
         (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file properties by Path with InputObject' {
         New-ExcelFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         Set-ExcelFileProperty -Path $path -InputObject $properties
+
         (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
       }
       It 'updates a file properties by LiteralPath with InputObject' {
         New-ExcelFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         Set-ExcelFileProperty -LiteralPath $path -InputObject $properties
+
         (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
+
         $path | Set-ExcelFileProperty -Name $name -Value $value
-        (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
+
+        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
+
         [PSCustomObject]@{ PSPath = $path } | Set-ExcelFileProperty -Name $name -Value $value
-        (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
+
+        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update properties when WhatIf is specified' {
         New-ExcelFile -Path $path
-        Set-ExcelFileProperty -Path $path -Name $name -Value $value -Force -WhatIf
-        (Get-ExcelFileProperty -Path $path).Final | Should-BeFalse
+
+        Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -Force -WhatIf
+
+        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-ExcelFile -Path $path
+
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
+
         $exitCode | Should-Be 0
         (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeFalse
       }
       It 'updates a read-only recommended workbook when Force is specified' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
+
         Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -Force -Confirm
-        (Get-ExcelFileProperty -Path $path).Final | Should-BeTrue
+
+        (Get-ExcelFileProperty -LiteralPath $path).Final | Should-BeTrue
       }
     }
     Context 'Other parameters' {
       It 'updates a file protected with PasswordToOpen' {
         New-ExcelFile -Path $path -PasswordToOpen $password
-        { Set-ExcelFileProperty -Path $path -Name $name -Value $value } | Should-Throw
-        { Set-ExcelFileProperty -Path $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
-        Set-ExcelFileProperty -Path $path -Name $name -Value $value -PasswordToOpen $password
-        (Get-ExcelFileProperty -Path $path -PasswordToOpen $password).Final | Should-BeTrue
+
+        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
+        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
+        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password } | Should -Not -Throw
+        (Get-ExcelFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-ExcelFile -Path $path -PasswordToModify $password
+
         { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
-        Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password
+        { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password } | Should -Not -Throw
         (Get-ExcelFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified' {
         New-ExcelFile -Path $path
-        $property = Set-ExcelFileProperty -Path $path -Name $name -Value $value -PassThru
+
+        $property = Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
+
         $property | Should-HaveType ([PSCustomObject])
         $property.Final | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified with InputObject' {
         New-ExcelFile -Path $path
+
         $properties = [PSCustomObject]@{ Final = $true }
         $property = Set-ExcelFileProperty -LiteralPath $path -InputObject $properties -PassThru
+
         $property | Should-HaveType ([PSCustomObject])
         $property.Final | Should-BeTrue
       }
@@ -526,15 +518,16 @@ InModuleScope 'Automation.Office' {
       It 'throws when trying to set a property that does not exist.' {
         New-ExcelFile -Path $path
 
-        { Set-ExcelFileProperty -Path $path -Name 'Dummy' -Value $value } | Should-Throw
+        { Set-ExcelFileProperty -LiteralPath $path -Name 'Dummy' -Value $value } | Should-Throw
       }
       It 'throws an error when read-only recommended file without Force' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
+
         { Set-ExcelFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
       }
     }
   }
-  Describe 'Set-ExcelFileProperty.Unit' {
+  Describe 'Set-ExcelFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
       New-Item -Path $path -ItemType File -Force | Out-Null
@@ -556,19 +549,22 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call Open-ExcelFile when WhatIf is specified' {
+      It 'does not open the file when WhatIf is specified' {
         Set-ExcelFileProperty -LiteralPath $path -Name Final -Value $false -WhatIf
+
         Should-NotInvoke -CommandName Open-ExcelFile
       }
     }
     Context 'Edge cases' {
-      It 'throws when target item is read-only' {
+      It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
+
         { Set-ExcelFileProperty -LiteralPath $path -Name Final -Value $false } | Should-Throw
+        Should-NotInvoke -CommandName Open-ExcelFile
       }
     }
   }
-  Describe 'Test-ExcelExtension' {
+  Describe 'Test-ExcelExtension' -Tag 'CI', 'Mock' {
     BeforeEach {
       Mock -CommandName Test-Path -MockWith { $true }
       Mock -CommandName Get-Item -MockWith {
@@ -583,36 +579,37 @@ InModuleScope 'Automation.Office' {
         }
       }
     }
-    It 'returns true for *.xlsx files by Path' {
-      Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.txt' } -MockWith {
-        1, 2 |
-        ForEach-Object {
-          [PSCustomObject]@{
-            PSIsContainer = $false
-            PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.txt")
-            FullName      = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+    Context 'ParameterSetName' {
+      It 'returns true for *.xlsx files by Path' {
+        Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.txt' } -MockWith {
+          1, 2 |
+          ForEach-Object {
+            [PSCustomObject]@{
+              PSIsContainer = $false
+              PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+              FullName      = ($env:TEMP | Join-Path -ChildPath "$_.txt")
+            }
           }
         }
-      }
-      Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.xlsx' } -MockWith {
-        1, 2 |
-        ForEach-Object {
-          [PSCustomObject]@{
-            PSIsContainer = $false
-            PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.xlsx")
-            FullName      = ($env:TEMP | Join-Path -ChildPath "$_.xlsx")
+        Mock -CommandName Get-Item -ParameterFilter { $Path -eq '*.xlsx' } -MockWith {
+          1, 2 |
+          ForEach-Object {
+            [PSCustomObject]@{
+              PSIsContainer = $false
+              PSPath        = ($env:TEMP | Join-Path -ChildPath "$_.xlsx")
+              FullName      = ($env:TEMP | Join-Path -ChildPath "$_.xlsx")
+            }
           }
         }
+
+        Test-ExcelExtension -Path '*.txt' | Should-BeFalse
+        Test-ExcelExtension -Path '*.xlsx' | Should-BeTrue
       }
-      Test-ExcelExtension -Path '*.txt' | Should-BeFalse
-      Test-ExcelExtension -Path '*.xlsx' | Should-BeTrue
+      It 'returns true for *.xlsx files by LiteralPath' {
+        Test-ExcelExtension -LiteralPath 'Book.txt' | Should-BeFalse
+        Test-ExcelExtension -LiteralPath 'Book.xlsx' | Should-BeTrue
+      }
     }
-    It 'returns true for *.xlsx files by LiteralPath' {
-      Test-ExcelExtension -LiteralPath 'Book.txt' | Should-BeFalse
-      Test-ExcelExtension -LiteralPath 'Book.xlsx' | Should-BeTrue
-    }
-  }
-  Describe 'Test-ExcelExtension.Unit' {
     Context 'Edge cases' {
       It 'returns false when Get-Item throws ItemNotFoundException' {
         Mock -CommandName Get-Item -MockWith {

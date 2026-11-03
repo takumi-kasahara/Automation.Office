@@ -1,6 +1,7 @@
 ﻿using module .\DocumentProperty.psm1
 using namespace Microsoft.Office.Core
 using namespace Microsoft.Office.Interop.Word
+using namespace System.Diagnostics.CodeAnalysis
 
 Set-StrictMode -Version Latest
 
@@ -71,6 +72,8 @@ function Get-WordDocumentProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Custom', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [SupportsWildcards()]
@@ -115,13 +118,13 @@ function Get-WordDocumentProperty {
           )
           $properties = Get-DocumentProperty -InputObject $Document -Name $Name -Custom:$Custom
           $missingNames = @(if ($Name) {
-            @(
-              $Name |
-              Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
-            )
-          } else {
-            @()
-          })
+              @(
+                $Name |
+                Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
+              )
+            } else {
+              @()
+            })
           if ($missingNames.Count -gt 0) {
             throw [ArgumentException]::new("Document property not found: $($missingNames -join ', ')")
           }
@@ -308,6 +311,8 @@ function Set-WordDocumentProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'ValuePathSet', SupportsShouldProcess)]
   [OutputType([PSCustomObject], [void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Custom', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'PassThru', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'ValuePathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [Parameter(Mandatory, ParameterSetName = 'PSObjectPathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]

@@ -1,4 +1,5 @@
 ﻿using module .\VBProject.psm1
+using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Text
 
@@ -147,9 +148,6 @@ function Import-PowerPointVBProject {
   .PARAMETER Source
     Specifies the source file path for `VBProject.json`.
 
-  .PARAMETER Force
-    Forces import processing when a file is marked as read-only recommended.
-
   .PARAMETER Hidden
     Imports while keeping the presentation window hidden.
 
@@ -176,18 +174,12 @@ function Import-PowerPointVBProject {
 
     Imports into presentation protected with a modify password.
 
-  .EXAMPLE
-    ```powershell
-    Import-PowerPointVBProject -Path "$env:TEMP\Presentation.pptm" -Source "$env:TEMP\VBProject.json" -WhatIf
-    ```
-
-    Shows what would happen if the command were executed without actually importing the VBA project.
-
   .OUTPUTS
     None.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Hidden', Justification = 'Parameter controls presentation window visibility inside the action callback')]
   param (
     [Alias('FilePath', 'FullName')]
     [Parameter(Mandatory, Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]

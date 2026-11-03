@@ -81,7 +81,7 @@ Private Sub ContainsReturnsFalseWhenTargetDoesNotSupportItemLookup()
   target.Add "A", "A"
 
   Assert.IsFalse CollectionExtensions.Contains(target, "A"), _
-    "Contains should return False when target does not support default Item call semantics."
+    "Contains should return False when the target does not support default Item call semantics."
 
 TestExit:
   '@Ignore UnhandledOnErrorResumeNext

@@ -362,14 +362,10 @@ function Open-WordFile {
         )
         try {
           if ($Action) {
-            & $Action $file
-          } else {
-            return $file
+            return & $Action $file
           }
         } finally {
-          if ($Action -and $file) {
-            $file.Close()
-          }
+          $file.Close()
         }
       } finally {
         try {
@@ -452,6 +448,9 @@ function Get-WordFileProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
+  [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Recurse', Justification = 'Parameter is used inside the action callback')]
+  [SuppressMessage('PSReviewUnusedParameter', 'Depth', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [SupportsWildcards()]
@@ -605,6 +604,7 @@ function Set-WordFileProperty {
   #>
   [CmdletBinding(DefaultParameterSetName = 'ValuePathSet', SupportsShouldProcess)]
   [OutputType([PSCustomObject], [void])]
+  [SuppressMessage('PSReviewUnusedParameter', 'PassThru', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'ValuePathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [Parameter(Mandatory, ParameterSetName = 'PSObjectPathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -676,6 +676,7 @@ function Set-WordFileProperty {
         if ($item.IsReadOnly) {
           $PSCmdlet.ThrowTerminatingError((New-ErrorRecord -ErrorId 'FileIsReadOnly' -TargetObject $item))
         }
+        $parameterSetName = $PSCmdlet.ParameterSetName
         Open-WordFile -Application $app -Path $item.FullName -PasswordToOpen $PasswordToOpen -PasswordToModify $PasswordToModify -Action {
           param (
             [Microsoft.Office.Interop.Word.Document]
@@ -689,16 +690,14 @@ function Set-WordFileProperty {
             $Document.Save()
           }
           if ($PassThru) {
-            $updated = Get-ObjectProperty -InputObject $Document
-            $propertyNames = switch -Exact -CaseSensitive ($PSCmdlet.ParameterSetName) {
+            switch -Exact -CaseSensitive ($parameterSetName) {
               { $_ -in 'ValuePathSet', 'ValueLiteralPathSet' } {
-                $Name
+                return Get-ObjectProperty -InputObject $Document -Name $Name
               }
               { $_ -in 'PSObjectPathSet', 'PSObjectLiteralPathSet' } {
-                $InputObject.PSObject.Properties.Name
+                return Get-ObjectProperty -InputObject $Document -Name $InputObject.PSObject.Properties.Name
               }
             }
-            return $updated | Select-Object -Property $propertyNames
           }
         }
       }

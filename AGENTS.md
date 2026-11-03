@@ -39,7 +39,7 @@ Run Pester with `Pester.bat`:
 - Filter by line: add `-LineNumber`
 
 ```bat
-".agents\skills\powershell-5\scripts/Pester.bat" -Path "Module.Tests.ps1"
+".agents\skills\powershell-5\scripts\Pester.bat" -Path "Module.Tests.ps1"
 ```
 
 ```powershell

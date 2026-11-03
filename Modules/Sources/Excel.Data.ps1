@@ -141,42 +141,42 @@ function Get-ExcelTableColumn {
 
   .EXAMPLE
     ```powershell
-    Get-ExcelTableColumn -Path "$env:TEMP\Workbook.xlsx" -Table Employees$
+    Get-ExcelTableColumn -Path "$env:TEMP\Workbook.xlsx" -Table 'Employees$'
     ```
 
     Gets column metadata for the Employees$ table in the specified Excel workbook file.
 
   .EXAMPLE
     ```powershell
-    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsx" -Table Employees$
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsx" -Table 'Employees$'
     ```
 
     Gets column metadata using a literal path (wildcards not interpreted).
 
   .EXAMPLE
     ```powershell
-    "$env:TEMP\Workbook.xlsx" | Get-ExcelTableColumn -Table Employees$
+    "$env:TEMP\Workbook.xlsx" | Get-ExcelTableColumn -Table 'Employees$'
     ```
 
     Gets column metadata by piping the file path to the cmdlet.
 
   .EXAMPLE
     ```powershell
-    Get-ExcelTableColumn -Path "$env:TEMP\*.xlsx" -Table Employees$
+    Get-ExcelTableColumn -Path "$env:TEMP\*.xlsx" -Table 'Employees$'
     ```
 
     Gets column metadata from all .xlsx files in the specified directory using wildcards.
 
   .EXAMPLE
     ```powershell
-    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xls" -Table Employees$
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xls" -Table 'Employees$'
     ```
 
     Gets column metadata from an .xls format workbook file.
 
   .EXAMPLE
     ```powershell
-    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsm" -Table Employees$ -ReadOnly
+    Get-ExcelTableColumn -LiteralPath "$env:TEMP\Workbook.xlsm" -Table 'Employees$' -ReadOnly
     ```
 
     Gets column metadata from a macro-enabled workbook in read-only mode.
@@ -504,7 +504,11 @@ function Invoke-ExcelQuery {
               $result.ObjectName = $target.Name
               foreach ($column in $dataTable.Columns) {
                 $value = $rowData[$column.ColumnName]
-                $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+                $result[$column.ColumnName] = if ($value -is [DBNull]) {
+                  $null
+                } else {
+                  $value
+                }
               }
               [PSCustomObject]$result
             }

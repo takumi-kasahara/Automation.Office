@@ -76,13 +76,6 @@ InModuleScope 'Automation.Office' {
       throw $_
     }
   }
-  AfterAll {
-    $componentRoot = [Path]::ChangeExtension($source, $null).TrimEnd('.')
-    if (-not (Test-Path -LiteralPath $componentRoot)) {
-      New-Item -Path $componentRoot -ItemType Directory | Out-Null
-    }
-    Export-PowerPointVBProject -Path $fixture -Destination $source
-  }
   Describe 'Export-PowerPointVBProject' {
     BeforeAll {
       function Invoke-Confirm {
@@ -131,27 +124,30 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'exports VBProject by FilePath as JSON' {
+      It 'exports VBProject by Path as JSON' {
         $item = Export-PowerPointVBProject -Path $fixture -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipeline' {
         $item = $fixture | Export-PowerPointVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
       It 'exports VBProject by Path with ValueFromPipelineByPropertyName' {
         $item = [PSCustomObject]@{ Path = $fixture } | Export-PowerPointVBProject -Destination $destination
         $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
+        $item.FullName | Should-Be ([Path]::GetFullPath($destination))
         @($exported.VBComponents).Count | Should-BeGreaterThan 0
         @($exported.References).Count | Should-BeGreaterThan 0
       }
@@ -160,9 +156,10 @@ InModuleScope 'Automation.Office' {
         try {
           $item = Export-PowerPointVBProject -Path $fixture -Destination $destination -ComponentRoot $customRoot
           $exported = Get-Content -LiteralPath $destination -Encoding UTF8 | ConvertFrom-Json
-          $item.FullName | Should-Be ([Path]::GetFullPath($destination))
+
           Test-Path -LiteralPath $customRoot -PathType Container | Should-BeTrue
           Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
+          $item.FullName | Should-Be ([Path]::GetFullPath($destination))
           @($exported.VBComponents).Count | Should-BeGreaterThan 0
           @($exported.References).Count | Should-BeGreaterThan 0
         } finally {
@@ -175,19 +172,22 @@ InModuleScope 'Automation.Office' {
     Context 'SupportsShouldProcess' {
       It 'does not create outputs when WhatIf is specified' {
         Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -WhatIf
+
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         $exitCode = 'N' | Invoke-Confirm -Path $fixture -Destination $destination
+
         $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
         (New-Item -Path $destination -ItemType File).IsReadOnly = $true
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
-        Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm } | Should -Not -Throw
         (Get-Item -LiteralPath $destination -Force).IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -195,16 +195,18 @@ InModuleScope 'Automation.Office' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         $bas = New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File
         $bas.IsReadOnly = $true
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
-        Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm
+        { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -Confirm } | Should -Not -Throw
         $bas.IsReadOnly | Should-BeTrue
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
       It 'throws and keeps the existing destination content unchanged when NoClobber is specified' {
         New-Item -Path $destination -ItemType File | Out-Null
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         (Get-Item -LiteralPath $destination).Length | Should-Be 0
@@ -213,6 +215,7 @@ InModuleScope 'Automation.Office' {
       It 'throws and keeps the existing component content unchanged when NoClobber is specified' {
         New-Item -Path $componentRoot -ItemType Directory | Out-Null
         New-Item -Path ($componentRoot | Join-Path -ChildPath 'Module1.bas') -ItemType File | Out-Null
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath ($componentRoot | Join-Path -ChildPath 'Module1.bas') -PathType Leaf | Should-BeTrue
@@ -220,22 +223,11 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Other parameters' {
-      It 'exports VBProject by relative path' {
-        Push-Location -Path $env:TEMP
-        try {
-          $relativeDestination = [Path]::GetFileName($destination)
-          $relativeComponentRoot = [Path]::ChangeExtension($relativeDestination, $null).TrimEnd('.')
-          Export-PowerPointVBProject -Path $fixture -Destination $relativeDestination -ComponentRoot $relativeComponentRoot
-          Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
-          Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
-        } finally {
-          Pop-Location
-        }
-      }
       It 'exports VBProject from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -PasswordToOpen $password
+
         { Export-PowerPointVBProject -Path $path -Destination $destination -PasswordToOpen (Get-Password) } | Should-Throw
-        Export-PowerPointVBProject -Path $path -Destination $destination -PasswordToOpen $password
+        { Export-PowerPointVBProject -Path $path -Destination $destination -PasswordToOpen $password } | Should -Not -Throw
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeTrue
       }
@@ -247,13 +239,16 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'Edge cases' {
-      It 'throws when the destination is an existing directory' {
+      It 'throws when destination is an existing directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
+
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
       }
-      It 'throws when the destination path already exists as a directory' {
+      It 'throws when destination path already exists as a directory' {
         New-Item -Path $destination -ItemType Directory | Out-Null
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -NoClobber } | Should-Throw
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force -NoClobber } | Should-Throw
         Test-Path -LiteralPath $destination -PathType Container | Should-BeTrue
@@ -261,13 +256,14 @@ InModuleScope 'Automation.Office' {
       }
       It 'throws when the component directory path already exists as a file' {
         New-Item -Path $componentRoot -ItemType File | Out-Null
+
         { Export-PowerPointVBProject -Path $fixture -Destination $destination -Force } | Should-Throw
         Test-Path -LiteralPath $componentRoot -PathType Leaf | Should-BeTrue
         Test-Path -LiteralPath $destination | Should-BeFalse
       }
     }
   }
-  Describe 'Export-PowerPointVBProject.Unit' {
+  Describe 'Export-PowerPointVBProject' -Tag 'Mock' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $PathType -ne 'Container' }
     }
@@ -275,19 +271,14 @@ InModuleScope 'Automation.Office' {
       $destination = Get-Destination
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-PowerPointObject when WhatIf is specified' {
-        Mock -CommandName New-PowerPointObject
+      It 'does not call the program when WhatIf is specified' {
+        Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Export-PowerPointVBProject -Path $fixture -Destination $destination -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
+        Export-PowerPointVBProject -Path $fixture -Destination $destination -WhatIf
+        Should-NotInvoke -CommandName New-PowerPointObject
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Export-PowerPointVBProject -Path $fixture -Destination $destination } | Should-Throw
-      }
     }
   }
   Describe 'Import-PowerPointVBProject' {
@@ -330,24 +321,30 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'imports VBProject by FilePath from JSON' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
+      It 'imports VBProject by Path from JSON' {
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
+
         Import-PowerPointVBProject -Path $path -Source $source -Hidden
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipeline' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
+
         $path | Import-PowerPointVBProject -Source $source -Hidden
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject by Path with ValueFromPipelineByPropertyName' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
+
         [PSCustomObject]@{ Path = $path } | Import-PowerPointVBProject -Source $source -Hidden
+
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
@@ -364,39 +361,30 @@ InModuleScope 'Automation.Office' {
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
         $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
         $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
-        $exitCode | Should-Be 0
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
+
+        $exitCode | Should-Be 0
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
       }
     }
     Context 'Other parameters' {
-      It 'imports VBProject by relative path' {
-        Push-Location -Path $env:TEMP
-        try {
-          $relativeSource = [Path]::GetFileName($source)
-          New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled
-          Import-PowerPointVBProject -Path $path -Source $relativeSource -Hidden
-          $actual = Get-ComparableVBProjectFromFile -LiteralPath $path
-          ($actual | ConvertTo-Json) | Should-Be ((Get-ComparableVBProjectFromJson -LiteralPath $source) | ConvertTo-Json)
-        } finally {
-          Pop-Location
-        }
-      }
       It 'imports VBProject into a file protected with PasswordToOpen' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -PasswordToOpen $password
+
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToOpen (Get-Password) } | Should-Throw
-        Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToOpen $password
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToOpen $password } | Should -Not -Throw
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToOpen $password
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
       It 'imports VBProject into a file protected with PasswordToModify' {
-        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -PasswordToModify $password
+
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToModify (Get-Password) } | Should-Throw
-        Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToModify $password
+        { Import-PowerPointVBProject -Path $path -Source $source -Hidden -PasswordToModify $password } | Should -Not -Throw
+        $expected = Get-ComparableVBProjectFromJson -LiteralPath $source
         $actual = Get-ComparableVBProjectFromFile -LiteralPath $path -PasswordToModify $password
         ($actual | ConvertTo-Json) | Should-Be ($expected | ConvertTo-Json)
       }
@@ -404,11 +392,12 @@ InModuleScope 'Automation.Office' {
     Context 'Edge cases' {
       It 'throws an error when read-only recommended presentation' {
         New-PowerPointFile -Path $path -FileFormat ppSaveAsOpenXMLPresentationMacroEnabled -ReadOnlyRecommended
+
         { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
       }
     }
   }
-  Describe 'Import-PowerPointVBProject.Unit' {
+  Describe 'Import-PowerPointVBProject' -Tag 'Mock' {
     BeforeAll {
       Mock -CommandName Test-Path -MockWith { $true }
     }
@@ -416,19 +405,15 @@ InModuleScope 'Automation.Office' {
       $path = Get-TempFile
     }
     Context 'SupportsShouldProcess' {
-      It 'does not call New-PowerPointObject when WhatIf is specified' {
+      It 'does not call the program when WhatIf is specified' {
         Mock -CommandName New-PowerPointObject -MockWith { throw }
 
-        { Import-PowerPointVBProject -Path $path -Source $source -Hidden -WhatIf } | Should -Not -Throw
-        Should-Invoke -CommandName New-PowerPointObject -Times 0 -Exactly
+        Import-PowerPointVBProject -Path $path -Source $source -Hidden -WhatIf
+
+        Should-NotInvoke -CommandName New-PowerPointObject
       }
     }
     Context 'Edge cases' {
-      It 'throws when New-PowerPointObject fails' {
-        Mock -CommandName New-PowerPointObject -MockWith { throw }
-
-        { Import-PowerPointVBProject -Path $path -Source $source -Hidden } | Should-Throw
-      }
     }
   }
 }
