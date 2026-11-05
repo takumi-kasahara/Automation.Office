@@ -9,3 +9,6 @@ node_modules/
 !.vscode/mcp.json
 !.vscode/settings.json
 !.vscode/tasks.json
+
+coverage.xml
+testResults.xml
