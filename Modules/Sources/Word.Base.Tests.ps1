@@ -280,7 +280,7 @@ InModuleScope 'Automation.Office' {
       It 'returns selected file properties by Path' {
         New-WordFile -Path $path
 
-        $properties = Get-WordFileProperty -LiteralPath $path -Name Final
+        $properties = Get-WordFileProperty -Path $path -Name Final
 
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
@@ -325,17 +325,10 @@ InModuleScope 'Automation.Office' {
         { Get-WordFileProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-WordFileProperty -LiteralPath $path -PasswordToModify $password } | Should -Not -Throw
       }
-      It 'returns file properties with Recurse' {
+      It 'returns file properties with Depth' {
         New-WordFile -Path $path
 
-        $properties = Get-WordFileProperty -LiteralPath $path -Recurse
-
-        $properties.Application | Should-HaveType ([PSCustomObject])
-      }
-      It 'returns file properties with Recurse and Depth' {
-        New-WordFile -Path $path
-
-        $properties = Get-WordFileProperty -LiteralPath $path -Recurse -Depth 2
+        $properties = Get-WordFileProperty -Path $path -Depth 2 -Name Application
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }

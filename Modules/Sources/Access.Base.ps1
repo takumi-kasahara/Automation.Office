@@ -85,13 +85,6 @@ function New-AccessFile {
   .PARAMETER Password
     Specifies the password required to open the database.
 
-  .PARAMETER Recurse
-    Recursively retrieves nested COM object properties.
-
-  .PARAMETER Depth
-    Specifies the maximum recursion depth when `-Recurse` is used.
-    The default value is `1`.
-
   .PARAMETER Force
     Overwrites an existing file at `-Path`.
     Without this switch, the cmdlet stops when the destination file already exists.
@@ -421,7 +414,7 @@ function Get-AccessFileProperty {
 
   .DESCRIPTION
     Opens one or more databases and returns database file properties as a `PSCustomObject`.
-    The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected databases via `-Password`.
+    Some properties are skipped with a warning at every depth because their getters can block automation.
 
   .PARAMETER Path
     Specifies database paths. Wildcards are supported.
@@ -434,6 +427,10 @@ function Get-AccessFileProperty {
 
   .PARAMETER Password
     Specifies the password required to open the database.
+
+  .PARAMETER Depth
+    Specifies the number of nested COM object levels to retrieve.
+    The default value is `1`.
 
   .EXAMPLE
     ```powershell
@@ -476,9 +473,7 @@ function Get-AccessFileProperty {
     $Name,
     [SecureString]
     $Password = $null,
-    [switch]
-    $Recurse,
-    [ValidateRange(0, [int]::MaxValue)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
@@ -499,7 +494,7 @@ function Get-AccessFileProperty {
       ForEach-Object {
         Open-AccessFile -Application $app -Path $_.FullName -Password $Password
         try {
-          return Get-ObjectProperty -InputObject $app.CurrentProject -Name $Name -Recurse:$Recurse -Depth $Depth
+          return Get-ObjectProperty -InputObject $app.CurrentProject -Name $Name -Depth $Depth
         } finally {
           $app.CloseCurrentDatabase()
         }

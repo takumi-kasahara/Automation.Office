@@ -16,7 +16,9 @@ function ConvertTo-UnescapedJson {
     The object to convert. Accepts pipeline input and null.
 
   .PARAMETER Depth
-    The serialization depth passed to ConvertTo-Json. The default is 2.
+    The serialization depth passed to ConvertTo-Json.
+    The default is `2`.
+
   .PARAMETER Compress
     Omits formatting whitespace from the JSON.
 

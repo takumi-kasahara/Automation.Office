@@ -18,13 +18,12 @@ function Get-ObjectProperty {
     $InputObject,
     [string[]]
     $Name,
-    [switch]
-    $Recurse,
     [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
   try {
+    $activity = 'Processing Object Properties'
     $visited = [HashSet[int]]::new()
     function Get-RecursiveObjectProperty {
       [CmdletBinding()]
@@ -36,8 +35,8 @@ function Get-ObjectProperty {
         [Parameter(Mandatory)]
         [int]
         $RemainingDepth,
-        [switch]
-        $Recursive
+        [string]
+        $ParentName = [string]::Empty
       )
       if ($null -eq $TargetObject) {
         return [PSCustomObject]@{}
@@ -58,62 +57,77 @@ function Get-ObjectProperty {
       }
       $memberProperties |
       ForEach-Object {
-        $propertyInfo = $TargetObject.GetType().GetProperty($_.Name)
-        $property = $null
+        $displayName = if ($ParentName) {
+          "$ParentName.$($_.Name)"
+        } else {
+          $_.Name
+        }
+        # Some properties can initialize the mail client and block inside the COM getter.
+        if ($_.Name -in 'MailEnvelope') {
+          Write-Warning -Message "$($displayName): Skipped because accessing it can block automation."
+          return
+        }
+        Write-Progress -Activity $activity -Status "Processing: $displayName"
+        $propertyInfo = try {
+          $TargetObject.GetType().GetProperty($_.Name)
+        } catch {
+          Write-Warning -Message "$($displayName): $($_.Exception.Message)"
+          $null
+        }
         if ($propertyInfo) {
           if (-not $propertyInfo.CanRead) {
+            Write-Warning -Message "$displayName is write-only."
             return
           }
           $type = $propertyInfo.PropertyType
         } else {
           $property = $TargetObject.PSObject.Properties | Where-Object -Property Name -Value $_.Name -EQ | Select-Object -First 1
-          if (-not $property) {
-            return
-          }
           if (-not $property.IsGettable) {
+            Write-Warning -Message "$displayName is write-only."
             return
           }
           $type = [type]$property.TypeNameOfValue
         }
-        if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime]) {
+        $value = $TargetObject.$($_.Name)
+        if ($null -ne $value) {
           try {
-            $value = $TargetObject.$($_.Name)
+            $type = $value.GetType()
           } catch {
-            return
+            Write-Warning -Message "$($displayName): $($_.Exception.Message)"
           }
+        }
+        if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime] -or $type -eq [string]) {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        if (-not $Recursive) {
+        if ($RemainingDepth -eq 0) {
           return
         }
-        try {
-          $value = $TargetObject.$($_.Name)
-        } catch {
+        if ($null -eq $value) {
+          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
           return
         }
-        if ($null -eq $value -or $value -isnot [__ComObject]) {
-          return
-        }
-        if ($RemainingDepth -le 0) {
+        if ($value -isnot [__ComObject]) {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -Recursive:$Recursive
+        $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -ParentName $displayName
         if (@($child.PSObject.Properties).Count -gt 0) {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
-          return
+        } else {
+          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
         }
       }
       return $properties
     }
-    return Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth -Recursive:$Recurse
+    return Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth
   } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
+    Write-Progress -Activity $activity -Completed
   }
 }
 function Set-ObjectProperty {
@@ -156,7 +170,7 @@ function Set-ObjectProperty {
         try {
           [__ComObject].InvokeMember($_.Name, [BindingFlags]::SetProperty, $null, $InputObject, $_.Value)
         } catch {
-          Write-Warning -Message $_.Exception.Message
+          Write-Warning -Message "$($_.Name)`t$($_.Exception.Message)"
         }
       }
     } | Out-Host

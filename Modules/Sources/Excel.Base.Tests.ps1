@@ -286,7 +286,7 @@ InModuleScope 'Automation.Office' {
       It 'returns selected file properties by Path' {
         New-ExcelFile -Path $path
 
-        $properties = Get-ExcelFileProperty -LiteralPath $path -Name Final
+        $properties = Get-ExcelFileProperty -Path $path -Name Final
 
         @($properties.PSObject.Properties).Count | Should-Be 1
         $properties.Final | Should-BeFalse
@@ -331,17 +331,10 @@ InModuleScope 'Automation.Office' {
         { Get-ExcelFileProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
         { Get-ExcelFileProperty -LiteralPath $path -PasswordToModify $password } | Should -Not -Throw
       }
-      It 'returns file properties with Recurse' {
+      It 'returns file properties with Depth' {
         New-ExcelFile -Path $path
 
-        $properties = Get-ExcelFileProperty -LiteralPath $path -Recurse
-
-        $properties.Application | Should-HaveType ([PSCustomObject])
-      }
-      It 'returns file properties with Recurse and Depth' {
-        New-ExcelFile -Path $path
-
-        $properties = Get-ExcelFileProperty -LiteralPath $path -Recurse -Depth 2
+        $properties = Get-ExcelFileProperty -Path $path -Depth 2 -Name Application
 
         $properties.Application | Should-HaveType ([PSCustomObject])
       }

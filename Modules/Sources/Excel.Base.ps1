@@ -99,13 +99,6 @@ function New-ExcelFile {
   .PARAMETER PasswordToModify
     Specifies the password required to modify the workbook.
 
-  .PARAMETER Recurse
-    Recursively reads nested COM object properties.
-
-  .PARAMETER Depth
-    Specifies recursion depth used with `-Recurse`.
-    The default value is `1`.
-
   .PARAMETER ReadOnlyRecommended
     Saves the workbook with the read-only recommended flag set.
     When this switch is specified, Excel recommends that users open the workbook as read-only.
@@ -411,7 +404,7 @@ function Get-ExcelFileProperty {
 
   .DESCRIPTION
     Opens one or more workbooks and returns file properties as a `PSCustomObject`.
-    The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected workbooks via `-PasswordToOpen` and `-PasswordToModify`.
+    Some properties are skipped with a warning at every depth because their getters can block automation.
 
   .PARAMETER Path
     Specifies workbook paths. Wildcards are supported.
@@ -427,6 +420,10 @@ function Get-ExcelFileProperty {
 
   .PARAMETER PasswordToModify
     Specifies the password required to modify the workbook.
+
+  .PARAMETER Depth
+    Specifies the number of nested COM object levels to retrieve.
+    The default value is `1`.
 
   .EXAMPLE
     ```powershell
@@ -453,7 +450,7 @@ function Get-ExcelFileProperty {
 
   .EXAMPLE
     ```powershell
-    Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Recurse -Depth 2
+    Get-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Depth 2
     ```
 
     Gets file properties including nested COM object properties up to 2 levels deep.
@@ -468,7 +465,6 @@ function Get-ExcelFileProperty {
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
   [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
-  [SuppressMessage('PSReviewUnusedParameter', 'Recurse', Justification = 'Parameter is used inside the action callback')]
   [SuppressMessage('PSReviewUnusedParameter', 'Depth', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -489,9 +485,7 @@ function Get-ExcelFileProperty {
     $PasswordToOpen = $null,
     [SecureString]
     $PasswordToModify = $null,
-    [switch]
-    $Recurse,
-    [ValidateRange(0, [int]::MaxValue)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
@@ -515,7 +509,7 @@ function Get-ExcelFileProperty {
             [Microsoft.Office.Interop.Excel.Workbook]
             $Workbook
           )
-          return Get-ObjectProperty -InputObject $Workbook -Name $Name -Recurse:$Recurse -Depth $Depth
+          return Get-ObjectProperty -InputObject $Workbook -Name $Name -Depth $Depth
         }
       }
     } catch {

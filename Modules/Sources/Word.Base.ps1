@@ -97,13 +97,6 @@ function New-WordFile {
   .PARAMETER PasswordToModify
     Specifies the password required to modify the document.
 
-  .PARAMETER Recurse
-    Recursively retrieves nested COM object properties.
-
-  .PARAMETER Depth
-    Specifies the maximum recursion depth when `-Recurse` is used.
-    The default value is `1`.
-
   .PARAMETER ReadOnlyRecommended
     Saves the document with the read-only recommended flag set.
 
@@ -399,7 +392,7 @@ function Get-WordFileProperty {
 
   .DESCRIPTION
     Opens one or more documents and returns file properties as a `PSCustomObject`.
-    The cmdlet supports both `-Path` and `-LiteralPath` parameter sets, optional name filtering with `-Name`, and protected documents via `-PasswordToOpen` and `-PasswordToModify`.
+    Some properties are skipped with a warning at every depth because their getters can block automation.
 
   .PARAMETER Path
     Specifies document paths. Wildcards are supported.
@@ -415,6 +408,10 @@ function Get-WordFileProperty {
 
   .PARAMETER PasswordToModify
     Specifies the password required to modify the document.
+
+  .PARAMETER Depth
+    Specifies the number of nested COM object levels to retrieve.
+    The default value is `1`.
 
   .EXAMPLE
     ```powershell
@@ -449,7 +446,6 @@ function Get-WordFileProperty {
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
   [SuppressMessage('PSReviewUnusedParameter', 'Name', Justification = 'Parameter is used inside the action callback')]
-  [SuppressMessage('PSReviewUnusedParameter', 'Recurse', Justification = 'Parameter is used inside the action callback')]
   [SuppressMessage('PSReviewUnusedParameter', 'Depth', Justification = 'Parameter is used inside the action callback')]
   param (
     [Parameter(Mandatory, ParameterSetName = 'PathSet', Position = 0, ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -470,9 +466,7 @@ function Get-WordFileProperty {
     $PasswordToOpen = $null,
     [SecureString]
     $PasswordToModify = $null,
-    [switch]
-    $Recurse,
-    [ValidateRange(0, [int]::MaxValue)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
@@ -496,7 +490,7 @@ function Get-WordFileProperty {
             [Microsoft.Office.Interop.Word.Document]
             $Document
           )
-          return Get-ObjectProperty -InputObject $Document -Name $Name -Recurse:$Recurse -Depth $Depth
+          return Get-ObjectProperty -InputObject $Document -Name $Name -Depth $Depth
         }
       }
     } catch {
