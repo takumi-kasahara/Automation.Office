@@ -1,10 +1,8 @@
 ﻿using module .\DialogSuppressor.psm1
-using namespace System.Collections.Generic
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Reflection
-using namespace System.Runtime.CompilerServices
 
 Set-StrictMode -Version Latest
 
@@ -24,7 +22,6 @@ function Get-ObjectProperty {
   )
   try {
     $activity = 'Processing Object Properties'
-    $visited = [HashSet[int]]::new()
     function Get-RecursiveObjectProperty {
       [CmdletBinding()]
       [OutputType([PSCustomObject])]
@@ -39,23 +36,17 @@ function Get-ObjectProperty {
         $ParentName = [string]::Empty
       )
       if ($null -eq $TargetObject) {
-        return [PSCustomObject]@{}
+        return $null
       }
-      $identity = [RuntimeHelpers]::GetHashCode($TargetObject)
-      if ($visited.Contains($identity)) {
-        return [PSCustomObject]@{}
-      }
-      [void]$visited.Add($identity)
-
-      $properties = [PSCustomObject]@{}
-      $memberProperties = @(
+      $psobject = [PSCustomObject]@{}
+      $members = @(
         Get-Member -InputObject $TargetObject -MemberType Properties -ErrorAction SilentlyContinue
       )
       if ($Name -and $RemainingDepth -eq $Depth) {
-        $memberProperties = $memberProperties |
+        $members = $members |
         Where-Object -Property Name -In -Value $Name
       }
-      $memberProperties |
+      $members |
       ForEach-Object {
         $displayName = if ($ParentName) {
           "$ParentName.$($_.Name)"
@@ -97,33 +88,44 @@ function Get-ObjectProperty {
           }
         }
         if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime] -or $type -eq [string]) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+          return
+        }
+        if ($_.Name -in '_NewEnum') {
+          $i = 0
+          $value = $TargetObject.$($_.Name) |
+          ForEach-Object {
+            Get-RecursiveObjectProperty -TargetObject $_ -RemainingDepth $RemainingDepth -ParentName "$displayName[$i]"
+            $i++
+          }
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
         if ($RemainingDepth -eq 0) {
           return
         }
         if ($null -eq $value) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
           return
         }
         if ($value -isnot [__ComObject]) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
         $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -ParentName $displayName
         if (@($child.PSObject.Properties).Count -gt 0) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
         } else {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
         }
       }
-      if ($null -ne $Name -and @($Name).Count -eq 1) {
-        return $properties.$Name
-      }
-      return $properties
+      return $psobject
     }
-    return Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth
+    $properties = Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth
+    if ($null -ne $Name -and @($Name).Count -eq 1) {
+      return $properties.$Name
+    }
+    return $properties
   } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |

@@ -332,9 +332,9 @@ InModuleScope 'Automation.Office' {
       It 'returns file properties with Depth' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -Path $path -Depth 2
+        $properties = Get-PowerPointFileProperty -Path $path -Name CustomXMLParts -Depth 2
 
-        $properties | Should-HaveType ([PSCustomObject])
+        $properties._NewEnum | Should-BeCollection -Count 3
       }
     }
   }

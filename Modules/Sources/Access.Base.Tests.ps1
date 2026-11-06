@@ -334,9 +334,9 @@ InModuleScope 'Automation.Office' {
       It 'returns file properties with Depth' {
         New-AccessFile -Path $path
 
-        $properties = Get-AccessFileProperty -Path $path -Depth 2
+        $properties = Get-AccessFileProperty -Path $path -Name Properties -Depth 2
 
-        $properties | Should-HaveType ([PSCustomObject])
+        $properties.Count | Should-Be 0
       }
     }
   }

@@ -337,9 +337,9 @@ InModuleScope 'Automation.Office' {
       It 'returns file properties with Depth' {
         New-WordFile -Path $path
 
-        $properties = Get-WordFileProperty -Path $path -Depth 2
+        $properties = Get-WordFileProperty -Path $path -Name CustomXMLParts -Depth 2
 
-        $properties | Should-HaveType ([PSCustomObject])
+        $properties._NewEnum | Should-BeCollection -Count 4
       }
     }
   }

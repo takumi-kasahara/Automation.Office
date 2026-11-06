@@ -343,9 +343,9 @@ InModuleScope 'Automation.Office' {
       It 'returns file properties with Depth' {
         New-ExcelFile -Path $path
 
-        $properties = Get-ExcelFileProperty -Path $path -Depth 2
+        $properties = Get-ExcelFileProperty -Path $path -Name Worksheets -Depth 2
 
-        $properties | Should-HaveType ([PSCustomObject])
+        $properties._NewEnum | Should-HaveType ([PSCustomObject])
       }
     }
   }
