@@ -3,45 +3,9 @@ apm_version: 0.35.0
 dependencies:
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
-    name: batchfile
-    host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
-    version: unknown
-    virtual_path: .apm/skills/batchfile
-    is_virtual: true
-    package_type: claude_skill
-    deployed_files:
-      - .agents/skills/batchfile
-      - .agents/skills/batchfile/SKILL.md
-      - .agents/skills/batchfile/assets/script.bat
-      - .agents/skills/batchfile/assets/script.runas.bat
-      - .agents/skills/batchfile/references/gotchas-argument-expansion.md
-    deployed_file_hashes:
-      .agents/skills/batchfile/SKILL.md: sha256:23ee3e9837bea196c9086650f6dcecad60a23ddf568b81a4ac4159bd33d184bd
-      .agents/skills/batchfile/assets/script.bat: sha256:c4873f67984fc830d4f2159cb08d4904f5499e324df83f58320f41736a1622ea
-      .agents/skills/batchfile/assets/script.runas.bat: sha256:f88baff41b503da1b06645a2636e0943354e557228d354e01bb73e139abb32da
-      .agents/skills/batchfile/references/gotchas-argument-expansion.md: sha256:0246c76a512c1ae19359c53a2eec3048a3296d80c4b933ec85a4de6212233ac3
-    content_hash: sha256:a680f520bbdfd9f98e0903bced6a3daa0e3c0acd34103d9ca63737cacfaff41b
-  - repo_url: takumi-kasahara/dotfiles
-    materialization_repo_url: takumi-kasahara/Dotfiles
-    name: csharp-for-powershell-5
-    host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
-    version: unknown
-    virtual_path: .apm/skills/csharp-for-powershell-5
-    is_virtual: true
-    package_type: claude_skill
-    deployed_files:
-      - .agents/skills/csharp-for-powershell-5
-      - .agents/skills/csharp-for-powershell-5/SKILL.md
-    deployed_file_hashes:
-      .agents/skills/csharp-for-powershell-5/SKILL.md: sha256:bd3e8c15c5f0e7e57026f791e8a0e0ab683705f2b4ea1d925896e420158774ff
-    content_hash: sha256:6df7d79c67480b85b206c965bf8669c39e00b55d9355f1681aeefb4faa4164f8
-  - repo_url: takumi-kasahara/dotfiles
-    materialization_repo_url: takumi-kasahara/Dotfiles
     name: office-scripts
     host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
+    resolved_commit: b18601999b41e130ab028a453add2bf939837555
     version: unknown
     virtual_path: .apm/skills/office-scripts
     is_virtual: true
@@ -49,48 +13,18 @@ dependencies:
     deployed_files:
       - .agents/skills/office-scripts
       - .agents/skills/office-scripts/SKILL.md
-      - .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1
-      - .agents/skills/office-scripts/scripts/Decompile.OfficeScripts.ps1
+      - .agents/skills/office-scripts/references/office-scripts-to-vba.md
+      - .agents/skills/office-scripts/references/vba-to-office-scripts.md
     deployed_file_hashes:
       .agents/skills/office-scripts/SKILL.md: sha256:d1033b1a2196f3f05ff28b6a07049c010a3cdeb86f40b665b4b29de74d235b1e
-      .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1: sha256:97dab79806c86890393ddcbe1fad52a6efa0127f904f6973fc0fe47d3c147dcd
-      .agents/skills/office-scripts/scripts/Decompile.OfficeScripts.ps1: sha256:55e7db02a1d70b496280b5aeea2f7ec8232a4873d8011f4bf6a97601a11635b1
-    content_hash: sha256:9b8fa66e24a451b4fd6e4868b3e7846744fd9f359e156bbacf6af39c1a656f0e
-  - repo_url: takumi-kasahara/dotfiles
-    materialization_repo_url: takumi-kasahara/Dotfiles
-    name: office-scripts-from-vba
-    host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
-    version: unknown
-    virtual_path: .apm/skills/office-scripts-from-vba
-    is_virtual: true
-    package_type: claude_skill
-    deployed_files:
-      - .agents/skills/office-scripts-from-vba
-      - .agents/skills/office-scripts-from-vba/SKILL.md
-    deployed_file_hashes:
-      .agents/skills/office-scripts-from-vba/SKILL.md: sha256:b98eb5a0079e7660371b3ace3f6fe0ffb9a32fc8eed04f364a4357d57da2e513
-    content_hash: sha256:62147632a6308161d1dee04b3c45db7186b2c81c75e11873080ea83dbd9c9f25
-  - repo_url: takumi-kasahara/dotfiles
-    materialization_repo_url: takumi-kasahara/Dotfiles
-    name: office-scripts-to-vba
-    host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
-    version: unknown
-    virtual_path: .apm/skills/office-scripts-to-vba
-    is_virtual: true
-    package_type: claude_skill
-    deployed_files:
-      - .agents/skills/office-scripts-to-vba
-      - .agents/skills/office-scripts-to-vba/SKILL.md
-    deployed_file_hashes:
-      .agents/skills/office-scripts-to-vba/SKILL.md: sha256:94d1fd13dd03a883ea700d47f64f0262ed46e665eb3295e09d103f19fa5edc65
-    content_hash: sha256:d7724e8b70223843289f5cdd642d382b313815aafa2e2084f67770c73f53f2c9
+      .agents/skills/office-scripts/references/office-scripts-to-vba.md: sha256:8db40573fc075317be73ae0193b41ac15da934ba35b731e52d27f40d498eb231
+      .agents/skills/office-scripts/references/vba-to-office-scripts.md: sha256:5f2055f8c09c2c987db1470c8e2e978b01be71d66200fb84b4d042110cf278cc
+    content_hash: sha256:78fe3aefa4a0c195e01930789f26cb3ad259926b943901e38a855fa22fb30012
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: powershell-5
     host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
+    resolved_commit: b18601999b41e130ab028a453add2bf939837555
     version: unknown
     virtual_path: .apm/skills/powershell-5
     is_virtual: true
@@ -99,31 +33,33 @@ dependencies:
       - .agents/skills/powershell-5
       - .agents/skills/powershell-5/SKILL.md
       - .agents/skills/powershell-5/references/comment-based-help.md
+      - .agents/skills/powershell-5/references/csharp.md
       - .agents/skills/powershell-5/references/powershell-cmdlet.md
       - .agents/skills/powershell-5/references/powershell-pester.md
-      - .agents/skills/powershell-5/scripts/Analyze.bat
-      - .agents/skills/powershell-5/scripts/Analyze.ps1
-      - .agents/skills/powershell-5/scripts/Parse.bat
-      - .agents/skills/powershell-5/scripts/Parse.ps1
-      - .agents/skills/powershell-5/scripts/Pester.bat
-      - .agents/skills/powershell-5/scripts/Pester.ps1
+      - .agents/skills/powershell-5/scripts/analyze.cmd
+      - .agents/skills/powershell-5/scripts/analyze.ps1
+      - .agents/skills/powershell-5/scripts/parse.cmd
+      - .agents/skills/powershell-5/scripts/parse.ps1
+      - .agents/skills/powershell-5/scripts/pester.cmd
+      - .agents/skills/powershell-5/scripts/pester.ps1
     deployed_file_hashes:
-      .agents/skills/powershell-5/SKILL.md: sha256:3a5e3f778937490a87cfadf1802de1203578e3a42292de00ff9c50e6de0f2074
-      .agents/skills/powershell-5/references/comment-based-help.md: sha256:0b763c723378d5ab3bfbb77d554d2f0519e6f57c7d33eda19094e7a81faf32c6
-      .agents/skills/powershell-5/references/powershell-cmdlet.md: sha256:a27acbf1eb3c919fde70a8242ff6a783e7846d65bbc5067c58797abc332acb52
-      .agents/skills/powershell-5/references/powershell-pester.md: sha256:2c42edebb0639b6f4a0d1506817512fe792391e7674be0acfcc0b1094eb08b3d
-      .agents/skills/powershell-5/scripts/Analyze.bat: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
-      .agents/skills/powershell-5/scripts/Analyze.ps1: sha256:5371b3e891328466cb62f0ea7f7e724c12220baa1cc9191bff3fb4bdd81da5c7
-      .agents/skills/powershell-5/scripts/Parse.bat: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
-      .agents/skills/powershell-5/scripts/Parse.ps1: sha256:fbf3e877c18f4a1d03d77b7c8687eb4c811ef3460cc6d6105c577837d08645b8
-      .agents/skills/powershell-5/scripts/Pester.bat: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
-      .agents/skills/powershell-5/scripts/Pester.ps1: sha256:7e601f3b105df564a868481da736d2a2f61221fdd496e49d344e9f0d1d8e6535
-    content_hash: sha256:6de1558d746a19c7957ebea09f7d9cdfe6045bee656e362d54abbb8bbf2764d6
+      .agents/skills/powershell-5/SKILL.md: sha256:2a8cb0e8879f80de18db9e44e45ebfd1c22d56c4af0dee53474eb7c8c1f0144e
+      .agents/skills/powershell-5/references/comment-based-help.md: sha256:a61d1ffcd1a56d3917d3ac2b8244b3be73a3d4ee9e1df39ad7709b4f56af9b7a
+      .agents/skills/powershell-5/references/csharp.md: sha256:645f4995bf67b0258f45d1fca7e344627fa4e70163bc2e0108b8c65eff2e24aa
+      .agents/skills/powershell-5/references/powershell-cmdlet.md: sha256:c0ce4716ac5a6162118269830a9f1d42541c4b2fa55057d2296de8811d955e95
+      .agents/skills/powershell-5/references/powershell-pester.md: sha256:16dcac5734a29b9904fd0c370ac2a88466e2c857f9245be11e790dd5b0266fcf
+      .agents/skills/powershell-5/scripts/analyze.cmd: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
+      .agents/skills/powershell-5/scripts/analyze.ps1: sha256:011695c75435e00f91b88753a34dc93608a43687b55e0bfd702aa876ab29c8ff
+      .agents/skills/powershell-5/scripts/parse.cmd: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
+      .agents/skills/powershell-5/scripts/parse.ps1: sha256:df25e45e2cc91a952cd88b108ba3e1294cb47ef66eb8d8fc28102f2ac3a051b3
+      .agents/skills/powershell-5/scripts/pester.cmd: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
+      .agents/skills/powershell-5/scripts/pester.ps1: sha256:8deb66b047a1fc0eda0e27d47906aae4e80ab8a95dbe4d11a2aade59e090e393
+    content_hash: sha256:d384ef99f5fbab30c70788aaebf52894e1070aeb1ea53632edb047436a0dfa99
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: rubberduck-vba
     host: github.com
-    resolved_commit: 1eacdb4f02270cc7c66ea16e048cf5e24bafc596
+    resolved_commit: b18601999b41e130ab028a453add2bf939837555
     version: unknown
     virtual_path: .apm/skills/rubberduck-vba
     is_virtual: true
@@ -136,70 +72,32 @@ dependencies:
       .agents/skills/rubberduck-vba/SKILL.md: sha256:a631f26585cb261925205f17ef570c59611486607979ca4de8ba34ae5cb83dd5
       .agents/skills/rubberduck-vba/assets/TestModule.bas: sha256:fe1ce4894d5cb7e46f07cda2e2ddb3d8ffc4a7819806fc460491539a5ee8d087
     content_hash: sha256:ceb8b873911d3812c378ae2bd6d79da7b45924ae03793feed977ea457ab5273d
+  - repo_url: takumi-kasahara/dotfiles
+    materialization_repo_url: takumi-kasahara/Dotfiles
+    name: windows-command
+    host: github.com
+    resolved_commit: b18601999b41e130ab028a453add2bf939837555
+    version: unknown
+    virtual_path: .apm/skills/windows-command
+    is_virtual: true
+    package_type: claude_skill
+    deployed_files:
+      - .agents/skills/windows-command
+      - .agents/skills/windows-command/SKILL.md
+      - .agents/skills/windows-command/assets/powershell.cmd
+      - .agents/skills/windows-command/assets/run.cmd
+      - .agents/skills/windows-command/assets/runas.cmd
+      - .agents/skills/windows-command/references/argument-expansion.md
+      - .agents/skills/windows-command/references/powershell.md
+    deployed_file_hashes:
+      .agents/skills/windows-command/SKILL.md: sha256:98b86cc227a9db6a7ae8a1e8105575177fc9592ac2b5611a1ef5cfe0cb5b2635
+      .agents/skills/windows-command/assets/powershell.cmd: sha256:a51ada6dc559a86542fabe0a822269852fc45f4f4bf9e4123dcad6cb836c8d37
+      .agents/skills/windows-command/assets/run.cmd: sha256:ae99171eb0b8b4b8a1e543fe41bc73ec311e7c5fe7c51bdc6a07fc67dda2551e
+      .agents/skills/windows-command/assets/runas.cmd: sha256:5b3816404e6c888ce59174f7e75f2a29fb45586cd23227184ad4f3c418fd5648
+      .agents/skills/windows-command/references/argument-expansion.md: sha256:0246c76a512c1ae19359c53a2eec3048a3296d80c4b933ec85a4de6212233ac3
+      .agents/skills/windows-command/references/powershell.md: sha256:27ea886213b27ac856e1814b888d6193bcaf3395fd28b39faca950c3b0381e0b
+    content_hash: sha256:ab9dccd1fd111dd2e5e2f58873e1afe1683404c45e367af43f9986c0ab405672
 deployments:
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/batchfile
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/batchfile
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: null
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/batchfile/SKILL.md
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/batchfile
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: sha256:23ee3e9837bea196c9086650f6dcecad60a23ddf568b81a4ac4159bd33d184bd
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/batchfile/assets/script.bat
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/batchfile
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: sha256:c4873f67984fc830d4f2159cb08d4904f5499e324df83f58320f41736a1622ea
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/batchfile/assets/script.runas.bat
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/batchfile
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: sha256:f88baff41b503da1b06645a2636e0943354e557228d354e01bb73e139abb32da
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/batchfile/references/gotchas-argument-expansion.md
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/batchfile
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/batchfile
-    content_hash: sha256:0246c76a512c1ae19359c53a2eec3048a3296d80c4b933ec85a4de6212233ac3
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/csharp-for-powershell-5
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/csharp-for-powershell-5
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/csharp-for-powershell-5
-    content_hash: null
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/csharp-for-powershell-5/SKILL.md
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/csharp-for-powershell-5
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/csharp-for-powershell-5
-    content_hash: sha256:bd3e8c15c5f0e7e57026f791e8a0e0ab683705f2b4ea1d925896e420158774ff
   - kind: project-relative
     target: copilot
     value: .agents/skills/office-scripts
@@ -211,42 +109,6 @@ deployments:
     content_hash: null
   - kind: project-relative
     target: copilot
-    value: .agents/skills/office-scripts-from-vba
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/office-scripts-from-vba
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts-from-vba
-    content_hash: null
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/office-scripts-from-vba/SKILL.md
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/office-scripts-from-vba
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts-from-vba
-    content_hash: sha256:b98eb5a0079e7660371b3ace3f6fe0ffb9a32fc8eed04f364a4357d57da2e513
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/office-scripts-to-vba
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/office-scripts-to-vba
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts-to-vba
-    content_hash: null
-  - kind: project-relative
-    target: copilot
-    value: .agents/skills/office-scripts-to-vba/SKILL.md
-    runtime: null
-    scope: project
-    owners:
-      - takumi-kasahara/dotfiles/.apm/skills/office-scripts-to-vba
-    active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts-to-vba
-    content_hash: sha256:94d1fd13dd03a883ea700d47f64f0262ed46e665eb3295e09d103f19fa5edc65
-  - kind: project-relative
-    target: copilot
     value: .agents/skills/office-scripts/SKILL.md
     runtime: null
     scope: project
@@ -256,22 +118,22 @@ deployments:
     content_hash: sha256:d1033b1a2196f3f05ff28b6a07049c010a3cdeb86f40b665b4b29de74d235b1e
   - kind: project-relative
     target: copilot
-    value: .agents/skills/office-scripts/scripts/Compile.OfficeScripts.ps1
+    value: .agents/skills/office-scripts/references/office-scripts-to-vba.md
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/office-scripts
     active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts
-    content_hash: sha256:97dab79806c86890393ddcbe1fad52a6efa0127f904f6973fc0fe47d3c147dcd
+    content_hash: sha256:8db40573fc075317be73ae0193b41ac15da934ba35b731e52d27f40d498eb231
   - kind: project-relative
     target: copilot
-    value: .agents/skills/office-scripts/scripts/Decompile.OfficeScripts.ps1
+    value: .agents/skills/office-scripts/references/vba-to-office-scripts.md
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/office-scripts
     active_owner: takumi-kasahara/dotfiles/.apm/skills/office-scripts
-    content_hash: sha256:55e7db02a1d70b496280b5aeea2f7ec8232a4873d8011f4bf6a97601a11635b1
+    content_hash: sha256:5f2055f8c09c2c987db1470c8e2e978b01be71d66200fb84b4d042110cf278cc
   - kind: project-relative
     target: copilot
     value: .agents/skills/powershell-5
@@ -289,7 +151,7 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:3a5e3f778937490a87cfadf1802de1203578e3a42292de00ff9c50e6de0f2074
+    content_hash: sha256:2a8cb0e8879f80de18db9e44e45ebfd1c22d56c4af0dee53474eb7c8c1f0144e
   - kind: project-relative
     target: copilot
     value: .agents/skills/powershell-5/references/comment-based-help.md
@@ -298,7 +160,16 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:0b763c723378d5ab3bfbb77d554d2f0519e6f57c7d33eda19094e7a81faf32c6
+    content_hash: sha256:a61d1ffcd1a56d3917d3ac2b8244b3be73a3d4ee9e1df39ad7709b4f56af9b7a
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/powershell-5/references/csharp.md
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/powershell-5
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
+    content_hash: sha256:645f4995bf67b0258f45d1fca7e344627fa4e70163bc2e0108b8c65eff2e24aa
   - kind: project-relative
     target: copilot
     value: .agents/skills/powershell-5/references/powershell-cmdlet.md
@@ -307,7 +178,7 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:a27acbf1eb3c919fde70a8242ff6a783e7846d65bbc5067c58797abc332acb52
+    content_hash: sha256:c0ce4716ac5a6162118269830a9f1d42541c4b2fa55057d2296de8811d955e95
   - kind: project-relative
     target: copilot
     value: .agents/skills/powershell-5/references/powershell-pester.md
@@ -316,61 +187,61 @@ deployments:
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:2c42edebb0639b6f4a0d1506817512fe792391e7674be0acfcc0b1094eb08b3d
+    content_hash: sha256:16dcac5734a29b9904fd0c370ac2a88466e2c857f9245be11e790dd5b0266fcf
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Analyze.bat
+    value: .agents/skills/powershell-5/scripts/analyze.cmd
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
+    content_hash: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Analyze.ps1
+    value: .agents/skills/powershell-5/scripts/analyze.ps1
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:5371b3e891328466cb62f0ea7f7e724c12220baa1cc9191bff3fb4bdd81da5c7
+    content_hash: sha256:011695c75435e00f91b88753a34dc93608a43687b55e0bfd702aa876ab29c8ff
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Parse.bat
+    value: .agents/skills/powershell-5/scripts/parse.cmd
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
+    content_hash: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Parse.ps1
+    value: .agents/skills/powershell-5/scripts/parse.ps1
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:fbf3e877c18f4a1d03d77b7c8687eb4c811ef3460cc6d6105c577837d08645b8
+    content_hash: sha256:df25e45e2cc91a952cd88b108ba3e1294cb47ef66eb8d8fc28102f2ac3a051b3
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Pester.bat
+    value: .agents/skills/powershell-5/scripts/pester.cmd
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:87687a42bbacc168f5c4c097fa49104ef46863a820f3783c26fbdee884d94c12
+    content_hash: sha256:c59ffd922c3fad9e01755ab55d28f971d64818500d28212cda5eb79b3ac421f7
   - kind: project-relative
     target: copilot
-    value: .agents/skills/powershell-5/scripts/Pester.ps1
+    value: .agents/skills/powershell-5/scripts/pester.ps1
     runtime: null
     scope: project
     owners:
       - takumi-kasahara/dotfiles/.apm/skills/powershell-5
     active_owner: takumi-kasahara/dotfiles/.apm/skills/powershell-5
-    content_hash: sha256:7e601f3b105df564a868481da736d2a2f61221fdd496e49d344e9f0d1d8e6535
+    content_hash: sha256:8deb66b047a1fc0eda0e27d47906aae4e80ab8a95dbe4d11a2aade59e090e393
   - kind: project-relative
     target: copilot
     value: .agents/skills/rubberduck-vba
@@ -398,3 +269,66 @@ deployments:
       - takumi-kasahara/dotfiles/.apm/skills/rubberduck-vba
     active_owner: takumi-kasahara/dotfiles/.apm/skills/rubberduck-vba
     content_hash: sha256:fe1ce4894d5cb7e46f07cda2e2ddb3d8ffc4a7819806fc460491539a5ee8d087
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: null
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/SKILL.md
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:98b86cc227a9db6a7ae8a1e8105575177fc9592ac2b5611a1ef5cfe0cb5b2635
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/assets/powershell.cmd
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:a51ada6dc559a86542fabe0a822269852fc45f4f4bf9e4123dcad6cb836c8d37
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/assets/run.cmd
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:ae99171eb0b8b4b8a1e543fe41bc73ec311e7c5fe7c51bdc6a07fc67dda2551e
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/assets/runas.cmd
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:5b3816404e6c888ce59174f7e75f2a29fb45586cd23227184ad4f3c418fd5648
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/references/argument-expansion.md
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:0246c76a512c1ae19359c53a2eec3048a3296d80c4b933ec85a4de6212233ac3
+  - kind: project-relative
+    target: copilot
+    value: .agents/skills/windows-command/references/powershell.md
+    runtime: null
+    scope: project
+    owners:
+      - takumi-kasahara/dotfiles/.apm/skills/windows-command
+    active_owner: takumi-kasahara/dotfiles/.apm/skills/windows-command
+    content_hash: sha256:27ea886213b27ac856e1814b888d6193bcaf3395fd28b39faca950c3b0381e0b

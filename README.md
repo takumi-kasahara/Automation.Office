@@ -16,7 +16,7 @@ A PowerShell module for automating Microsoft Office applications (Access / Excel
 Run from the repository root:
 
 ```powershell
-.\Install.bat
+.\Install.cmd
 ```
 
 If you want to install Pester v6, run:

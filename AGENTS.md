@@ -22,28 +22,28 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 
 #### PSScriptAnalyzer Invocation
 
-Run PSScriptAnalyzer with `Analyze.bat`:
+Run PSScriptAnalyzer with `analyze.cmd`:
 
 ```bat
-".agents\skills\powershell-5\scripts\Analyze.bat" -Path "Modules" -Recurse
+".agents\skills\powershell-5\scripts\analyze.cmd" -Path "Modules" -Recurse
 ```
 
 ```powershell
-& '.agents\skills\powershell-5\scripts\Analyze.bat' -Path '.\Modules' -Recurse
+& '.agents\skills\powershell-5\scripts\analyze.cmd' -Path '.\Modules' -Recurse
 ```
 
 #### Pester Invocation
 
-Run Pester with `Pester.bat`:
+Run Pester with `pester.cmd`:
 
 - Filter by line: add `-LineNumber`
 
 ```bat
-".agents\skills\powershell-5\scripts\Pester.bat" -Path "Module.Tests.ps1"
+".agents\skills\powershell-5\scripts\pester.cmd" -Path "Module.Tests.ps1"
 ```
 
 ```powershell
-& '.agents\skills\powershell-5\scripts\Pester.bat' -Path '.\Module.Tests.ps1'
+& '.agents\skills\powershell-5\scripts\pester.cmd' -Path '.\Module.Tests.ps1'
 ```
 
 ### VBA development cycle
