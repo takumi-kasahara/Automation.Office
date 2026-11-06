@@ -583,14 +583,14 @@ function Set-ExcelFileProperty {
 
   .EXAMPLE
     ```powershell
-    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false
+    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name Final -Value $true
     ```
 
     Sets a single workbook property.
 
   .EXAMPLE
     ```powershell
-    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -InputObject ([PSCustomObject]@{ SaveLinkValues = $false; CheckCompatibility = $false })
+    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -InputObject ([PSCustomObject]@{ Final = $true })
     ```
 
     Updates multiple workbook properties in a single call.
@@ -598,14 +598,14 @@ function Set-ExcelFileProperty {
   .EXAMPLE
     ```powershell
     $password = Read-Host -AsSecureString
-    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PasswordToOpen $password -Force
+    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name Final -Value $true -PasswordToOpen $password -Force
     ```
 
     Updates file properties on a protected workbook.
 
   .EXAMPLE
     ```powershell
-    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name SaveLinkValues -Value $false -PassThru
+    Set-ExcelFileProperty -Path "$env:TEMP\Book.xlsx" -Name Final -Value $true -PassThru
     ```
 
     Updates the property and returns the updated value.

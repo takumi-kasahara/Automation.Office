@@ -906,7 +906,7 @@ function Export-AccessDatabase {
                 if (Test-Path -LiteralPath $resolvedDestination) {
                   Remove-Item -LiteralPath $resolvedDestination -Force -WhatIf:$WhatIfPreference -Confirm:$false
                 }
-                Rename-Item -LiteralPath $tempDestination -NewName $resolvedDestination -Force
+                Rename-Item -LiteralPath $tempDestination -NewName $resolvedDestination -Force -WhatIf:$false -Confirm:$false
                 return Get-Item -LiteralPath $resolvedDestination -Force
               }
             } finally {

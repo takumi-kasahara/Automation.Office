@@ -284,50 +284,59 @@ InModuleScope 'Automation.Office' {
       It 'returns selected file properties by Path' {
         New-AccessFile -Path $path
 
-        $properties = Get-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation
+        $properties = Get-AccessFileProperty -Path $path -Name RemovePersonalInformation, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-AccessFile -Path $path
 
-        $properties = Get-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation
+        $properties = Get-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-AccessFile -Path $path
 
-        $properties = $path | Get-AccessFileProperty -Name RemovePersonalInformation
+        $properties = $path | Get-AccessFileProperty -Name RemovePersonalInformation, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-AccessFile -Path $path
 
-        $properties = [PSCustomObject]@{ PSPath = $path } | Get-AccessFileProperty -Name RemovePersonalInformation
+        $properties = [PSCustomObject]@{ PSPath = $path } | Get-AccessFileProperty -Name RemovePersonalInformation, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
     }
     Context 'Other parameters' {
       It 'returns file properties from a file protected with Password' {
         New-AccessFile -Path $path -Password $password
 
-        { Get-AccessFileProperty -LiteralPath $path } | Should-Throw
-        { Get-AccessFileProperty -LiteralPath $path -Password (Get-Password) } | Should-Throw
-        { Get-AccessFileProperty -LiteralPath $path -Password $password } | Should -Not -Throw
+        { Get-AccessFileProperty -LiteralPath $path -Name FullName } | Should-Throw
+        { Get-AccessFileProperty -LiteralPath $path -Name FullName -Password (Get-Password) } | Should-Throw
+        { Get-AccessFileProperty -LiteralPath $path -Name FullName -Password $password } | Should -Not -Throw
+      }
+      It 'returns the property directly when only one name is provided' {
+        New-AccessFile -Path $path
+
+        Get-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation | Should-BeFalse
       }
       It 'returns file properties with Depth' {
         New-AccessFile -Path $path
 
-        $properties = Get-AccessFileProperty -Path $path -Depth 2 -Name Application
+        $properties = Get-AccessFileProperty -Path $path -Depth 2
 
-        $properties.Application | Should-HaveType ([PSCustomObject])
+        $properties | Should-HaveType ([PSCustomObject])
       }
     }
   }
@@ -357,85 +366,84 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'ParameterSetName' {
-      It 'updates a file property by by Path' {
+      It 'updates a file property by Path' {
+        New-AccessFile -Path $path
+
+        Set-AccessFileProperty -Path $path -Name $name -Value $value
+
+        Get-AccessFileProperty -Path $path -Name $name | Should-BeTrue
+      }
+      It 'updates a file property by LiteralPath' {
         New-AccessFile -Path $path
 
         Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
-      It 'updates a file property by by LiteralPath' {
-        New-AccessFile -Path $path
-
-        Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value
-
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
-      }
-      It 'updates a file properties by Path with InputObject' {
+      It 'updates a file property by Path with InputObject' {
         New-AccessFile -Path $path
 
         $properties = [PSCustomObject]@{ RemovePersonalInformation = $value }
         Set-AccessFileProperty -LiteralPath $path -InputObject $properties
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
-      It 'updates a file properties by LiteralPath with InputObject' {
+      It 'updates a file property by LiteralPath with InputObject' {
         New-AccessFile -Path $path
 
         $properties = [PSCustomObject]@{ RemovePersonalInformation = $value }
         Set-AccessFileProperty -LiteralPath $path -InputObject $properties
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-AccessFile -Path $path
 
         $path | Set-AccessFileProperty -Name $name -Value $value
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-AccessFile -Path $path
 
         [PSCustomObject]@{ PSPath = $path } | Set-AccessFileProperty -Name $name -Value $value
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeTrue
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
       It 'does not update property when WhatIf is specified' {
         New-AccessFile -Path $path
 
-        Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $value -WhatIf
+        Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
 
-        (Get-AccessFileProperty -LiteralPath $path).RemovePersonalInformation | Should-BeFalse
+        Get-AccessFileProperty -LiteralPath $path -Name $name | Should-BeFalse
       }
     }
     Context 'Other parameters' {
       It 'updates a file protected with Password' {
         New-AccessFile -Path $path -Password $password
 
-        { Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true } | Should-Throw
-        { Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true -Password (Get-Password) } | Should-Throw
-        { Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true -Password $password } | Should -Not -Throw
-        (Get-AccessFileProperty -LiteralPath $path -Password $password).RemovePersonalInformation | Should-BeTrue
+        { Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
+        { Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value -Password (Get-Password) } | Should-Throw
+        { Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value -Password $password } | Should -Not -Throw
+        Get-AccessFileProperty -LiteralPath $path -Name $name -Password $password | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified' {
         New-AccessFile -Path $path
 
-        $property = Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true -PassThru
+        $property = Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
 
-        $property | Should-HaveType ([PSCustomObject])
-        $property.RemovePersonalInformation | Should-BeTrue
+        $property | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified with InputObject' {
         New-AccessFile -Path $path
 
-        $properties = [PSCustomObject]@{ RemovePersonalInformation = $true }
-        $property = Set-AccessFileProperty -LiteralPath $path -InputObject $properties -PassThru
+        $properties = [PSCustomObject]@{ $name = $value }
+        $property = Set-AccessFileProperty -LiteralPath $path -InputObject $properties -PassThru -Name $name
 
-        $property | Should-HaveType ([PSCustomObject])
-        $property.RemovePersonalInformation | Should-BeTrue
+        $property | Should-BeTrue
       }
     }
     Context 'Edge cases' {
@@ -449,6 +457,8 @@ InModuleScope 'Automation.Office' {
   Describe 'Set-AccessFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
+      $name = 'RemovePersonalInformation'
+      $value = $true
       New-Item -Path $path -ItemType File -Force | Out-Null
 
       $app = [PSCustomObject]@{}
@@ -469,7 +479,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not open the file when WhatIf is specified' {
-        Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true -WhatIf
+        Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
 
         Should-NotInvoke -CommandName Open-AccessFile
       }
@@ -478,7 +488,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Set-AccessFileProperty -LiteralPath $path -Name RemovePersonalInformation -Value $true } | Should-Throw
+        { Set-AccessFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         Should-NotInvoke -CommandName Open-AccessFile
       }
     }

@@ -118,6 +118,9 @@ function Get-ObjectProperty {
           $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
         }
       }
+      if ($null -ne $Name -and @($Name).Count -eq 1) {
+        return $properties.$Name
+      }
       return $properties
     }
     return Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth

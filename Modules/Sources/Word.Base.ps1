@@ -562,14 +562,14 @@ function Set-WordFileProperty {
 
   .EXAMPLE
     ```powershell
-    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true
+    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name Final -Value $true
     ```
 
     Sets a single file property.
 
   .EXAMPLE
     ```powershell
-    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ RemovePersonalInformation = $true })
+    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -InputObject ([PSCustomObject]@{ Final = $true })
     ```
 
     Updates multiple file properties in a single call.
@@ -577,14 +577,14 @@ function Set-WordFileProperty {
   .EXAMPLE
     ```powershell
     $password = Read-Host -AsSecureString
-    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PasswordToOpen $password
+    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name Final -Value $true -PasswordToOpen $password
     ```
 
     Updates file properties on a protected document.
 
   .EXAMPLE
     ```powershell
-    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name RemovePersonalInformation -Value $true -PassThru
+    Set-WordFileProperty -Path "$env:TEMP\Document.docx" -Name Final -Value $true -PassThru
     ```
 
     Updates the property and returns the updated value.
