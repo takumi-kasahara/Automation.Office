@@ -287,7 +287,7 @@ InModuleScope 'Automation.Office' {
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
         Set-ExcelDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -Force -WhatIf
 
-        Get-ExcelDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
+        Get-ExcelDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
         New-ExcelFile -Path $path
@@ -296,7 +296,7 @@ InModuleScope 'Automation.Office' {
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
 
         $exitCode | Should-Be 0
-        Get-ExcelDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante confirm'
+        Get-ExcelDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante confirm'
       }
       It 'updates a read-only recommended workbook when Force is specified' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
@@ -467,7 +467,7 @@ InModuleScope 'Automation.Office' {
         Remove-ExcelDocumentProperty -Path $pathSet.Path
         $values = Get-ExcelDocumentPropertyValue -Path $pathSet.Path -Name $name
 
-        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values.Count | Should-BeString $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by Path with ValueFromPipeline' {
@@ -477,7 +477,7 @@ InModuleScope 'Automation.Office' {
         $pathSet.Path | Remove-ExcelDocumentProperty
         $values = Get-ExcelDocumentPropertyValue -Path $pathSet.Path -Name $name
 
-        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values.Count | Should-BeString $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by LiteralPath' {

@@ -106,7 +106,7 @@ InModuleScope 'Automation.Office' {
         $result.Path | Should-Be ([Path]::GetFullPath($path))
         $result.Items -is [SpeakerNote[]] | Should-BeTrue
         $result.Items[0].Page | Should-Be 1
-        $result.Items[0].Text | Should-Be 'page 1 note'
+        $result.Items[0].Text | Should-BeString 'page 1 note'
       }
       It 'returns speaker notes by LiteralPath' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
@@ -115,7 +115,7 @@ InModuleScope 'Automation.Office' {
 
         $result | Should-NotBeNull
         $result.Items[1].Page | Should-Be 2
-        $result.Items[1].Text | Should-Be 'page 2 note'
+        $result.Items[1].Text | Should-BeString 'page 2 note'
       }
       It 'returns speaker notes by ValueFromPipelineByPropertyName' {
         New-PowerPointFileWithSpeakerNote -Path $path -SlideCount 2
@@ -124,7 +124,7 @@ InModuleScope 'Automation.Office' {
 
         $result | Should-NotBeNull
         $result.Items[0].Page | Should-Be 1
-        $result.Items[0].Text | Should-Be 'page 1 note'
+        $result.Items[0].Text | Should-BeString 'page 1 note'
       }
     }
     Context 'Other parameters' {
@@ -136,7 +136,7 @@ InModuleScope 'Automation.Office' {
         $result | Should-NotBeNull
         $result.Items.Count | Should-Be 1
         $result.Items[0].Page | Should-Be 1
-        $result.Items[0].Text | Should-Be 'visible note'
+        $result.Items[0].Text | Should-BeString 'visible note'
       }
       It 'returns notes from hidden slides when Force is specified' {
         New-PowerPointFileWithHiddenSpeakerNote -Path $path
@@ -146,7 +146,7 @@ InModuleScope 'Automation.Office' {
         $result | Should-NotBeNull
         $result.Items.Count | Should-Be 2
         $result.Items[1].Page | Should-Be 2
-        $result.Items[1].Text | Should-Be 'hidden note'
+        $result.Items[1].Text | Should-BeString 'hidden note'
       }
       It 'throws when PasswordToOpen is incorrect' {
         New-PowerPointFile -Path $path -PasswordToOpen $password | Out-Null

@@ -129,14 +129,12 @@ InModuleScope 'Automation.Office' {
       It 'creates a file with ReadOnlyRecommended' {
         New-WordFile -Path $path -ReadOnlyRecommended
 
-        $properties = Get-WordFileProperty -LiteralPath $path
-        $properties.ReadOnlyRecommended | Should-BeTrue
+        Get-WordFileProperty -LiteralPath $path -Name ReadOnlyRecommended | Should-BeTrue
       }
       It 'creates a file with RemovePersonalInformation' {
         New-WordFile -Path $path -RemovePersonalInformation
 
-        $properties = Get-WordFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should-BeTrue
+        Get-WordFileProperty -LiteralPath $path -Name RemovePersonalInformation | Should-BeTrue
       }
       It 'creates a file with Initialize script block' {
         { New-WordFile -Path $path -Initialize {
@@ -234,7 +232,7 @@ InModuleScope 'Automation.Office' {
           return $Document.Range().Text
         }
 
-        $value | Should-Be 'TestContent'
+        $value | Should-BeString 'TestContent'
       }
       It 'opens a file using an existing Application object' {
         New-WordFile -Path $path
@@ -284,7 +282,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-WordFile -Path $path
@@ -293,7 +291,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-WordFile -Path $path
@@ -302,7 +300,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
@@ -311,7 +309,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
     }
     Context 'Other parameters' {

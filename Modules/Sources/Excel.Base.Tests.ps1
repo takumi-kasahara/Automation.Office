@@ -129,14 +129,12 @@ InModuleScope 'Automation.Office' {
       It 'creates a file with ReadOnlyRecommended' {
         New-ExcelFile -Path $path -ReadOnlyRecommended
 
-        $properties = Get-ExcelFileProperty -LiteralPath $path
-        $properties.ReadOnlyRecommended | Should-BeTrue
+        Get-ExcelFileProperty -LiteralPath $path -Name ReadOnlyRecommended | Should-BeTrue
       }
       It 'creates a file with RemovePersonalInformation' {
         $item = New-ExcelFile -Path $path -RemovePersonalInformation
 
-        $properties = Get-ExcelFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should-BeTrue
+        Get-ExcelFileProperty -LiteralPath $path -Name RemovePersonalInformation | Should-BeTrue
       }
       It 'creates a file with Initialize script block' {
         {
@@ -240,7 +238,7 @@ InModuleScope 'Automation.Office' {
           return $Workbook.Worksheets.Item(1).Name
         }
 
-        $value | Should-Be 'Sheet1'
+        $value | Should-BeString 'Sheet1'
       }
       It 'opens a file using an existing Application object' {
         New-ExcelFile -Path $path
@@ -290,7 +288,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-ExcelFile -Path $path
@@ -299,7 +297,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-ExcelFile -Path $path
@@ -308,7 +306,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-ExcelFile -Path $path
@@ -317,7 +315,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
     }
     Context 'Other parameters' {

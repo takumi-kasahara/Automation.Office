@@ -302,11 +302,11 @@ public enum XMLSchema
 
         $result = Get-OneNoteHierarchy -Id 'notebook-id'
         $result | Should-NotBeNull
-        $result.DocumentElement.LocalName | Should-Be 'Notebook'
-        $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Notebook'
+        $result.DocumentElement.LocalName | Should-BeString 'Notebook'
+        $result.DocumentElement.Attributes['name'].Value | Should-BeString 'Mock Notebook'
         $app.Calls.Count | Should-Be 1
-        $app.Calls[0].Id | Should-Be 'notebook-id'
-        $app.Calls[0].HierarchyScope.ToString() | Should-Be 'hsSelf'
+        $app.Calls[0].Id | Should-BeString 'notebook-id'
+        $app.Calls[0].HierarchyScope.ToString() | Should-BeString 'hsSelf'
       }
     }
     Context 'Other parameters' {
@@ -317,7 +317,7 @@ public enum XMLSchema
         $result = Get-OneNoteHierarchy -Id 'notebook-id' -HierarchyScope hsPages
         $result | Should-NotBeNull
         $app.Calls.Count | Should-Be 1
-        $app.Calls[0].HierarchyScope.ToString() | Should-Be 'hsPages'
+        $app.Calls[0].HierarchyScope.ToString() | Should-BeString 'hsPages'
       }
     }
     Context 'Edge cases' {
@@ -398,10 +398,10 @@ public enum XMLSchema
         $result = Get-OneNotePageContent -Id 'page-id'
 
         $result | Should-NotBeNull
-        $result.DocumentElement.LocalName | Should-Be 'Page'
-        $result.DocumentElement.Attributes['name'].Value | Should-Be 'Mock Page'
+        $result.DocumentElement.LocalName | Should-BeString 'Page'
+        $result.DocumentElement.Attributes['name'].Value | Should-BeString 'Mock Page'
         $app.Calls.Count | Should-Be 1
-        $app.Calls[0].Id | Should-Be 'page-id'
+        $app.Calls[0].Id | Should-BeString 'page-id'
         $app.Calls[0].PageInfo | Should-Be ([Microsoft.Office.Interop.OneNote.PageInfo]::piBasic)
       }
     }

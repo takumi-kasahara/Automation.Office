@@ -128,7 +128,7 @@ InModuleScope 'Automation.Office' {
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
-          $Project.FullName | Should-Be $path
+          $Project.FullName | Should-BeString $path
         }
       }
       It 'creates a file with RemovePersonalInformation' {
@@ -159,7 +159,7 @@ InModuleScope 'Automation.Office' {
             [Microsoft.Office.Interop.Access.CurrentProject]
             $Project
           )
-          $Project.FullName | Should-Be $path
+          $Project.FullName | Should-BeString $path
         }
 
         $item | Should-HaveType ([System.IO.FileInfo])
@@ -288,7 +288,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-AccessFile -Path $path
@@ -297,7 +297,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-AccessFile -Path $path
@@ -306,7 +306,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-AccessFile -Path $path
@@ -315,7 +315,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.RemovePersonalInformation | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
     }
     Context 'Other parameters' {

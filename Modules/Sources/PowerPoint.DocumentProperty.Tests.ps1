@@ -287,7 +287,7 @@ InModuleScope 'Automation.Office' {
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value 'ante value'
         Set-PowerPointDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -WhatIf
 
-        Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante value'
+        Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante value'
       }
       It 'asks for confirmation when Confirm is specified' {
         New-PowerPointFile -Path $path
@@ -296,7 +296,7 @@ InModuleScope 'Automation.Office' {
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
 
         $exitCode | Should-Be 0
-        Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be 'ante confirm'
+        Get-PowerPointDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante confirm'
       }
     }
     Context 'Other parameters' {
@@ -460,7 +460,7 @@ InModuleScope 'Automation.Office' {
         Remove-PowerPointDocumentProperty -Path $pathSet.Path
         $values = Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name
 
-        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values.Count | Should-BeString $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by Path with ValueFromPipeline' {
@@ -470,7 +470,7 @@ InModuleScope 'Automation.Office' {
         $pathSet.Path | Remove-PowerPointDocumentProperty
         $values = Get-PowerPointDocumentPropertyValue -Path $pathSet.Path -Name $name
 
-        $values.Count | Should-Be $pathSet.ChildItem.Count
+        $values.Count | Should-BeString $pathSet.ChildItem.Count
         $values | ForEach-Object { $_ | Should-BeEmptyString }
       }
       It 'removes built-in properties by LiteralPath' {

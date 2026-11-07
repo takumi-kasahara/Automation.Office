@@ -94,9 +94,9 @@ InModuleScope 'Automation.Office' {
         $table = Get-AccessTable -LiteralPath $path | Where-Object -Property Name -EQ 'Employees' | Select-Object -First 1
 
         $table | Should-NotBeNull
-        $table.Path | Should-Be $path
-        $table.Type | Should-Be 'TABLE'
-        $table.Name | Should-Be 'Employees'
+        $table.Path | Should-BeString $path
+        $table.Type | Should-BeString 'TABLE'
+        $table.Name | Should-BeString 'Employees'
       }
     }
     Context 'Other parameters' {
@@ -173,18 +173,18 @@ InModuleScope 'Automation.Office' {
 
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $id | Should-NotBeNull
-        $id.Path | Should-Be $path
-        $id.ObjectType | Should-Be 'Table'
-        $id.ObjectName | Should-Be 'Employees'
-        $id.ColumnName | Should-Be 'Id'
+        $id.Path | Should-BeString $path
+        $id.ObjectType | Should-BeString 'Table'
+        $id.ObjectName | Should-BeString 'Employees'
+        $id.ColumnName | Should-BeString 'Id'
         $id.Ordinal | Should-HaveType ([int])
         $id.DataType | Should-NotBeNull
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $name | Should-NotBeNull
-        $name.Path | Should-Be $path
-        $name.ObjectType | Should-Be 'Table'
-        $name.ObjectName | Should-Be 'Employees'
-        $name.ColumnName | Should-Be 'Name'
+        $name.Path | Should-BeString $path
+        $name.ObjectType | Should-BeString 'Table'
+        $name.ObjectName | Should-BeString 'Employees'
+        $name.ColumnName | Should-BeString 'Name'
         $name.Ordinal | Should-HaveType ([int])
         $name.DataType | Should-NotBeNull
       }
@@ -231,12 +231,12 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-AccessQuery -Path $path -Table 'Employees'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets table data by LiteralPath' {
         Initialize-AccessFixture -Path $path
@@ -244,12 +244,12 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-AccessQuery -LiteralPath $path -Table 'Employees'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets table data by ValueFromPipeline' {
         Initialize-AccessFixture -Path $path
@@ -257,12 +257,12 @@ InModuleScope 'Automation.Office' {
         $rows = $path | Invoke-AccessQuery -Table 'Employees'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets table data by ValueFromPipelineByPropertyName' {
         Initialize-AccessFixture -Path $path
@@ -270,12 +270,12 @@ InModuleScope 'Automation.Office' {
         $rows = [PSCustomObject]@{ PSPath = $path } | Invoke-AccessQuery -Table 'Employees'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets table data with selected columns' {
         Initialize-AccessFixture -Path $path
@@ -303,11 +303,11 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-AccessQuery -LiteralPath $path -Query $select
 
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
+        $rows[0].Name | Should-BeString 'Alice'
 
       }
     }
@@ -319,18 +319,18 @@ InModuleScope 'Automation.Office' {
 
         $result = Invoke-AccessQuery -LiteralPath $path -Query $insert
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
-        $result.ObjectName | Should-Be $insert
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
+        $result.ObjectName | Should-BeString $insert
         $result.RecordsAffected | Should-Be 1
         $rows = Invoke-AccessQuery -LiteralPath $path -Query $select
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 3
-        $rows[0].Name | Should-Be 'Carol'
-        $rows[0].Department | Should-Be 'Marketing'
+        $rows[0].Name | Should-BeString 'Carol'
+        $rows[0].Department | Should-BeString 'Marketing'
       }
       It 'updates rows and returns affected count' {
         $update = "UPDATE [Employees] SET [Department] = 'Marketing' WHERE [Id] = 1"
@@ -339,18 +339,18 @@ InModuleScope 'Automation.Office' {
 
         $result = Invoke-AccessQuery -LiteralPath $path -Query $update
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
-        $result.ObjectName | Should-Be $update
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
+        $result.ObjectName | Should-BeString $update
         $result.RecordsAffected | Should-Be 1
         $rows = Invoke-AccessQuery -LiteralPath $path -Query $select
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Marketing'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Marketing'
       }
       It 'deletes rows and returns affected count' {
         Initialize-AccessFixture -Path $path
@@ -359,8 +359,8 @@ InModuleScope 'Automation.Office' {
         $result = Invoke-AccessQuery -LiteralPath $path -Query $delete
 
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
         $result.ObjectName | Should-Be $delete
         $result.RecordsAffected | Should-Be 1
       }
@@ -371,8 +371,8 @@ InModuleScope 'Automation.Office' {
         $result = Invoke-AccessQuery -LiteralPath $path -Query $delete
 
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
         $result.ObjectName | Should-Be $delete
         $result.RecordsAffected | Should-Be 0
       }
@@ -384,11 +384,11 @@ InModuleScope 'Automation.Office' {
         $row = Invoke-AccessQuery -LiteralPath $path -Table 'Employees' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
 
         $row | Should-NotBeNull
-        $row.Path | Should-Be $path
-        $row.ObjectType | Should-Be 'Table'
-        $row.ObjectName | Should-Be 'Employees'
+        $row.Path | Should-BeString $path
+        $row.ObjectType | Should-BeString 'Table'
+        $row.ObjectName | Should-BeString 'Employees'
         $row.Id | Should-Be 1
-        $row.Name | Should-Be 'Alice'
+        $row.Name | Should-BeString 'Alice'
       }
       It 'returns row metadata and column values for view data' {
         Initialize-AccessFixture -Path $path
@@ -396,11 +396,11 @@ InModuleScope 'Automation.Office' {
         $row = Invoke-AccessQuery -LiteralPath $path -View vwSalesEmployees | Select-Object -First 1
 
         $row | Should-NotBeNull
-        $row.Path | Should-Be $path
-        $row.ObjectType | Should-Be 'View'
-        $row.ObjectName | Should-Be 'vwSalesEmployees'
+        $row.Path | Should-BeString $path
+        $row.ObjectType | Should-BeString 'View'
+        $row.ObjectName | Should-BeString 'vwSalesEmployees'
         $row.Id | Should-Be 1
-        $row.Name | Should-Be 'Alice'
+        $row.Name | Should-BeString 'Alice'
       }
     }
     Context 'Other parameters' {
@@ -493,9 +493,9 @@ InModuleScope 'Automation.Office' {
         $view = Get-AccessView -LiteralPath $path | Where-Object -Property Name -EQ 'vwSalesEmployees' | Select-Object -First 1
 
         $view | Should-NotBeNull
-        $view.Path | Should-Be $path
-        $view.Type | Should-Be 'VIEW'
-        $view.Name | Should-Be 'vwSalesEmployees'
+        $view.Path | Should-BeString $path
+        $view.Type | Should-BeString 'VIEW'
+        $view.Name | Should-BeString 'vwSalesEmployees'
       }
     }
     Context 'Other parameters' {
@@ -573,18 +573,18 @@ InModuleScope 'Automation.Office' {
 
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $id | Should-NotBeNull
-        $id.Path | Should-Be $path
-        $id.ObjectType | Should-Be 'View'
-        $id.ObjectName | Should-Be 'vwSalesEmployees'
-        $id.ColumnName | Should-Be 'Id'
+        $id.Path | Should-BeString $path
+        $id.ObjectType | Should-BeString 'View'
+        $id.ObjectName | Should-BeString 'vwSalesEmployees'
+        $id.ColumnName | Should-BeString 'Id'
         $id.Ordinal | Should-HaveType ([int])
         $id.DataType | Should-NotBeNull
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $name | Should-NotBeNull
-        $name.Path | Should-Be $path
-        $name.ObjectType | Should-Be 'View'
-        $name.ObjectName | Should-Be 'vwSalesEmployees'
-        $name.ColumnName | Should-Be 'Name'
+        $name.Path | Should-BeString $path
+        $name.ObjectType | Should-BeString 'View'
+        $name.ObjectName | Should-BeString 'vwSalesEmployees'
+        $name.ColumnName | Should-BeString 'Name'
         $name.Ordinal | Should-HaveType ([int])
         $name.DataType | Should-NotBeNull
       }
