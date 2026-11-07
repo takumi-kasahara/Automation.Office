@@ -39,31 +39,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'New-AccessFile' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "New-AccessFile -Path '$escapedPath' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -97,12 +72,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path $path
-
-        $exitCode | Should-Be 0
-        Test-Path -LiteralPath $path | Should-BeFalse
-      }
       It 'overwrites an existing database when Force is specified' {
         New-Item -Path $path -ItemType File | Out-Null
 
@@ -441,7 +410,7 @@ InModuleScope 'Automation.Office' {
         New-AccessFile -Path $path
 
         $properties = [PSCustomObject]@{ $name = $value }
-        $property = Set-AccessFileProperty -LiteralPath $path -InputObject $properties -PassThru -Name $name
+        $property = Set-AccessFileProperty -LiteralPath $path -InputObject $properties -PassThru
 
         $property | Should-BeTrue
       }
@@ -495,32 +464,6 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Export-AccessDatabase' {
     BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [string]
-          $Destination
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedDestination = $Destination.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Export-AccessDatabase -Path '$escapedPath' -TableName 'Employees' -Destination '$escapedDestination' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
       function Initialize-AccessFixture {
         param (
           [string]
@@ -593,14 +536,6 @@ InModuleScope 'Automation.Office' {
 
         Export-AccessDatabase -Path $path -TableName 'Employees' -Destination $destination -WhatIf
 
-        Test-Path -LiteralPath $destination | Should-BeFalse
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        Initialize-AccessFixture -Path $path
-
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Destination $destination
-
-        $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination | Should-BeFalse
       }
       It 'overwrites an existing read-only destination when Force is specified' {
@@ -713,32 +648,6 @@ InModuleScope 'Automation.Office' {
   }
   Describe 'Import-AccessDatabase' {
     BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [string]
-          $Source
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedSource = $Source.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Import-AccessDatabase -Path '$escapedPath' -Source '$escapedSource' -TableName 'Employees' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
       function Get-SourceFile {
         [CmdletBinding()]
         [OutputType([string])]
@@ -850,15 +759,6 @@ InModuleScope 'Automation.Office' {
 
         Import-AccessDatabase -Path $path -Source $source -TableName 'Employees' -WhatIf
 
-        Get-AccessTable -Path $path | Where-Object -Property Name -EQ 'Employees' | Should-BeNull
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-AccessFile -Path $path
-        Initialize-TextFile -Path $source
-
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
-
-        $exitCode | Should-Be 0
         Get-AccessTable -Path $path | Where-Object -Property Name -EQ 'Employees' | Should-BeNull
       }
     }

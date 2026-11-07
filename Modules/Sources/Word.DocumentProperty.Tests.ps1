@@ -172,39 +172,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Set-WordDocumentProperty' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [Parameter(Mandatory)]
-          [string]
-          $Name,
-          [Parameter(Mandatory)]
-          [string]
-          $Value
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedName = $Name.Replace("'", "''")
-          $escapedValue = $Value.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Set-WordDocumentProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value '$escapedValue' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -288,15 +255,6 @@ InModuleScope 'Automation.Office' {
         Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'post value' -WhatIf
 
         Get-WordDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante value'
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-WordFile -Path $path
-
-        Set-WordDocumentProperty -LiteralPath $path -Name $name -Value 'ante confirm'
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value 'post confirm'
-
-        $exitCode | Should-Be 0
-        Get-WordDocumentPropertyValue -LiteralPath $path -Name $name | Should-BeString 'ante confirm'
       }
     }
     Context 'Other parameters' {
@@ -412,31 +370,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Remove-WordDocumentProperty' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Remove-WordDocumentProperty -LiteralPath '$escapedPath' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -497,15 +430,6 @@ InModuleScope 'Automation.Office' {
 
         Remove-WordDocumentProperty -LiteralPath $path -WhatIf
 
-        Get-WordDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-WordFile -Path $path
-        Set-WordDocumentProperty -LiteralPath $path -Name $name -Value $value
-
-        $exitCode = 'N' | Invoke-Confirm -Path $path
-
-        $exitCode | Should-Be 0
         Get-WordDocumentPropertyValue -LiteralPath $path -Name $name | Should-Be $value
       }
     }

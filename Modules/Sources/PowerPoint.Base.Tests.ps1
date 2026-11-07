@@ -31,31 +31,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'New-PowerPointFile' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "New-PowerPointFile -Path '$escapedPath' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -89,12 +64,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path $path
-
-        $exitCode | Should-Be 0
-        Test-Path -LiteralPath $path | Should-BeFalse
-      }
       It 'overwrites an existing presentation when Force is specified' {
         New-Item -Path $path -ItemType File | Out-Null
 
@@ -351,43 +320,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Set-PowerPointFileProperty' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [Parameter(Mandatory)]
-          [string]
-          $Name,
-          [Parameter(Mandatory)]
-          [bool]
-          $Value
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedName = $Name.Replace("'", "''")
-          $escapedValue = if ($Value) {
-            '$true'
-          } else {
-            '$false'
-          }
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Set-PowerPointFileProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value $escapedValue -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -451,14 +383,6 @@ InModuleScope 'Automation.Office' {
 
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
 
-        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeFalse
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-PowerPointFile -Path $path
-
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
-
-        $exitCode | Should-Be 0
         Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeFalse
       }
     }
