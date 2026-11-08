@@ -3,12 +3,13 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import ts from 'typescript-eslint';
 
 export default defineConfig([
-  js.configs.recommended,
-  ts.configs.strict,
-  ts.configs.stylistic,
   globalIgnores(['apm_modules', 'node_modules']),
   {
     files: ['**/*.mjs'],
+    plugins: {
+      js,
+    },
+    extends: [js.configs.recommended],
     rules: {
       'consistent-return': 'error',
       eqeqeq: 'error',
@@ -20,13 +21,10 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts'],
-    languageOptions: {
-      parser: ts.parser,
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+    plugins: {
+      ts,
     },
+    extends: [js.configs.recommended, ts.configs.strict, ts.configs.stylistic],
     rules: {
       '@typescript-eslint/consistent-type-imports': ['error'],
       'consistent-return': 'error',

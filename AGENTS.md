@@ -36,14 +36,14 @@ Run PSScriptAnalyzer with `analyze.cmd`:
 
 Run Pester with `pester.cmd`:
 
-- Filter by line: add `-LineNumber`
+- Always specify `-LineNumber`, targeting one of the `Describe`, `Context`, or `It` lines in the `*.Tests.ps1` file.
 
 ```bat
-".agents\skills\powershell-5\scripts\pester.cmd" -Path "Module.Tests.ps1"
+".agents\skills\powershell-5\scripts\pester.cmd" -Path "Module.Tests.ps1" -LineNumber 42
 ```
 
 ```powershell
-& '.agents\skills\powershell-5\scripts\pester.cmd' -Path '.\Module.Tests.ps1'
+& '.agents\skills\powershell-5\scripts\pester.cmd' -Path '.\Module.Tests.ps1' -LineNumber 42
 ```
 
 ### VBA development cycle
