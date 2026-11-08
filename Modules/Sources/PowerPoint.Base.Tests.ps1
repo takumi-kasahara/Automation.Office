@@ -275,64 +275,66 @@ InModuleScope 'Automation.Office' {
       It 'returns selected file properties by Path' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -LiteralPath $path -Name Final
+        $properties = Get-PowerPointFileProperty -Path $path -Name Final, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -LiteralPath $path -Name Final
+        $properties = Get-PowerPointFileProperty -LiteralPath $path -Name Final, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
 
-        $properties = $path | Get-PowerPointFileProperty -Name Final
+        $properties = $path | Get-PowerPointFileProperty -Name Final, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
 
-        $properties = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointFileProperty -Name Final
+        $properties = [PSCustomObject]@{ PSPath = $path } | Get-PowerPointFileProperty -Name Final, FullName
 
-        @($properties.PSObject.Properties).Count | Should-Be 1
+        @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
+        $properties.FullName | Should-Be $path
       }
     }
     Context 'Other parameters' {
       It 'returns file properties from a file protected with PasswordToOpen' {
         New-PowerPointFile -Path $path -PasswordToOpen $password
 
-        { Get-PowerPointFileProperty -LiteralPath $path } | Should-Throw
-        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen (Get-Password) } | Should-Throw
-        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen $password } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName } | Should-Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName -PasswordToOpen (Get-Password) } | Should-Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName -PasswordToOpen $password } | Should -Not -Throw
       }
       It 'returns file properties from a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
 
-        { Get-PowerPointFileProperty -LiteralPath $path } | Should -Not -Throw
-        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify (Get-Password) } | Should -Not -Throw
-        { Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify $password } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName -PasswordToModify (Get-Password) } | Should -Not -Throw
+        { Get-PowerPointFileProperty -LiteralPath $path -Name FullName -PasswordToModify $password } | Should -Not -Throw
       }
-      It 'returns file properties with Recurse' {
+      It 'returns the property directly when only one name is provided' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -LiteralPath $path -Recurse
-
-        $properties.Application | Should-HaveType ([PSCustomObject])
+        Get-PowerPointFileProperty -LiteralPath $path -Name Final | Should-BeFalse
       }
-      It 'returns file properties with Recurse and Depth' {
+      It 'returns file properties with Depth' {
         New-PowerPointFile -Path $path
 
-        $properties = Get-PowerPointFileProperty -LiteralPath $path -Recurse -Depth 2
+        $properties = Get-PowerPointFileProperty -Path $path -Name CustomXMLParts -Depth 2
 
-        $properties.Application | Should-HaveType ([PSCustomObject])
+        $properties._NewEnum | Should-BeCollection -Count 3
       }
     }
   }
@@ -404,44 +406,44 @@ InModuleScope 'Automation.Office' {
 
         Set-PowerPointFileProperty -Path $path -Name $name -Value $value
 
-        (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -Path $path -Name $name | Should-BeTrue
       }
       It 'updates a file property by LiteralPath with Name and Value' {
         New-PowerPointFile -Path $path
 
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value
 
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
-      It 'updates a file properties by Path with InputObject' {
+      It 'updates a file property by Path with InputObject' {
         New-PowerPointFile -Path $path
 
-        $properties = [PSCustomObject]@{ Final = $true }
+        $properties = [PSCustomObject]@{ $name = $value }
         Set-PowerPointFileProperty -Path $path -InputObject $properties
 
-        (Get-PowerPointFileProperty -Path $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -Path $path -Name $name | Should-BeTrue
       }
-      It 'updates a file properties by LiteralPath with InputObject' {
+      It 'updates a file property by LiteralPath with InputObject' {
         New-PowerPointFile -Path $path
 
-        $properties = [PSCustomObject]@{ Final = $true }
+        $properties = [PSCustomObject]@{ $name = $value }
         Set-PowerPointFileProperty -LiteralPath $path -InputObject $properties
 
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipeline' {
         New-PowerPointFile -Path $path
 
         $path | Set-PowerPointFileProperty -Name $name -Value $value
 
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
       It 'updates a file property by Path with ValueFromPipelineByPropertyName' {
         New-PowerPointFile -Path $path
 
         [PSCustomObject]@{ PSPath = $path } | Set-PowerPointFileProperty -Name $name -Value $value
 
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeTrue
       }
     }
     Context 'SupportsShouldProcess' {
@@ -450,7 +452,7 @@ InModuleScope 'Automation.Office' {
 
         Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
 
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeFalse
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeFalse
       }
       It 'asks for confirmation when Confirm is specified' {
         New-PowerPointFile -Path $path
@@ -458,7 +460,7 @@ InModuleScope 'Automation.Office' {
         $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
 
         $exitCode | Should-Be 0
-        (Get-PowerPointFileProperty -LiteralPath $path).Final | Should-BeFalse
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name | Should-BeFalse
       }
     }
     Context 'Other parameters' {
@@ -468,7 +470,7 @@ InModuleScope 'Automation.Office' {
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen (Get-Password) } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToOpen $password } | Should -Not -Throw
-        (Get-PowerPointFileProperty -LiteralPath $path -PasswordToOpen $password).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name -PasswordToOpen $password | Should-BeTrue
       }
       It 'updates a file protected with PasswordToModify' {
         New-PowerPointFile -Path $path -PasswordToModify $password
@@ -476,24 +478,22 @@ InModuleScope 'Automation.Office' {
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify (Get-Password) } | Should-Throw
         { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PasswordToModify $password } | Should -Not -Throw
-        (Get-PowerPointFileProperty -LiteralPath $path -PasswordToModify $password).Final | Should-BeTrue
+        Get-PowerPointFileProperty -LiteralPath $path -Name $name -PasswordToModify $password | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified' {
         New-PowerPointFile -Path $path
 
         $property = Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -PassThru
 
-        $property | Should-HaveType ([PSCustomObject])
-        $property.Final | Should-BeTrue
+        $property | Should-BeTrue
       }
       It 'returns updated file properties when PassThru is specified with InputObject' {
         New-PowerPointFile -Path $path
 
-        $properties = [PSCustomObject]@{ Final = $true }
+        $properties = [PSCustomObject]@{ $name = $value }
         $property = Set-PowerPointFileProperty -LiteralPath $path -InputObject $properties -PassThru
 
-        $property | Should-NotBeNull
-        $property.Final | Should-BeTrue
+        $property | Should-BeTrue
       }
     }
     Context 'Edge cases' {
@@ -512,6 +512,8 @@ InModuleScope 'Automation.Office' {
   Describe 'Set-PowerPointFileProperty' -Tag 'CI', 'Mock' {
     BeforeEach {
       $path = Get-TempFile
+      $name = 'Final'
+      $value = $true
       New-Item -Path $path -ItemType File -Force | Out-Null
 
       $app = [PSCustomObject]@{}
@@ -532,7 +534,7 @@ InModuleScope 'Automation.Office' {
     }
     Context 'SupportsShouldProcess' {
       It 'does not open the file when WhatIf is specified' {
-        Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $true -WhatIf
+        Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
 
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
@@ -541,7 +543,7 @@ InModuleScope 'Automation.Office' {
       It 'throws when the target is read-only' {
         (Get-Item -LiteralPath $path -Force).IsReadOnly = $true
 
-        { Set-PowerPointFileProperty -LiteralPath $path -Name Final -Value $true } | Should-Throw
+        { Set-PowerPointFileProperty -LiteralPath $path -Name $name -Value $value } | Should-Throw
         Should-NotInvoke -CommandName Open-PowerPointFile
       }
     }

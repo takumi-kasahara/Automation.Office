@@ -1,10 +1,8 @@
 ﻿using module .\DialogSuppressor.psm1
-using namespace System.Collections.Generic
 using namespace System.Diagnostics.CodeAnalysis
 using namespace System.IO
 using namespace System.Management.Automation
 using namespace System.Reflection
-using namespace System.Runtime.CompilerServices
 
 Set-StrictMode -Version Latest
 
@@ -18,14 +16,12 @@ function Get-ObjectProperty {
     $InputObject,
     [string[]]
     $Name,
-    [switch]
-    $Recurse,
     [ValidateRange(1, [int]::MaxValue)]
     [int]
     $Depth = 1
   )
   try {
-    $visited = [HashSet[int]]::new()
+    $activity = 'Processing Object Properties'
     function Get-RecursiveObjectProperty {
       [CmdletBinding()]
       [OutputType([PSCustomObject])]
@@ -36,84 +32,107 @@ function Get-ObjectProperty {
         [Parameter(Mandatory)]
         [int]
         $RemainingDepth,
-        [switch]
-        $Recursive
+        [string]
+        $ParentName = [string]::Empty
       )
       if ($null -eq $TargetObject) {
-        return [PSCustomObject]@{}
+        return $null
       }
-      $identity = [RuntimeHelpers]::GetHashCode($TargetObject)
-      if ($visited.Contains($identity)) {
-        return [PSCustomObject]@{}
-      }
-      [void]$visited.Add($identity)
-
-      $properties = [PSCustomObject]@{}
-      $memberProperties = @(
+      $psobject = [PSCustomObject]@{}
+      $members = @(
         Get-Member -InputObject $TargetObject -MemberType Properties -ErrorAction SilentlyContinue
       )
       if ($Name -and $RemainingDepth -eq $Depth) {
-        $memberProperties = $memberProperties |
+        $members = $members |
         Where-Object -Property Name -In -Value $Name
       }
-      $memberProperties |
+      $members |
       ForEach-Object {
-        $propertyInfo = $TargetObject.GetType().GetProperty($_.Name)
-        $property = $null
+        $displayName = if ($ParentName) {
+          "$ParentName.$($_.Name)"
+        } else {
+          $_.Name
+        }
+        # Some properties can initialize the mail client and block inside the COM getter.
+        if ($_.Name -in 'MailEnvelope') {
+          Write-Warning -Message "$($displayName): Skipped because accessing it can block automation."
+          return
+        }
+        Write-Progress -Activity $activity -Status "Processing: $displayName"
+        $propertyInfo = try {
+          $TargetObject.GetType().GetProperty($_.Name)
+        } catch {
+          Write-Warning -Message "$($displayName): $($_.Exception.Message)"
+          $null
+        }
         if ($propertyInfo) {
           if (-not $propertyInfo.CanRead) {
+            Write-Warning -Message "$displayName is write-only."
             return
           }
           $type = $propertyInfo.PropertyType
         } else {
           $property = $TargetObject.PSObject.Properties | Where-Object -Property Name -Value $_.Name -EQ | Select-Object -First 1
-          if (-not $property) {
-            return
-          }
           if (-not $property.IsGettable) {
+            Write-Warning -Message "$displayName is write-only."
             return
           }
           $type = [type]$property.TypeNameOfValue
         }
-        if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime]) {
+        $value = $TargetObject.$($_.Name)
+        if ($null -ne $value) {
           try {
-            $value = $TargetObject.$($_.Name)
+            $type = $value.GetType()
           } catch {
-            return
+            Write-Warning -Message "$($displayName): $($_.Exception.Message)"
           }
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+        }
+        if ($type.IsPrimitive -or $type.IsEnum -or $type -eq [datetime] -or $type -eq [string]) {
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        if (-not $Recursive) {
+        if ($_.Name -in '_NewEnum') {
+          $i = 0
+          $value = $TargetObject.$($_.Name) |
+          ForEach-Object {
+            Get-RecursiveObjectProperty -TargetObject $_ -RemainingDepth $RemainingDepth -ParentName "$displayName[$i]"
+            $i++
+          }
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        try {
-          $value = $TargetObject.$($_.Name)
-        } catch {
+        if ($RemainingDepth -eq 0) {
           return
         }
-        if ($null -eq $value -or $value -isnot [__ComObject]) {
+        if ($null -eq $value) {
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
           return
         }
-        if ($RemainingDepth -le 0) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+        if ($value -isnot [__ComObject]) {
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -Recursive:$Recursive
+        $child = Get-RecursiveObjectProperty -TargetObject $value -RemainingDepth ($RemainingDepth - 1) -ParentName $displayName
         if (@($child.PSObject.Properties).Count -gt 0) {
-          $properties | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
-          return
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $child
+        } else {
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $null
         }
       }
-      return $properties
+      return $psobject
     }
-    return Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth -Recursive:$Recurse
+    $properties = Get-RecursiveObjectProperty -TargetObject $InputObject -RemainingDepth $Depth
+    if ($null -ne $Name -and @($Name).Count -eq 1) {
+      return $properties.$Name
+    }
+    return $properties
   } finally {
     Get-Variable |
     Where-Object -Property Value -Is [__ComObject] |
     Clear-Variable -Force -WhatIf:$false -Confirm:$false
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
+    Write-Progress -Activity $activity -Completed
   }
 }
 function Set-ObjectProperty {
@@ -156,7 +175,7 @@ function Set-ObjectProperty {
         try {
           [__ComObject].InvokeMember($_.Name, [BindingFlags]::SetProperty, $null, $InputObject, $_.Value)
         } catch {
-          Write-Warning -Message $_.Exception.Message
+          Write-Warning -Message "$($_.Name)`t$($_.Exception.Message)"
         }
       }
     } | Out-Host

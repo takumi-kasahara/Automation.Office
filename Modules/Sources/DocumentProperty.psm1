@@ -60,7 +60,7 @@ function Get-DocumentProperty {
       $value = [__ComObject].InvokeMember('Value', [BindingFlags]::GetProperty, $null, $_, $null)
     } catch [COMException] {
       $value = $null
-      Write-Warning -Message "$($_.Exception.Message) on $propertyName"
+      Write-Warning -Message "$($propertyName): $($_.Exception.Message)"
     }
     $values | Add-Member -MemberType NoteProperty -Name $propertyName -Value $value
   }
@@ -117,7 +117,7 @@ function Set-BuiltInDocumentProperty {
         [__ComObject].InvokeMember('Value', [BindingFlags]::SetProperty, $null, $property, $_.Value)
         return $true
       } catch [COMException] {
-        Write-Warning -Message "$($_.Exception.Message) on $($_.Name)"
+        Write-Warning -Message "$($_.Name): $($_.Exception.Message)"
         return $false
       }
     }
@@ -161,7 +161,7 @@ function Set-CustomDocumentProperty {
         [__ComObject].InvokeMember('Add', [BindingFlags]::InvokeMethod, $null, $InputObject.CustomDocumentProperties, $arguments) | Out-Null
         return $true
       } catch [COMException] {
-        Write-Warning -Message "$($_.Exception.Message) on $($_.Name)"
+        Write-Warning -Message "$($_.Name): $($_.Exception.Message)"
         return $false
       }
     }
