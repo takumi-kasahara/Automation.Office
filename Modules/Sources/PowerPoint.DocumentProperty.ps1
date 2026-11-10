@@ -64,7 +64,7 @@ function Get-PowerPointDocumentProperty {
     Gets a custom document property.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -118,13 +118,13 @@ function Get-PowerPointDocumentProperty {
           )
           $properties = Get-DocumentProperty -InputObject $Presentation -Name $Name -Custom:$Custom
           $missingNames = @(if ($Name) {
-            @(
-              $Name |
-              Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
-            )
-          } else {
-            @()
-          })
+              @(
+                $Name |
+                Where-Object { $_ -notin @($properties.PSObject.Properties.Name) }
+              )
+            } else {
+              @()
+            })
           if ($missingNames.Count -gt 0) {
             throw [ArgumentException]::new("Document property not found: $($missingNames -join ', ')")
           }
@@ -303,7 +303,7 @@ function Set-PowerPointDocumentProperty {
     Updates the `Title` built-in document property and returns the updated property object.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -486,9 +486,6 @@ function Remove-PowerPointDocumentProperty {
     ```
 
     Removes all supported document information categories.
-
-  .OUTPUTS
-    None.
 
   .NOTES
     If a file cannot be updated (for example, read-only state or file access issues), the cmdlet throws an exception and continues processing remaining items.

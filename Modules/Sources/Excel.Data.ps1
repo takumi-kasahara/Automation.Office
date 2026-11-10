@@ -68,7 +68,7 @@ function Get-ExcelTable {
     Gets all tables from a macro-enabled workbook in read-only mode.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -182,7 +182,7 @@ function Get-ExcelTableColumn {
     Gets column metadata from a macro-enabled workbook in read-only mode.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -360,7 +360,7 @@ function Invoke-ExcelQuery {
     Queries a macro-enabled workbook (.xlsm format).
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
 
   .NOTES
     SQL syntax is based on the Jet/ACE SQL dialect used by the Microsoft Access database engine. For a complete SQL reference, see:

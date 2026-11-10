@@ -445,7 +445,7 @@ function New-OneNotePage {
 
   .OUTPUTS
     System.String
-    The OneNote object ID of the created page.
+      The OneNote object ID of the created page.
 
   .NOTES
     This function uses the OneNote COM API (CreateNewPage) internally.
@@ -1108,8 +1108,7 @@ function Export-OneNoteBinaryObject {
               Set-ItemProperty -LiteralPath $file -Name 'LastWriteTime' -Value ([datetime]::Parse($lastModifiedTime.Value)) -WhatIf:$WhatIfPreference -Confirm:$false
             }
           }
-        }
-        finally {
+        } finally {
           if ($isReadOnly -and $Force) {
             (Get-Item -LiteralPath $file -Force).IsReadOnly = $true
           }
@@ -1157,9 +1156,6 @@ function Import-OneNoteHierarchy {
     ```
 
     Imports all hierarchy XML files in the specified directory via pipeline.
-
-  .OUTPUTS
-    None.
 
   .NOTES
     This function uses the OneNote COM API (UpdateHierarchy) internally.
@@ -1249,9 +1245,6 @@ function Import-OneNotePageContent {
     Get-ChildItem -Path "$env:TEMP\*.content.xml" | Import-OneNotePageContent -Confirm:$false
 
     Imports all page content XML files in the specified directory via pipeline.
-
-  .OUTPUTS
-    None.
 
   .NOTES
     This function uses the OneNote COM API (UpdatePageContent) internally.

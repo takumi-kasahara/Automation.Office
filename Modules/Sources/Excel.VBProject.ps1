@@ -177,9 +177,6 @@ function Import-ExcelVBProject {
 
     Imports into workbook protected with a modify password.
 
-  .OUTPUTS
-    None.
-
   .NOTES
     If a file is read-only recommended and -Force is not specified, the cmdlet throws an exception.
   #>

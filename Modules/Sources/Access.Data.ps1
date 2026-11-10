@@ -69,7 +69,7 @@ function Get-AccessTable {
     Gets all tables from a password-protected database.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -184,7 +184,7 @@ function Get-AccessTableColumn {
     Gets column metadata from a password-protected database.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -305,7 +305,7 @@ function Get-AccessView {
     Gets views from a password-protected database.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -416,7 +416,7 @@ function Get-AccessViewColumn {
     Gets column metadata from a password-protected database.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
   #>
   [CmdletBinding(DefaultParameterSetName = 'PathSet')]
   [OutputType([PSCustomObject])]
@@ -567,7 +567,7 @@ function Invoke-AccessQuery {
     Executes a query against a password-protected database.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
 
   .NOTES
     SQL syntax is based on the Microsoft Access SQL dialect. For a complete SQL reference, see:
@@ -686,7 +686,11 @@ function Invoke-AccessQuery {
               $result.ObjectName = $target.Name
               foreach ($column in $dataTable.Columns) {
                 $value = $rowData[$column.ColumnName]
-                $result[$column.ColumnName] = if ($value -is [DBNull]) { $null } else { $value }
+                $result[$column.ColumnName] = if ($value -is [DBNull]) {
+                  $null
+                } else {
+                  $value
+                }
               }
               [PSCustomObject]$result
             }

@@ -7,6 +7,28 @@
   },
   "tasks": [
     {
+      "label": "build",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": [
+        "build: docs",
+        "Office Macros: compile (debug)",
+        "Office Macros: compile (release)",
+        "Office Scripts: compile"
+      ]
+    },
+    {
+      "label": "build: docs",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": ["-NoLogo", "-NoProfile", "-File", "Docs.ps1"],
+      "problemMatcher": [],
+      "hide": true
+    },
+    {
       "label": "Office Macros: compile (debug)",
       "type": "shell",
       "command": "powershell.exe",
@@ -19,9 +41,7 @@
         "Compile.OfficeMacros.ps1"
       ],
       "problemMatcher": [],
-      "group": {
-        "kind": "build"
-      }
+      "hide": true
     },
     {
       "label": "Office Macros: compile (release)",
@@ -37,9 +57,7 @@
         "-Release"
       ],
       "problemMatcher": [],
-      "group": {
-        "kind": "build"
-      }
+      "hide": true
     },
     {
       "label": "Office Scripts: compile",
@@ -54,9 +72,7 @@
         "Compile.OfficeScripts.ps1"
       ],
       "problemMatcher": [],
-      "group": {
-        "kind": "build"
-      }
+      "hide": true
     },
     {
       "label": "Office Macros: decompile (debug)",
@@ -102,6 +118,21 @@
       "problemMatcher": []
     },
     {
+      "label": "psscriptanalyzer",
+      "type": "shell",
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        ".agents\\skills\\powershell-5\\scripts\\analyze.cmd",
+        "-Path",
+        "${file}"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test"
+      }
+    },
+    {
       "label": "pester",
       "type": "shell",
       "command": "cmd.exe",
@@ -109,7 +140,9 @@
         "/c",
         ".agents\\skills\\powershell-5\\scripts\\pester.cmd",
         "-Path",
-        "${file}"
+        "${file}",
+        "-LineNumber",
+        "${lineNumber}"
       ],
       "problemMatcher": ["$pester"],
       "group": {

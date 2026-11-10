@@ -57,9 +57,6 @@ function New-WordObject {
 #endregion
 #region Public
 function Get-WordVersionInfo {
-  [CmdletBinding()]
-  [OutputType([System.Diagnostics.FileVersionInfo])]
-  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Word application.
@@ -72,6 +69,9 @@ function Get-WordVersionInfo {
     Requires Word to be installed and accessible via COM automation.
     The function uses the New-WordObject helper to locate the Word executable.
   #>
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param ()
   (New-WordObject).Path | Join-Path -ChildPath 'WINWORD.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
 }
 function New-WordFile {
@@ -296,7 +296,7 @@ function Open-WordFile {
     Opens a document, adds text, and closes the document.
 
   .OUTPUTS
-    __ComObject
+    System.__ComObject
       Returns the opened document object.
   #>
   [CmdletBinding()]
@@ -437,7 +437,7 @@ function Get-WordFileProperty {
     Gets file properties from a file protected with a modify password.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -590,7 +590,7 @@ function Set-WordFileProperty {
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
 
   .NOTES

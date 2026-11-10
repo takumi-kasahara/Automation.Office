@@ -167,9 +167,6 @@ function Import-AccessVBProject {
     ```
 
     Imports protected database with password.
-
-  .OUTPUTS
-    None.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([void])]
