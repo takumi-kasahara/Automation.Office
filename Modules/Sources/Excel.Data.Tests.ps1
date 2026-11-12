@@ -108,9 +108,9 @@ InModuleScope 'Automation.Office' {
         $table = Get-ExcelTable -LiteralPath $path | Where-Object -Property Name -EQ 'Employees$' | Select-Object -First 1
 
         $table | Should-NotBeNull
-        $table.Path | Should-Be $path
-        $table.Type | Should-Be 'TABLE'
-        $table.Name | Should-Be 'Employees$'
+        $table.Path | Should-BeString $path
+        $table.Type | Should-BeString 'TABLE'
+        $table.Name | Should-BeString 'Employees$'
       }
     }
     Context 'Other parameters' {
@@ -186,18 +186,18 @@ InModuleScope 'Automation.Office' {
 
         $id = $columns | Where-Object -Property ColumnName -EQ 'Id' | Select-Object -First 1
         $id | Should-NotBeNull
-        $id.Path | Should-Be $path
-        $id.ObjectType | Should-Be 'Table'
-        $id.ObjectName | Should-Be 'Employees$'
-        $id.ColumnName | Should-Be 'Id'
+        $id.Path | Should-BeString $path
+        $id.ObjectType | Should-BeString 'Table'
+        $id.ObjectName | Should-BeString 'Employees$'
+        $id.ColumnName | Should-BeString 'Id'
         $id.Ordinal | Should-HaveType ([int])
         $id.DataType | Should-NotBeNull
         $name = $columns | Where-Object -Property ColumnName -EQ 'Name' | Select-Object -First 1
         $name | Should-NotBeNull
-        $name.Path | Should-Be $path
-        $name.ObjectType | Should-Be 'Table'
-        $name.ObjectName | Should-Be 'Employees$'
-        $name.ColumnName | Should-Be 'Name'
+        $name.Path | Should-BeString $path
+        $name.ObjectType | Should-BeString 'Table'
+        $name.ObjectName | Should-BeString 'Employees$'
+        $name.ColumnName | Should-BeString 'Name'
         $name.Ordinal | Should-HaveType ([int])
         $name.DataType | Should-NotBeNull
       }
@@ -248,12 +248,12 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-ExcelQuery -Path $path -Table 'Employees$'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees$'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees$'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets rows by LiteralPath' {
         Initialize-ExcelFixture -Path $path
@@ -261,12 +261,12 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-ExcelQuery -LiteralPath $path -Table 'Employees$'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees$'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees$'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets rows by ValueFromPipeline' {
         Initialize-ExcelFixture -Path $path
@@ -274,12 +274,12 @@ InModuleScope 'Automation.Office' {
         $rows = $path | Invoke-ExcelQuery -Table 'Employees$'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees$'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees$'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets rows by ValueFromPipelineByPropertyName' {
         Initialize-ExcelFixture -Path $path
@@ -287,12 +287,12 @@ InModuleScope 'Automation.Office' {
         $rows = [PSCustomObject]@{ PSPath = $path } | Invoke-ExcelQuery -Table 'Employees$'
 
         $rows | Should-BeCollection -Count 2
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Table'
-        $rows[0].ObjectName | Should-Be 'Employees$'
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Table'
+        $rows[0].ObjectName | Should-BeString 'Employees$'
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Sales'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Sales'
       }
       It 'gets rows with selected columns' {
         Initialize-ExcelFixture -Path $path
@@ -311,11 +311,11 @@ InModuleScope 'Automation.Office' {
         $rows = Invoke-ExcelQuery -LiteralPath $path -Query $select
 
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
+        $rows[0].Name | Should-BeString 'Alice'
       }
     }
     Context 'Input' {
@@ -326,18 +326,18 @@ InModuleScope 'Automation.Office' {
 
         $result = Invoke-ExcelQuery -LiteralPath $path -Query $insert
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
-        $result.ObjectName | Should-Be $insert
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
+        $result.ObjectName | Should-BeString $insert
         $result.RecordsAffected | Should-Be 1
         $rows = Invoke-ExcelQuery -LiteralPath $path -Query $select
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 3
-        $rows[0].Name | Should-Be 'Carol'
-        $rows[0].Department | Should-Be 'Marketing'
+        $rows[0].Name | Should-BeString 'Carol'
+        $rows[0].Department | Should-BeString 'Marketing'
       }
       It 'updates rows and returns affected count' {
         $update = "UPDATE [Employees$] SET [Department] = 'Marketing' WHERE [Id] = 1"
@@ -346,18 +346,18 @@ InModuleScope 'Automation.Office' {
 
         $result = Invoke-ExcelQuery -LiteralPath $path -Query $update
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
-        $result.ObjectName | Should-Be $update
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
+        $result.ObjectName | Should-BeString $update
         $result.RecordsAffected | Should-Be 1
         $rows = Invoke-ExcelQuery -LiteralPath $path -Query $select
         $rows | Should-BeCollection -Count 1
-        $rows[0].Path | Should-Be $path
-        $rows[0].ObjectType | Should-Be 'Query'
-        $rows[0].ObjectName | Should-Be $select
+        $rows[0].Path | Should-BeString $path
+        $rows[0].ObjectType | Should-BeString 'Query'
+        $rows[0].ObjectName | Should-BeString $select
         $rows[0].Id | Should-Be 1
-        $rows[0].Name | Should-Be 'Alice'
-        $rows[0].Department | Should-Be 'Marketing'
+        $rows[0].Name | Should-BeString 'Alice'
+        $rows[0].Department | Should-BeString 'Marketing'
       }
       It 'throws when executing DELETE' {
         Initialize-ExcelFixture -Path $path
@@ -371,9 +371,9 @@ InModuleScope 'Automation.Office' {
         $result = Invoke-ExcelQuery -LiteralPath $path -Query $update
 
         $result | Should-NotBeNull
-        $result.Path | Should-Be $path
-        $result.ObjectType | Should-Be 'Query'
-        $result.ObjectName | Should-Be $update
+        $result.Path | Should-BeString $path
+        $result.ObjectType | Should-BeString 'Query'
+        $result.ObjectName | Should-BeString $update
         $result.RecordsAffected | Should-Be 0
       }
     }
@@ -384,12 +384,12 @@ InModuleScope 'Automation.Office' {
         $row = Invoke-ExcelQuery -LiteralPath $path -Table 'Employees$' | Where-Object -Property Id -EQ 1 | Select-Object -First 1
 
         $row | Should-NotBeNull
-        $row.Path | Should-Be $path
-        $row.ObjectType | Should-Be 'Table'
-        $row.ObjectName | Should-Be 'Employees$'
+        $row.Path | Should-BeString $path
+        $row.ObjectType | Should-BeString 'Table'
+        $row.ObjectName | Should-BeString 'Employees$'
         $row.Id | Should-Be 1
-        $row.Name | Should-Be 'Alice'
-        $row.Department | Should-Be 'Sales'
+        $row.Name | Should-BeString 'Alice'
+        $row.Department | Should-BeString 'Sales'
       }
     }
     Context 'Other parameters' {

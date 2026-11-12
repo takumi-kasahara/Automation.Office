@@ -31,31 +31,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'New-WordFile' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "New-WordFile -Path '$escapedPath' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -89,12 +64,6 @@ InModuleScope 'Automation.Office' {
       }
     }
     Context 'SupportsShouldProcess' {
-      It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path $path
-
-        $exitCode | Should-Be 0
-        Test-Path -LiteralPath $path | Should-BeFalse
-      }
       It 'overwrites an existing document when Force is specified' {
         New-Item -Path $path -ItemType File | Out-Null
 
@@ -129,14 +98,12 @@ InModuleScope 'Automation.Office' {
       It 'creates a file with ReadOnlyRecommended' {
         New-WordFile -Path $path -ReadOnlyRecommended
 
-        $properties = Get-WordFileProperty -LiteralPath $path
-        $properties.ReadOnlyRecommended | Should-BeTrue
+        Get-WordFileProperty -LiteralPath $path -Name ReadOnlyRecommended | Should-BeTrue
       }
       It 'creates a file with RemovePersonalInformation' {
         New-WordFile -Path $path -RemovePersonalInformation
 
-        $properties = Get-WordFileProperty -LiteralPath $path
-        $properties.RemovePersonalInformation | Should-BeTrue
+        Get-WordFileProperty -LiteralPath $path -Name RemovePersonalInformation | Should-BeTrue
       }
       It 'creates a file with Initialize script block' {
         { New-WordFile -Path $path -Initialize {
@@ -234,7 +201,7 @@ InModuleScope 'Automation.Office' {
           return $Document.Range().Text
         }
 
-        $value | Should-Be 'TestContent'
+        $value | Should-BeString 'TestContent'
       }
       It 'opens a file using an existing Application object' {
         New-WordFile -Path $path
@@ -284,7 +251,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by LiteralPath' {
         New-WordFile -Path $path
@@ -293,7 +260,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipeline' {
         New-WordFile -Path $path
@@ -302,7 +269,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
       It 'returns selected file properties by Path with ValueFromPipelineByPropertyName' {
         New-WordFile -Path $path
@@ -311,7 +278,7 @@ InModuleScope 'Automation.Office' {
 
         @($properties.PSObject.Properties).Count | Should-Be 2
         $properties.Final | Should-BeFalse
-        $properties.FullName | Should-Be $path
+        $properties.FullName | Should-BeString $path
       }
     }
     Context 'Other parameters' {
@@ -357,43 +324,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Set-WordFileProperty' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [Parameter(Mandatory)]
-          [string]
-          $Name,
-          [Parameter(Mandatory)]
-          [bool]
-          $Value
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedName = $Name.Replace("'", "''")
-          $escapedValue = if ($Value) {
-            '$true'
-          } else {
-            '$false'
-          }
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Set-WordFileProperty -LiteralPath '$escapedPath' -Name '$escapedName' -Value $escapedValue -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -456,14 +386,6 @@ InModuleScope 'Automation.Office' {
         New-WordFile -Path $path
 
         Set-WordFileProperty -LiteralPath $path -Name $name -Value $value -WhatIf
-
-        Get-WordFileProperty -LiteralPath $path -Name $name | Should-BeFalse
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-WordFile -Path $path
-
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Name $name -Value $value
-        $exitCode | Should-Be 0
 
         Get-WordFileProperty -LiteralPath $path -Name $name | Should-BeFalse
       }

@@ -91,16 +91,6 @@ function Get-ObjectProperty {
           $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }
-        if ($_.Name -in '_NewEnum') {
-          $i = 0
-          $value = $TargetObject.$($_.Name) |
-          ForEach-Object {
-            Get-RecursiveObjectProperty -TargetObject $_ -RemainingDepth $RemainingDepth -ParentName "$displayName[$i]"
-            $i++
-          }
-          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
-          return
-        }
         if ($RemainingDepth -eq 0) {
           return
         }
@@ -109,6 +99,16 @@ function Get-ObjectProperty {
           return
         }
         if ($value -isnot [__ComObject]) {
+          $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
+          return
+        }
+        if ($_.Name -in '_NewEnum') {
+          $i = 0
+          $value = $TargetObject.$($_.Name) |
+          ForEach-Object {
+            Get-RecursiveObjectProperty -TargetObject $_ -RemainingDepth ($RemainingDepth - 1) -ParentName "$displayName[$i]"
+            $i++
+          }
           $psobject | Add-Member -MemberType NoteProperty -Name $_.Name -Value $value
           return
         }

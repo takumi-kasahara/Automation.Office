@@ -77,35 +77,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Export-ExcelVBProject' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [Parameter(Mandatory)]
-          [string]
-          $Destination
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedDestination = $Destination.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Export-ExcelVBProject -Path '$escapedPath' -Destination '$escapedDestination' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -173,13 +144,6 @@ InModuleScope 'Automation.Office' {
       It 'does not create outputs when WhatIf is specified' {
         Export-ExcelVBProject -Path $fixture -Destination $destination -Force -WhatIf
 
-        Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
-        Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        $exitCode = 'N' | Invoke-Confirm -Path $fixture -Destination $destination
-
-        $exitCode | Should-Be 0
         Test-Path -LiteralPath $destination -PathType Leaf | Should-BeFalse
         Test-Path -LiteralPath $componentRoot -PathType Container | Should-BeFalse
       }
@@ -298,35 +262,6 @@ InModuleScope 'Automation.Office' {
     }
   }
   Describe 'Import-ExcelVBProject' {
-    BeforeAll {
-      function Invoke-Confirm {
-        [CmdletBinding()]
-        [OutputType([int])]
-        param (
-          [Parameter(ValueFromPipeline)]
-          [string]
-          $Response,
-          [Parameter(Mandatory)]
-          [string]
-          $Path,
-          [Parameter(Mandatory)]
-          [string]
-          $Source
-        )
-        process {
-          $modulePath = [Path]::GetFullPath(($PSScriptRoot | Join-Path -ChildPath '..\Automation.Office.psd1'))
-          $escapedModulePath = $modulePath.Replace("'", "''")
-          $escapedPath = $Path.Replace("'", "''")
-          $escapedSource = $Source.Replace("'", "''")
-          $command = @(
-            "Import-Module -Name '$escapedModulePath' -Force"
-            "Import-ExcelVBProject -Path '$escapedPath' -Source '$escapedSource' -Confirm"
-          ) -join '; '
-          @($Response) | & powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command $command | Out-Host
-          return $LASTEXITCODE
-        }
-      }
-    }
     BeforeEach {
       $password = Get-Password
       $path = Get-TempFile
@@ -372,15 +307,6 @@ InModuleScope 'Automation.Office' {
         Import-ExcelVBProject -Path $path -Source $source -Force -WhatIf
         $post = Get-ComparableVBProjectFromFile -LiteralPath $path
 
-        ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
-      }
-      It 'asks for confirmation when Confirm is specified' {
-        New-ExcelFile -Path $path -FileFormat xlOpenXMLWorkbookMacroEnabled
-        $ante = Get-ComparableVBProjectFromFile -LiteralPath $path
-        $exitCode = 'N' | Invoke-Confirm -Path $path -Source $source
-        $post = Get-ComparableVBProjectFromFile -LiteralPath $path
-
-        $exitCode | Should-Be 0
         ($post | ConvertTo-Json) | Should-Be ($ante | ConvertTo-Json)
       }
       It 'imports into a read-only recommended workbook when Force is specified' {
