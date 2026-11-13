@@ -57,9 +57,6 @@ function New-ExcelObject {
 #endregion
 #region Public
 function Get-ExcelVersionInfo {
-  [CmdletBinding()]
-  [OutputType([System.Diagnostics.FileVersionInfo])]
-  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Excel application.
@@ -72,6 +69,9 @@ function Get-ExcelVersionInfo {
     Requires Excel to be installed and accessible via COM automation.
     The function uses the New-ExcelObject helper to locate the Excel executable.
   #>
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param ()
   (New-ExcelObject).Path | Join-Path -ChildPath 'EXCEL.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
 }
 function New-ExcelFile {
@@ -309,7 +309,7 @@ function Open-ExcelFile {
     Opens a workbook using an existing Excel Application object.
 
   .OUTPUTS
-    __ComObject
+    System.__ComObject
       Returns the opened workbook object.
   #>
   [OutputType([__ComObject])]
@@ -456,7 +456,7 @@ function Get-ExcelFileProperty {
     Gets file properties including nested COM object properties up to 2 levels deep.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -611,10 +611,8 @@ function Set-ExcelFileProperty {
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
-
-    None.
 
   .NOTES
     The workbook and Excel COM objects are always closed and released after applying properties.

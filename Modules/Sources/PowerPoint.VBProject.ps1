@@ -173,9 +173,6 @@ function Import-PowerPointVBProject {
     ```
 
     Imports into presentation protected with a modify password.
-
-  .OUTPUTS
-    None.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([void])]

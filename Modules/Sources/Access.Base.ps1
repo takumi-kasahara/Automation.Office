@@ -48,9 +48,6 @@ function New-AccessObject {
 #endregion
 #region Public
 function Get-AccessVersionInfo {
-  [CmdletBinding()]
-  [OutputType([System.Diagnostics.FileVersionInfo])]
-  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the Access application.
@@ -63,6 +60,9 @@ function Get-AccessVersionInfo {
     Requires Access to be installed and accessible via COM automation.
     The function uses the New-AccessObject helper to locate the Access executable.
   #>
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param ()
   (New-AccessObject).Path | Join-Path -ChildPath 'ACCESS.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
 }
 function New-AccessFile {
@@ -318,8 +318,7 @@ function Open-AccessFile {
     Opens a database and returns the connection string.
 
   .OUTPUTS
-    __ComObject
-      Returns the opened CurrentProject object when no Action parameter is specified.
+    System.__ComObject
 
   .NOTES
     If neither ActionDb nor ActionProject is specified, do not return anything.
@@ -448,7 +447,7 @@ function Get-AccessFileProperty {
     Gets file properties from a file protected with a password.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -591,7 +590,7 @@ function Set-AccessFileProperty {
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -1039,9 +1038,6 @@ function Import-AccessDatabase {
     ```
 
     Imports data from a specific range in an Excel spreadsheet.
-
-  .OUTPUTS
-    None.
   #>
   [CmdletBinding(DefaultParameterSetName = 'TextSet', SupportsShouldProcess)]
   [OutputType([void])]

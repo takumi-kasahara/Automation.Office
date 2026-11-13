@@ -56,9 +56,6 @@ function New-PowerPointObject {
 #endregion
 #region Public
 function Get-PowerPointVersionInfo {
-  [CmdletBinding()]
-  [OutputType([System.Diagnostics.FileVersionInfo])]
-  param ()
   <#
   .SYNOPSIS
     Retrieves the version information of the PowerPoint application.
@@ -71,6 +68,9 @@ function Get-PowerPointVersionInfo {
     Requires PowerPoint to be installed and accessible via COM automation.
     The function uses the New-PowerPointObject helper to locate the PowerPoint executable.
   #>
+  [CmdletBinding()]
+  [OutputType([System.Diagnostics.FileVersionInfo])]
+  param ()
   (New-PowerPointObject).Path | Join-Path -ChildPath 'POWERPNT.EXE' | Get-Item | Select-Object -ExpandProperty VersionInfo
 }
 function New-PowerPointFile {
@@ -298,7 +298,7 @@ function Open-PowerPointFile {
     Opens a presentation, adds a title slide, and closes the presentation.
 
   .OUTPUTS
-    __ComObject
+    System.__ComObject
       Returns the opened presentation object.
   #>
   [CmdletBinding()]
@@ -439,7 +439,7 @@ function Get-PowerPointFileProperty {
     Gets file properties from a file protected with a modify password.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -590,10 +590,8 @@ function Set-PowerPointFileProperty {
     Updates the property and returns the updated value.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
-
-    None.
 
   .NOTES
     If a file cannot be updated (for example, read-only state, invalid property name, or file access issues), the cmdlet throws an exception and continues processing remaining items.

@@ -64,7 +64,7 @@ function Get-WordDocumentProperty {
     Gets a custom document property.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       Each NoteProperty corresponds to a file property.
 
   .NOTES
@@ -303,7 +303,7 @@ function Set-WordDocumentProperty {
     Updates the `Title` built-in document property and returns the updated property object.
 
   .OUTPUTS
-    PSCustomObject
+    System.Management.Automation.PSObject
       When `-PassThru` is specified.
 
   .NOTES
@@ -487,9 +487,6 @@ function Remove-WordDocumentProperty {
     ```
 
     Removes all supported document information categories.
-
-  .OUTPUTS
-    None.
 
   .NOTES
     If a file cannot be updated (for example, read-only state or file access issues), the cmdlet throws an exception and continues processing remaining items.

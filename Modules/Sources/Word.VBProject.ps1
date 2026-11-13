@@ -175,9 +175,6 @@ function Import-WordVBProject {
     ```
 
     Imports while keeping the Word window hidden.
-
-  .OUTPUTS
-    None.
   #>
   [CmdletBinding(SupportsShouldProcess)]
   [OutputType([void])]
