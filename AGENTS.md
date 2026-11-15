@@ -22,42 +22,41 @@ This repository is a collection of PowerShell modules for automating Microsoft O
 
 #### PSScriptAnalyzer Invocation
 
-Run PSScriptAnalyzer with `analyze.cmd`:
+Prefer the `psscriptanalyzer` task defined in `.vscode/tasks.json` when using VS Code.
+
+Run PSScriptAnalyzer with `analyze.cmd` only when invoking directly outside of VS Code tasks:
 
 ```bat
 ".agents\skills\powershell-5\scripts\analyze.cmd" -Path "Modules" -Recurse
 ```
 
 ```powershell
-& '.agents\skills\powershell-5\scripts\analyze.cmd' -Path '.\Modules' -Recurse
+& '.\.agents\skills\powershell-5\scripts\analyze.cmd' -Path '.\Modules\' -Recurse
 ```
 
 #### Pester Invocation
 
-Run Pester with `pester.cmd`:
+Prefer the `pester` task defined in `.vscode/tasks.json` when using VS Code.
 
-- Always specify `-LineNumber`, targeting one of the `Describe`, `Context`, or `It` lines in the `*.Tests.ps1` file.
+Run Pester with `Pester.cmd` only when invoking directly outside of VS Code tasks:
 
 ```bat
-".agents\skills\powershell-5\scripts\pester.cmd" -Path "Module.Tests.ps1" -LineNumber 42
+".agents\skills\powershell-5\scripts\pester.cmd" -Path "Modules\Sources" -Parallel
 ```
 
 ```powershell
-& '.agents\skills\powershell-5\scripts\pester.cmd' -Path '.\Module.Tests.ps1' -LineNumber 42
+& '.\.agents\skills\powershell-5\scripts\pester.cmd' -Path '.\Modules\Sources\' -Parallel
 ```
 
 ### VBA development cycle
 
 1. Edit files under `Apps/`.
-2. Run `Compile.ps1`.
+2. Run `Office Macros: compile` task.
 
 ### Office Scripts development cycle
 
-1. Edit the TypeScript source file under `Office Scripts/` (e.g., `Script.ts`).
-2. Run the compile script: `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "./Compile.OfficeScripts.ps1"`.
-   - This converts `.ts` to `.osts` format using the JSON schema defined in `Script.osts`.
-3. To decompile, run: `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "./Decompile.OfficeScripts.ps1"`.
-   - This extracts the TypeScript source from `.osts` back to `.ts`.
+1. Edit the TypeScript source file under `Office Scripts/`.
+2. Run `Office Scripts: compile` task.
 
 ## Coding Conventions
 
@@ -72,4 +71,4 @@ Run Pester with `pester.cmd`:
 - Do not run one-line PowerShell commands directly for auditability and reproducibility.
 - Write the command content to `./.temp/execute.ps1` first.
 - Run PowerShell scripts only with:
-  - `powershell.exe -NoLogo -NoProfile -ExecutionPolicy RemoteSigned -File "./.temp/execute.ps1"`
+  - `powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File "./.temp/execute.ps1"`
