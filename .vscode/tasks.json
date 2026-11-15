@@ -24,7 +24,15 @@
       "label": "build: docs",
       "type": "shell",
       "command": "powershell.exe",
-      "args": ["-NoLogo", "-NoProfile", "-File", "Docs.ps1"],
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Docs.ps1"
+      ],
       "problemMatcher": [],
       "hide": true
     },
@@ -35,6 +43,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -50,6 +59,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -66,6 +76,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -81,6 +92,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -95,6 +107,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -110,6 +123,7 @@
       "args": [
         "-NoLogo",
         "-NoProfile",
+        "-NonInteractive",
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
@@ -118,26 +132,16 @@
       "problemMatcher": []
     },
     {
-      "label": "psscriptanalyzer",
-      "type": "shell",
-      "command": "cmd.exe",
-      "args": [
-        "/c",
-        ".agents\\skills\\powershell-5\\scripts\\analyze.cmd",
-        "-Path",
-        "${file}"
-      ],
-      "problemMatcher": [],
-      "group": {
-        "kind": "test"
-      }
-    },
-    {
       "label": "pester",
       "type": "shell",
       "command": "cmd.exe",
       "args": [
-        "/c",
+        "/D",
+        "/E:ON",
+        "/V:OFF",
+        "/S",
+        "/C",
+        "call",
         ".agents\\skills\\powershell-5\\scripts\\pester.cmd",
         "-Path",
         "${file}",
@@ -148,6 +152,26 @@
       "group": {
         "kind": "test",
         "isDefault": true
+      }
+    },
+    {
+      "label": "psscriptanalyzer",
+      "type": "shell",
+      "command": "cmd.exe",
+      "args": [
+        "/D",
+        "/E:ON",
+        "/V:OFF",
+        "/S",
+        "/C",
+        "call",
+        ".agents\\skills\\powershell-5\\scripts\\analyze.cmd",
+        "-Path",
+        "${file}"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test"
       }
     }
   ]
