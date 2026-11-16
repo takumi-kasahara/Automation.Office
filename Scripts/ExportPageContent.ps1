@@ -8,7 +8,7 @@
 .NOTES
   The script expects a Config.psd1 file with Output and StartNodeId properties.
 #>
-using module .\Modules\Automation.Office.psd1
+using module ..\Modules\Automation.Office.psd1
 using namespace System.Xml
 
 [CmdletBinding()]

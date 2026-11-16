@@ -9,7 +9,7 @@
 .NOTES
   The script expects a Config.psd1 file in the same directory with an Output property specifying the base directory for processing.
 #>
-using module .\Modules\Automation.Office.psd1
+using module ..\Modules\Automation.Office.psd1
 using namespace System.IO
 using namespace System.Xml
 
