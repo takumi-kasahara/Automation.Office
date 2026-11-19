@@ -19,16 +19,23 @@ $config = Import-PowerShellDataFile -LiteralPath 'Config.psd1'
 if ($null -eq $config.Output) {
   throw [InvalidOperationException]::new('Output is required.')
 }
-$source = $config.Output | Join-Path -ChildPath 'Page'
-if (-not (Test-Path -LiteralPath $source)) {
-  throw [DirectoryNotFoundException]::new("$source does not exist.")
+$output = $config.Output | Join-Path -ChildPath 'Page'
+if (-not (Test-Path -LiteralPath $output)) {
+  throw [DirectoryNotFoundException]::new("$output does not exist.")
 }
 
-Compress-Archive -Path "$source/*" -Destination "$source.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
-Get-ChildItem -LiteralPath $source -Filter '*.xml' |
-ForEach-Object {
-  "Import:`t$($_.FullName)" | Out-Host
-  Import-OneNotePageContent -LiteralPath $_.FullName
+Compress-Archive -Path "$output/*" -Destination "$output.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+
+$activity = 'Importing PageContents'
+try {
+  Get-ChildItem -LiteralPath $output -Filter '*.xml' |
+  ForEach-Object {
+    Write-Progress -Activity $activity -Status "Importing: $($_.Name)"
+    Import-OneNotePageContent -LiteralPath $_.FullName
+    "Imported: $($_.Name)" | Out-Host
+  }
+} finally {
+  Write-Progress -Activity $activity -Completed
 }
 
 & .\ExportPageContent.ps1
