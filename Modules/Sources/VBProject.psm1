@@ -83,7 +83,7 @@ function Import-VBProjectReference {
         Write-Progress -Activity $activity -Status "Removing: $description"
         try {
           $VBProject.References.Remove($_)
-          "Removed:`t$description" | Out-Host
+          "Removed: $description" | Out-Host
         } catch [COMException] {
           Write-Warning -Message $_.Exception.Message
         }
@@ -101,7 +101,7 @@ function Import-VBProjectReference {
       # https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/addfromguid-method-vba-add-in-object-model
       try {
         $VBProject.References.AddFromGuid($_.Guid, [int]$_.Major, [int]$_.Minor) | Write-Verbose
-        "Imported:`t$description" | Out-Host
+        "Imported: $description" | Out-Host
       } catch [COMException] {
         Write-Warning -Message $_.Exception.Message
       }
@@ -302,7 +302,7 @@ function Export-VBProjectComponent {
           Path = [PathCompatibility]::GetRelativePath($resolved, $path)
           Type = [AcObjectType]$_.Type
         }
-        "Exported:`t$($_.Name) as $([AcObjectType]$_.Type) to $($path)" | Out-Host
+        "Exported: $($_.Name) as $([AcObjectType]$_.Type) to $($path)" | Out-Host
       }
     }
     $VBProject.VBComponents |
@@ -348,7 +348,7 @@ function Export-VBProjectComponent {
         Path = [PathCompatibility]::GetRelativePath($resolved, $path)
         Type = [vbext_ComponentType]$_.Type
       }
-      "Exported:`t$($_.Name) as $([vbext_ComponentType]$_.Type) to $($path)" | Out-Host
+      "Exported: $($_.Name) as $([vbext_ComponentType]$_.Type) to $($path)" | Out-Host
     }
     return $exported
   } finally {
@@ -426,7 +426,7 @@ function Import-VBProjectComponent {
           try {
             # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.deleteobject
             $Application.DoCmd.DeleteObject([AcObjectType]$_.Type, $_.Name)
-            "Removed:`t$($_.Name) as $([AcObjectType]$_.Type)" | Out-Host
+            "Removed: $($_.Name) as $([AcObjectType]$_.Type)" | Out-Host
           } catch [COMException] {
             Write-Warning -Message $_.Exception.Message
           }
@@ -443,7 +443,7 @@ function Import-VBProjectComponent {
                   , $_.Name                       # Destination
                   , $true                         # StructureOnly
                 )
-                "Imported:`t$($_.Name) as $([AcObjectType]$_.Type) from $($tableDefs)" | Out-Host
+                "Imported: $($_.Name) as $([AcObjectType]$_.Type) from $($tableDefs)" | Out-Host
               }
               # https://learn.microsoft.com/en-us/office/vba/api/access.docmd.transfertext
               $Application.DoCmd.TransferText(
@@ -467,7 +467,7 @@ function Import-VBProjectComponent {
               , "$importPath"       # FileName
             )
           }
-          "Imported:`t$($_.Name) as $([AcObjectType]$_.Type) from $($importPath)" | Out-Host
+          "Imported: $($_.Name) as $([AcObjectType]$_.Type) from $($importPath)" | Out-Host
         } finally {
           if ($null -ne $tempDir -and (Test-Path -LiteralPath $tempDir -PathType Container)) {
             Remove-Item -LiteralPath $tempDir -Recurse -Force -WhatIf:$false -Confirm:$false
@@ -480,7 +480,7 @@ function Import-VBProjectComponent {
     ForEach-Object {
       Write-Progress -Activity $activity -Status "Removing: $($_.Name)"
       $VBProject.VBComponents.Remove($_)
-      "Removed:`t$($_.Name) as $([vbext_ComponentType]$_.Type)" | Out-Host
+      "Removed: $($_.Name) as $([vbext_ComponentType]$_.Type)" | Out-Host
     }
     $component = $null
     $components |
@@ -537,7 +537,7 @@ function Import-VBProjectComponent {
       }
     }
     if ($component) {
-      "Imported:`t$($component.Name) as $([vbext_ComponentType]$component.Type) from $($importPath)" | Out-Host
+      "Imported: $($component.Name) as $([vbext_ComponentType]$component.Type) from $($importPath)" | Out-Host
     }
   } finally {
     Get-Variable |
