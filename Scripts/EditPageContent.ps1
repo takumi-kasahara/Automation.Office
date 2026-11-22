@@ -26,13 +26,14 @@ $config = Import-PowerShellDataFile -LiteralPath $configPath
 if ($null -eq $config.Output) {
   throw [InvalidOperationException]::new('Output is required.')
 }
-$source = $config.Output | Join-Path -ChildPath 'Page'
-if (-not (Test-Path -LiteralPath $source)) {
-  throw [DirectoryNotFoundException]::new("$source does not exist.")
+$output = $config.Output | Join-Path -ChildPath 'Page'
+if (-not (Test-Path -LiteralPath $output)) {
+  throw [DirectoryNotFoundException]::new("$output does not exist.")
 }
 
-Compress-Archive -Path "$source/*" -Destination "$source.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
-Get-ChildItem -LiteralPath $source -Filter '*.xml' |
+Compress-Archive -Path "$output/*" -Destination "$output.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+
+Get-ChildItem -LiteralPath $output -Filter '*.xml' |
 ForEach-Object {
   $path = $_.FullName
   $xml = [XmlDocument]::new()
@@ -60,9 +61,9 @@ ForEach-Object {
   ForEach-Object { $_.RemoveAttribute('lang') }
   if ($updated) {
     $xml.Save($path)
-    "Updated:`t$path" | Out-Host
+    "Updated: $path" | Out-Host
   }
 }
-if (@(Get-Item -Path "$source/*").Count -gt 0) {
-  Compress-Archive -Path "$source/*" -Destination "$source.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
+if (@(Get-Item -Path "$output/*").Count -gt 0) {
+  Compress-Archive -Path "$output/*" -Destination "$output.$(Get-Date -Format 'yyyyMMddHHmmss').zip"
 }
