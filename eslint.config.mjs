@@ -3,7 +3,8 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import ts from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['apm_modules', 'node_modules']),
+  globalIgnores(['.agents', 'apm_modules']),
+  globalIgnores(['node_modules']),
   {
     files: ['**/*.mjs'],
     plugins: {
