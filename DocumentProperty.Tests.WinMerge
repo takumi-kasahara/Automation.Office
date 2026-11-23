@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <paths>
-    <left>Modules\Sources\Excel.DocumentProperty.Tests.ps1</left>
-    <middle>Modules\Sources\PowerPoint.DocumentProperty.Tests.ps1</middle>
-    <right>Modules\Sources\Word.DocumentProperty.Tests.ps1</right>
+    <left>Modules\Functions\Excel.DocumentProperty.Tests.ps1</left>
+    <middle>Modules\Functions\PowerPoint.DocumentProperty.Tests.ps1</middle>
+    <right>Modules\Functions\Word.DocumentProperty.Tests.ps1</right>
     <filter>*.*</filter>
     <subfolders>0</subfolders>
     <left-readonly>0</left-readonly>

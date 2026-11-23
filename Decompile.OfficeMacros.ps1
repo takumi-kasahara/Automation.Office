@@ -8,7 +8,6 @@ param (
 if ($PSEdition -ne 'Desktop') {
   return
 }
-
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 

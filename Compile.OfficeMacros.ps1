@@ -11,35 +11,38 @@ if ($PSEdition -ne 'Desktop') {
 Set-StrictMode -Version Latest
 Set-Location -LiteralPath $PSScriptRoot
 
-$root = Resolve-Path -LiteralPath '.\Bin'
 $config = if ($Release) {
   'Release'
 } else {
   'Debug'
 }
+$bin = '.\Bin'
+if (-not (Test-Path -LiteralPath $bin)) {
+  New-Item -Path $bin -ItemType Directory | Out-Null
+}
 
 try {
-  $bin = $root | Join-Path -ChildPath "Personal.$config.xlsb"
-  New-ExcelFile -Path $bin -FileFormat xlExcel12 -Force
+  $target = $bin | Join-Path -ChildPath "Personal.$config.xlsb"
+  New-ExcelFile -Path $target -FileFormat xlExcel12 -Force
   $source = Resolve-Path -LiteralPath ".\Apps\Personal.xlsb\VBProject.$config.json"
-  Import-ExcelVBProject -Path $bin -Source $source -Hidden
+  Import-ExcelVBProject -Path $target -Source $source -Hidden
 } catch {
   Get-Process |
   Where-Object -Property Name -EQ 'EXCEL' |
   Stop-Process
-  Remove-Item -LiteralPath $bin -Force
+  Remove-Item -LiteralPath $target -Force
   Write-Error -ErrorRecord $_
 }
 
 try {
-  $bin = $root | Join-Path -ChildPath "Normal.$config.dotm"
-  New-WordFile -Path $bin -FileFormat wdFormatXMLTemplateMacroEnabled -Force
+  $target = $bin | Join-Path -ChildPath "Normal.$config.dotm"
+  New-WordFile -Path $target -FileFormat wdFormatXMLTemplateMacroEnabled -Force
   $source = Resolve-Path -LiteralPath ".\Apps\Normal.dotm\VBProject.$config.json"
-  Import-WordVBProject -Path $bin -Source $source
+  Import-WordVBProject -Path $target -Source $source
 } catch {
   Get-Process |
   Where-Object -Property Name -EQ 'WINWORD' |
   Stop-Process
-  Remove-Item -LiteralPath $bin -Force
+  Remove-Item -LiteralPath $target -Force
   Write-Error -ErrorRecord $_
 }

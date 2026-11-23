@@ -1,6 +1,6 @@
 ﻿Get-ChildItem -LiteralPath $PSScriptRoot -Recurse -Filter '*.cs' |
 ForEach-Object { Add-Type -LiteralPath $_.FullName }
-Get-ChildItem -LiteralPath ($PSScriptRoot | Join-Path -ChildPath 'Sources') -Recurse -Filter '*.ps1' |
+Get-ChildItem -LiteralPath ($PSScriptRoot | Join-Path -ChildPath 'Functions') -Recurse -Filter '*.ps1' |
 Where-Object { $_.BaseName -notlike '*.Tests' } |
 ForEach-Object { . $_.FullName }
 
@@ -72,7 +72,11 @@ Register-ArgumentCompleter -CommandName @(
   $propertyNames |
   Where-Object { $_.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) } |
   ForEach-Object {
-    $completionText = if ($_ -match '\s') { "'$_'" } else { $_ }
+    $completionText = if ($_ -match '\s') {
+      "'$_'"
+    } else {
+      $_
+    }
     [System.Management.Automation.CompletionResult]::new($completionText, $_, 'ParameterValue', $_)
   }
 }
