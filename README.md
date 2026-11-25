@@ -14,7 +14,7 @@ A PowerShell module for automating Microsoft Office applications (Access / Excel
 
 ## Installation
 
-Run from the repository root:
+Run [Install.cmd](./Install.cmd) from the repository root:
 
 ```powershell
 .\Install.cmd

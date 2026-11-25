@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
   <paths>
-    <left>Modules\Sources\Excel.VBProject.Tests.ps1</left>
-    <middle>Modules\Sources\PowerPoint.VBProject.Tests.ps1</middle>
-    <right>Modules\Sources\Word.VBProject.Tests.ps1</right>
+    <left>Modules\Functions\Excel.VBProject.Tests.ps1</left>
+    <middle>Modules\Functions\PowerPoint.VBProject.Tests.ps1</middle>
+    <right>Modules\Functions\Word.VBProject.Tests.ps1</right>
     <filter>*.*</filter>
     <subfolders>0</subfolders>
     <left-readonly>0</left-readonly>
