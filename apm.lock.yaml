@@ -1,11 +1,13 @@
-lockfile_version: '1'
-apm_version: 0.36.1
+lockfile_version: '4'
+apm_version: 0.39.1
+manifest_targets:
+  - copilot
 dependencies:
   - repo_url: takumi-kasahara/dotfiles
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: office-scripts
     host: github.com
-    resolved_commit: 967ceef010aeacc69aa4fa0a17d831b9cc221454
+    resolved_commit: 29b40a451081461e506584a6391ca91c1d4c605c
     version: unknown
     virtual_path: .apm/skills/office-scripts
     is_virtual: true
@@ -21,7 +23,7 @@ dependencies:
       .agents/skills/office-scripts/SKILL.md: sha256:d1033b1a2196f3f05ff28b6a07049c010a3cdeb86f40b665b4b29de74d235b1e
       .agents/skills/office-scripts/references/office-scripts-to-vba.md: sha256:8db40573fc075317be73ae0193b41ac15da934ba35b731e52d27f40d498eb231
       .agents/skills/office-scripts/references/vba-to-office-scripts.md: sha256:5f2055f8c09c2c987db1470c8e2e978b01be71d66200fb84b4d042110cf278cc
-    content_hash: sha256:78fe3aefa4a0c195e01930789f26cb3ad259926b943901e38a855fa22fb30012
+    content_hash: sha256:f6aaeaeb27c12d303c9d1522ad504aed42b0577a91a3158ef0a172a72be2091c
     carried_licenses:
       - path: LICENSE
         source: LICENSE
@@ -30,7 +32,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: powershell-5
     host: github.com
-    resolved_commit: 967ceef010aeacc69aa4fa0a17d831b9cc221454
+    resolved_commit: 29b40a451081461e506584a6391ca91c1d4c605c
     version: unknown
     virtual_path: .apm/skills/powershell-5
     is_virtual: true
@@ -70,7 +72,7 @@ dependencies:
       .agents/skills/powershell-5/scripts/pester.cmd: sha256:d8298130f9ee65f8df019efa2691fe9de1b4f4305ace55fe9430a52d408fa110
       .agents/skills/powershell-5/scripts/pester.ps1: sha256:06a42649bb814dc8e2be928a687fa7beba5ca850228d67bc8fec66ee13d6a8d9
       .agents/skills/powershell-5/scripts/pester.ps1.md: sha256:d6b1bdebe3b46b7995c7913af4ebe8bf3119e0708563bc30de7ee51c251bdf16
-    content_hash: sha256:fadd03a2d7074a1525a4591eb4d098dbb2e7350235d0de3b5a1b5ce97807cfc0
+    content_hash: sha256:f59a2c8cdbb7311730782a685b9e4d52000d3dc33b661e6de580b1f0e12632b4
     carried_licenses:
       - path: LICENSE
         source: LICENSE
@@ -79,7 +81,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: rubberduck-vba
     host: github.com
-    resolved_commit: 967ceef010aeacc69aa4fa0a17d831b9cc221454
+    resolved_commit: 29b40a451081461e506584a6391ca91c1d4c605c
     version: unknown
     virtual_path: .apm/skills/rubberduck-vba
     is_virtual: true
@@ -93,7 +95,7 @@ dependencies:
       .agents/skills/rubberduck-vba/LICENSE: sha256:3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
       .agents/skills/rubberduck-vba/SKILL.md: sha256:a631f26585cb261925205f17ef570c59611486607979ca4de8ba34ae5cb83dd5
       .agents/skills/rubberduck-vba/assets/TestModule.bas: sha256:fe1ce4894d5cb7e46f07cda2e2ddb3d8ffc4a7819806fc460491539a5ee8d087
-    content_hash: sha256:ceb8b873911d3812c378ae2bd6d79da7b45924ae03793feed977ea457ab5273d
+    content_hash: sha256:c24dee3c635ef1ac453f897766ac54076303c6982d5d92e2c2788585ea516a28
     carried_licenses:
       - path: LICENSE
         source: LICENSE
@@ -102,7 +104,7 @@ dependencies:
     materialization_repo_url: takumi-kasahara/Dotfiles
     name: windows-command
     host: github.com
-    resolved_commit: 967ceef010aeacc69aa4fa0a17d831b9cc221454
+    resolved_commit: 29b40a451081461e506584a6391ca91c1d4c605c
     version: unknown
     virtual_path: .apm/skills/windows-command
     is_virtual: true
@@ -126,7 +128,7 @@ dependencies:
       .agents/skills/windows-command/references/argument-expansion.md: sha256:ebb2a04268defdf4cc7176e2b7b6849acd0355a8cd6ee85b4243b3c39c95aa80
       .agents/skills/windows-command/references/cmd.md: sha256:2fd156825ab4882ab437030c2c79594799ba9bad85d8e34b8caa4e62c8242dce
       .agents/skills/windows-command/references/powershell.md: sha256:221769c871c69baac835406001bd27994125c0289cb0aa30fc661deb5cd465d7
-    content_hash: sha256:9cc2a217c9a2079e573f5ec8c4c240e8261b1b8c5d627c33e21590d9868c62e5
+    content_hash: sha256:403586b678b4c42b2305d56e482d9b7a35aec6431645ccef3e0fe737b175063a
     carried_licenses:
       - path: LICENSE
         source: LICENSE
