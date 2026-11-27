@@ -15,6 +15,7 @@
       },
       "dependsOn": [
         "build: docs",
+        "build: modules",
         "Office Macros: compile (debug)",
         "Office Macros: compile (release)",
         "Office Scripts: compile"
@@ -31,7 +32,23 @@
         "-ExecutionPolicy",
         "RemoteSigned",
         "-File",
-        "Docs.ps1"
+        "Build.Docs.ps1"
+      ],
+      "problemMatcher": [],
+      "hide": true
+    },
+    {
+      "label": "build: modules",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "RemoteSigned",
+        "-File",
+        "Build.Modules.ps1"
       ],
       "problemMatcher": [],
       "hide": true

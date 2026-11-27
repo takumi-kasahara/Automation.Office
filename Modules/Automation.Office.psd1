@@ -1,8 +1,9 @@
 ﻿@{
-  RootModule           = 'Automation.Office.psm1'
-  ModuleVersion        = '1.0.0'
-  CompatiblePSEditions = @('Desktop')
-  FunctionsToExport    = @(
+  RootModule        = 'Automation.Office.psm1'
+  ModuleVersion     = '1.0.0'
+  Author            = 'Kasahara Takumi'
+  Description       = 'A PowerShell module for automating Microsoft Office applications (Access / Excel / PowerPoint / Word / OneNote).'
+  FunctionsToExport = @(
     #region Access
     'Get-AccessVersionInfo'
     'New-AccessFile'
@@ -76,7 +77,7 @@
     'Import-OneNotePageContent'
     #endregion
   )
-  CmdletsToExport      = @()
-  VariablesToExport    = @()
-  AliasesToExport      = @()
+  CmdletsToExport   = @()
+  VariablesToExport = @()
+  AliasesToExport   = @()
 }

@@ -1,15 +1,15 @@
 ---
 document type: cmdlet
-external help file: Docs.ps1-Help.xml
+external help file: Build.Docs.ps1-Help.xml
 HelpUri: ''
 Locale: ja-JP
 Module Name: ''
 ms.date: 11/09/2026
 PlatyPS schema version: 2024-05-01
-title: Docs.ps1
+title: Build.Docs.ps1
 ---
 
-# Docs.ps1
+# Build.Docs.ps1
 
 ## SYNOPSIS
 
@@ -20,7 +20,7 @@ Generates Markdown command documentation for the repository PowerShell scripts.
 ### __AllParameterSets
 
 ```
-Docs.ps1
+Build.Docs.ps1
 ```
 
 ## ALIASES
